@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NetAdmin — ISP Management</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0d0f14;--surface:#151820;--card:#1c2030;--border:#2a2f42;--accent:#4f8cff;--accent2:#00d4aa;--danger:#ff4f6d;--warn:#ffb930;--text:#e8eaf0;--muted:#6b7291;--font:'Syne',sans-serif;--mono:'DM Mono',monospace;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;}
+.shell{display:flex;height:100vh;overflow:hidden;}
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+.main{flex:1;overflow-y:auto;padding:28px;}
+.logo{padding:24px 20px 20px;border-bottom:1px solid var(--border);}
+.logo-name{font-size:18px;font-weight:700;}
+.logo-sub{font-size:11px;color:var(--accent);font-family:var(--mono);margin-top:2px;}
+.nav{padding:12px 0;flex:1;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border-left:2px solid transparent;}
+.nav-item:hover{color:var(--text);background:rgba(79,140,255,.06);}
+.nav-item.active{color:var(--accent);background:rgba(79,140,255,.1);border-left-color:var(--accent);}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.nav-section{font-size:10px;color:var(--muted);padding:16px 20px 6px;letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono);}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);}
+.user-row{display:flex;align-items:center;gap:10px;}
+.avatar{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.user-name{font-size:13px;font-weight:500;}
+.user-role{font-size:11px;color:var(--muted);font-family:var(--mono);}
+.logout-btn{margin-top:10px;width:100%;padding:7px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--font);transition:all .15s;}
+.logout-btn:hover{border-color:var(--danger);color:var(--danger);}
+.login-wrap{display:flex;align-items:center;justify-content:center;height:100vh;}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:380px;}
+.login-logo{font-size:24px;font-weight:700;margin-bottom:4px;}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:32px;font-family:var(--mono);}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-family:var(--mono);}
+.field input{width:100%;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border .15s;}
+.field input:focus{border-color:var(--accent);}
+.btn-primary{width:100%;padding:11px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;}
+.btn-primary:hover{opacity:.88;}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+.login-err{background:rgba(255,79,109,.12);border:1px solid rgba(255,79,109,.3);border-radius:8px;padding:10px 14px;color:var(--danger);font-size:13px;margin-bottom:16px;display:none;}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.page-title{font-size:22px;font-weight:700;}
+.page-sub{font-size:13px;color:var(--muted);margin-top:2px;font-family:var(--mono);}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;transition:border-color .15s;}
+.stat-card:hover{border-color:var(--accent);}
+.stat-label{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;}
+.stat-val{font-size:28px;font-weight:700;line-height:1;}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:6px;}
+.up{color:var(--accent2);}
+.down{color:var(--danger);}
+.warn{color:var(--warn);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+.card-title{font-size:14px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;font-size:11px;color:var(--muted);padding:0 12px 10px 0;border-bottom:1px solid var(--border);font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+td{padding:12px 12px 12px 0;border-bottom:1px solid rgba(42,47,66,.6);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(79,140,255,.03);}
+.badge{display:inline-block;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:500;font-family:var(--mono);white-space:nowrap;}
+.bok{background:rgba(0,212,170,.15);color:var(--accent2);}
+.bwarn{background:rgba(255,185,48,.15);color:var(--warn);}
+.berr{background:rgba(255,79,109,.15);color:var(--danger);}
+.binfo{background:rgba(79,140,255,.15);color:var(--accent);}
+.bgray{background:rgba(107,114,145,.15);color:var(--muted);}
+.bzoho{background:rgba(255,185,48,.15);color:var(--warn);}
+.btn{padding:7px 14px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn:hover{background:var(--surface);border-color:var(--accent);color:var(--accent);}
+.bblu{background:var(--accent);border-color:var(--accent);color:#fff;}
+.bblu:hover{opacity:.88;}
+.bsm{padding:4px 10px;font-size:11px;}
+.bedit{background:rgba(255,185,48,.1);border-color:var(--warn);color:var(--warn);}
+.bedit:hover{background:var(--warn);color:#000;}
+.bview{background:rgba(79,140,255,.1);border-color:var(--accent);color:var(--accent);}
+.bview:hover{background:var(--accent);color:#fff;}
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.sbox{padding:8px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;width:240px;transition:border .15s;}
+.sbox:focus{border-color:var(--accent);}
+.fsel{padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;cursor:pointer;}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;}
+.modal-lg{max-width:760px;}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:20px;}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.ff{display:flex;flex-direction:column;gap:5px;}
+.ff.full{grid-column:1/-1;}
+.ff label{font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em;}
+.ff input,.ff select,.ff textarea{padding:9px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border .15s;}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--accent);}
+.ff select option{background:var(--card);}
+.ff textarea{resize:vertical;min-height:70px;}
+.mactions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+.errmsg{color:var(--danger);font-size:12px;margin-top:12px;display:none;}
+.sec-title{font-size:11px;font-weight:600;color:var(--accent);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ditem{background:var(--card);border-radius:8px;padding:10px;}
+.ditem.full{grid-column:1/-1;}
+.dlabel{font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
+.dval{font-size:13px;color:var(--text);word-break:break-all;}
+.loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:13px;gap:10px;}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:13px;}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;z-index:200;transform:translateY(80px);opacity:0;transition:all .25s;max-width:320px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{border-color:var(--accent2);color:var(--accent2);}
+.toast.err{border-color:var(--danger);color:var(--danger);}
+.abtns{display:flex;gap:4px;}
+.tpl-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+.tpl-item:hover{border-color:var(--accent);}
+.tpl-title{font-size:13px;font-weight:600;margin-bottom:4px;}
+.tpl-msg{font-size:12px;color:var(--muted);}
+.tabs{display:flex;gap:2px;margin-bottom:14px;background:var(--card);padding:4px;border-radius:8px;}
+.tab{flex:1;padding:7px;text-align:center;cursor:pointer;border-radius:6px;font-size:12px;font-weight:500;color:var(--muted);transition:all .15s;}
+.tab.active{background:var(--accent);color:#fff;}
+.chk-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(42,47,66,.3);}
+.chk-row:last-child{border-bottom:none;}
+.chk-row input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--accent);}
+.nprev{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:10px;display:none;}
+.alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.alert-row{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-bottom:1px solid rgba(42,47,66,.4);}
+.alert-row:last-child{border-bottom:none;}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<div class="login-wrap" id="login-page">
+  <div class="login-card">
+    <div class="login-logo">NetAdmin</div>
+    <div class="login-sub">// ISP Management System</div>
+    <div class="login-err" id="login-err"></div>
+    <div class="field"><label>Username</label><input type="text" id="login-phone" placeholder="admin"/></div>
+    <div class="field"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••"/></div>
+    <button class="btn-primary" id="login-btn">Sign in</button>
+  </div>
+</div>
+
+<div class="shell" id="app-shell" style="display:none">
+  <div class="sidebar">
+    <div class="logo"><div class="logo-name">NetAdmin</div><div class="logo-sub">// ISP Management</div></div>
+    <nav class="nav">
+      <div style="padding:12px 20px">
+        <div id="voice-settings-btn" style="padding:12px 20px;display:none;flex-direction:column;gap:8px;border-bottom:1px solid var(--border)">
+          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em">Voice Alerts</div>
+          <button id="voice-banner" onclick="enableVoiceOnRefresh()" style="width:100%;text-align:left;font-size:12px;padding:7px 10px;border-radius:7px;border:1px solid var(--accent2);background:rgba(0,212,170,.08);color:var(--accent2);cursor:pointer;font-family:var(--font);display:none;">🔊 Click to activate voice</button>
+          <button class="btn" id="voice-toggle" onclick="toggleVoice()" style="width:100%;text-align:left;font-size:12px;color:var(--muted)">🔇 Voice OFF</button>
+          <select id="voice-lang-sel" class="fsel" style="width:100%;font-size:12px" onchange="changeLanguage(this.value)">
+            <option value="hi-IN">🇮🇳 हिंदी</option>
+            <option value="en-IN">🇬🇧 English</option>
+          </select>
+        </div>
+      </div>
+      <div class="nav-section">Overview</div>
+      <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')"><div class="nav-dot"></div>Dashboard</div>
+      <div class="nav-section">Management</div>
+      <div class="nav-item" id="nav-customers" onclick="showPage('customers')"><div class="nav-dot"></div>Customers</div>
+      <div class="nav-item" id="nav-activations" onclick="showPage('activations')"><div class="nav-dot"></div>Activations</div>
+      <div class="nav-item" id="nav-payments" onclick="showPage('payments')"><div class="nav-dot"></div>Payments</div>
+      <div class="nav-item" id="nav-notifications" onclick="showPage('notifications')"><div class="nav-dot"></div>Notifications</div>
+      <div class="nav-item" id="nav-plans" onclick="showPage('plans')"><div class="nav-dot"></div>Plans</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="avatar" id="sb-avatar">A</div>
+        <div><div class="user-name" id="sb-name">Admin</div><div class="user-role" id="sb-role">admin</div></div>
+      </div>
+      <button class="logout-btn" id="logout-btn">Sign out</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div id="page-dashboard">
+      <div class="page-header">
+        <div><div class="page-title">Dashboard</div><div class="page-sub">// <span id="dash-date"></span></div></div>
+        <button class="btn bblu" onclick="showPage('customers');openAdd()">+ Add customer</button>
+      </div>
+      <div class="stats">
+        <div class="stat-card" onclick="showPage('customers')"><div class="stat-label">Total</div><div class="stat-val" id="s-total">—</div><div class="stat-sub">customers</div></div>
+        <div class="stat-card" onclick="showPage('customers');filterSt('active')"><div class="stat-label">Active</div><div class="stat-val" id="s-active">—</div><div class="stat-sub up">online</div></div>
+        <div class="stat-card" onclick="showPage('customers');filterSt('expired')"><div class="stat-label">Expired</div><div class="stat-val" id="s-expired">—</div><div class="stat-sub down">renewal needed</div></div>
+        <div class="stat-card" onclick="showPage('activations')"><div class="stat-label">Pending</div><div class="stat-val" id="s-pending">—</div><div class="stat-sub warn">activations</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="card-title">Recent customers <span id="dash-cnt" style="font-size:11px;color:var(--muted);font-family:var(--mono)"></span></div>
+          <div id="dash-recent"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Quick actions</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+            <button class="btn" style="text-align:left" onclick="showPage('customers');openAdd()">+ Add customer</button>
+            <button class="btn" style="text-align:left" onclick="showPage('payments');openCash()">+ Cash payment</button>
+            <button class="btn" style="text-align:left" onclick="showPage('notifications')">📢 Send notification</button>
+            <button class="btn" style="text-align:left" onclick="showPage('customers');filterSt('expired')">Expired accounts</button>
+          </div>
+          <div class="card-title">System status</div>
+          <div>
+            <div class="alert-row"><div class="alert-dot" style="background:var(--accent2)"></div><div><div>Cloudflare Workers</div><div style="font-size:11px;color:var(--muted)">online</div></div></div>
+            <div class="alert-row"><div class="alert-dot" style="background:var(--accent2)"></div><div><div>Jaze ISP Server</div><div style="font-size:11px;color:var(--muted)">connected</div></div></div>
+            <div class="alert-row"><div class="alert-dot" style="background:var(--accent2)"></div><div><div>NetAdmin Server</div><div style="font-size:11px;color:var(--muted)">scheduler active</div></div></div>
+            <div class="alert-row"><div class="alert-dot" style="background:var(--accent2)"></div><div><div>Payment Gateway</div><div style="font-size:11px;color:var(--muted)">active</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-customers" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">Customers</div><div class="page-sub">// manage subscribers</div></div>
+        <button class="btn bblu" onclick="openAdd()">+ Add customer</button>
+      </div>
+      <div class="toolbar">
+        <input class="sbox" id="csearch" placeholder="Search name or phone..." oninput="searchC()"/>
+        <select class="fsel" id="cstatus" onchange="searchC()">
+          <option value="">All status</option>
+          <option value="active">Active</option>
+          <option value="expired">Expired</option>
+          <option value="suspended">Suspended</option>
+          <option value="lead">Lead</option>
+        </select>
+        <button class="btn" onclick="loadCustomers()">Refresh</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th style="padding-left:16px">Name</th><th>Phone</th><th>ISP</th><th>Username</th>
+              <th>Plan</th><th>Expiry</th><th>Due</th><th>Status</th>
+              <th style="padding-right:16px">Actions</th>
+            </tr></thead>
+            <tbody id="ctbody"><tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-activations" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">Activations</div><div class="page-sub">// ISP activation log</div></div>
+        <button class="btn" onclick="loadActivations()">Refresh</button>
+      </div>
+      <div class="stats3">
+        <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-val" id="ap">—</div><div class="stat-sub warn">NetAdmin queue</div></div>
+        <div class="stat-card"><div class="stat-label">Confirmed</div><div class="stat-val" id="ac">—</div><div class="stat-sub up">activated</div></div>
+        <div class="stat-card"><div class="stat-label">Failed</div><div class="stat-val" id="af">—</div><div class="stat-sub down">attention needed</div></div>
+      </div>
+      <div class="toolbar">
+        <select class="fsel" id="af-status" onchange="loadActivations()"><option value="">All status</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="failed">Failed</option></select>
+        <select class="fsel" id="af-type" onchange="loadActivations()"><option value="">All types</option><option value="update">NetAdmin Server</option><option value="jaze_renew">Jaze</option></select>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th style="padding-left:16px">#</th><th>Customer</th><th>Username</th>
+              <th>Server</th><th>Profile</th><th>Expiry</th><th>Status</th><th>Created</th>
+              <th style="padding-right:16px">Confirmed</th>
+            </tr></thead>
+            <tbody id="atbody"><tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-payments" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">Payments</div><div class="page-sub">// billing history</div></div>
+        <button class="btn bblu" onclick="openCash()">+ Cash payment</button>
+      </div>
+      <div class="stats3">
+        <div class="stat-card"><div class="stat-label">Total Collected</div><div class="stat-val" id="pt">—</div><div class="stat-sub up">all time</div></div>
+        <div class="stat-card"><div class="stat-label">Online / Zoho</div><div class="stat-val" id="po">—</div><div class="stat-sub up">Razorpay + Zoho</div></div>
+        <div class="stat-card"><div class="stat-label">Cash</div><div class="stat-val" id="pc">—</div><div class="stat-sub up">collected</div></div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th style="padding-left:16px">#</th><th>Customer</th><th>Amount</th>
+              <th>Method</th><th>Type</th><th>App Ref</th><th>Bank Txn</th>
+              <th>Status</th><th style="padding-right:16px">Date</th>
+            </tr></thead>
+            <tbody id="ptbody"><tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-notifications" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">Notifications</div><div class="page-sub">// send push notifications</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="card-title">Send Notification</div>
+          <div class="sec-title">Step 1 — Audience</div>
+          <div class="tabs">
+            <div class="tab active" id="tab-f" onclick="switchTab('f')">By Filter</div>
+            <div class="tab" id="tab-s" onclick="switchTab('s')">Select Customers</div>
+          </div>
+          <div id="aud-f">
+            <select class="fsel" id="nfilter" style="width:100%" onchange="updateAudCount()">
+              <option value="all">All customers</option>
+              <option value="active">Active only</option>
+              <option value="expired">Expired only</option>
+              <option value="expiring_7">Expiring in 7 days</option>
+            </select>
+            <div style="font-size:12px;color:var(--muted);margin-top:8px" id="aud-count"></div>
+          </div>
+          <div id="aud-s" style="display:none">
+            <div style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px" id="chklist"><div class="loading"><div class="spinner"></div></div></div>
+          </div>
+          <div class="sec-title">Step 2 — Message</div>
+          <div class="ff" style="margin-bottom:10px"><label>Title *</label><input id="ntitle" placeholder="Notification title" oninput="updatePrev()"/></div>
+          <div class="ff" style="margin-bottom:10px"><label>Message *</label><textarea id="nmsg" rows="3" placeholder="Your message..." oninput="updatePrev()"></textarea></div>
+          <div class="nprev" id="nprev">
+            <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:6px">PREVIEW</div>
+            <div style="font-weight:600;font-size:13px" id="pv-title"></div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px" id="pv-msg"></div>
+          </div>
+          <div class="mactions" style="margin-top:14px">
+            <button class="btn" onclick="clearNotif()">Clear</button>
+            <button class="btn bblu" id="send-btn" onclick="sendNotif()">📢 Send Now</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Templates <button class="btn bsm bblu" onclick="openSaveTpl()">+ Save New</button></div>
+          <div id="tpl-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:8px">
+        <div class="card-title">Notification History <button class="btn bsm" onclick="loadNHistory()" style="margin-left:8px">Refresh</button></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th style="padding-left:12px">Customer</th><th>Type</th><th>Message</th><th>Status</th><th style="padding-right:12px">Sent At</th>
+            </tr></thead>
+            <tbody id="nhtbody"><tr><td colspan="5"><div class="empty">Click Refresh to load</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-plans" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">Plans</div><div class="page-sub">// manage broadband plans</div></div>
+        <button class="btn bblu" onclick="openAddPlan()">+ Add Plan</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th style="padding-left:16px">#</th><th>Plan Name</th><th>Speed ↓</th><th>Speed ↑</th>
+              <th>Price</th><th>Validity</th><th>ISP Server</th><th>NetAdmin Profile</th>
+              <th>Status</th><th style="padding-right:16px">Actions</th>
+            </tr></thead>
+            <tbody id="plan-tbody"><tr><td colspan="10"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT PLAN MODAL -->
+<div class="modal-bg" id="m-plan" style="display:none">
+  <div class="modal">
+    <div class="modal-title" id="plan-modal-title">Add Plan</div>
+    <input type="hidden" id="pl-id"/>
+    <div class="fgrid">
+      <div class="ff full"><label>Plan Name *</label><input id="pl-name" placeholder="e.g. Basic 50 Mbps"/></div>
+      <div class="ff"><label>Download Speed (Mbps)</label><input id="pl-down" type="number" placeholder="50"/></div>
+      <div class="ff"><label>Upload Speed (Mbps)</label><input id="pl-up" type="number" placeholder="10"/></div>
+      <div class="ff"><label>Price (₹) *</label><input id="pl-price" type="number" placeholder="600"/></div>
+      <div class="ff"><label>Validity (days) *</label><input id="pl-days" type="number" placeholder="30"/></div>
+      <div class="ff"><label>ISP Server</label>
+        <select id="pl-isp"><option value="1">Jaze ISP Server</option><option value="2">NetAdmin Server</option></select>
+      </div>
+      <div class="ff"><label>ISP Plan ID (Jaze)</label><input id="pl-isp-id" placeholder="Jaze plan ID if needed"/></div>
+      <div class="ff"><label>NetAdmin Profile</label><input id="pl-mk-profile" placeholder="e.g. 1 Month 50 Mbps Prepaid"/></div>
+      <div class="ff"><label>NetAdmin Service</label><input id="pl-mk-service" placeholder="pppoe" value="pppoe"/></div>
+      <div class="ff"><label>Status</label>
+        <select id="pl-active"><option value="1">Active</option><option value="0">Inactive</option></select>
+      </div>
+    </div>
+    <div class="errmsg" id="pl-err"></div>
+    <div class="mactions">
+      <button class="btn" onclick="closeM('m-plan')">Cancel</button>
+      <button class="btn bblu" id="pl-btn" onclick="submitPlan()">Save Plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CUSTOMER -->
+<div class="modal-bg" id="m-add" style="display:none">
+  <div class="modal modal-lg">
+    <div class="modal-title">Add new customer</div>
+    <div class="sec-title">Customer Details</div>
+    <div class="fgrid">
+      <div class="ff"><label>Full name *</label><input id="a-name" placeholder="Ramesh Kumar"/></div>
+      <div class="ff"><label>Phone *</label><input id="a-phone" type="tel" placeholder="9876543210"/></div>
+      <div class="ff"><label>Email</label><input id="a-email" type="email" placeholder="email@example.com"/></div>
+      <div class="ff"><label>Password (default: phone)</label><input id="a-pass" placeholder="blank = phone number"/></div>
+      <div class="ff full"><label>Address</label><input id="a-addr" placeholder="House, Street, Area"/></div>
+      <div class="ff"><label>Membership No.</label><input id="a-mem" placeholder="MEM-001"/></div>
+      <div class="ff"><label>Comments</label><input id="a-comments" placeholder="Notes about customer"/></div>
+    </div>
+    <div class="sec-title">ISP Details</div>
+    <div class="fgrid">
+      <div class="ff"><label>ISP Server *</label><select id="a-isp"><option value="1">Jaze ISP Server</option><option value="2">NetAdmin Server</option></select></div>
+      <div class="ff"><label>ISP Customer ID *</label><input id="a-cid" placeholder="ID on Jaze/NetAdmin"/></div>
+      <div class="ff full"><label>ISP Username (PPPoE)</label><input id="a-iuser" placeholder="ramesh.ncn"/></div>
+      <div class="ff"><label>Expiry date</label><input id="a-expiry" type="date"/></div>
+      <div class="ff"><label>Plan</label><select id="a-plan"><option value="">— Select Plan —</option></select></div>
+    </div>
+    <div class="sec-title">Hardware Details</div>
+    <div class="fgrid">
+      <div class="ff"><label>Router brand</label><select id="a-brand"><option value="">— Select —</option><option value="1">Syrotech (192.168.1.1)</option><option value="2">Ubiquiti (192.168.1.200)</option></select></div>
+      <div class="ff"><label>Router IP</label><input id="a-rip" placeholder="192.168.1.1"/></div>
+      <div class="ff"><label>Router username</label><input id="a-ruser" placeholder="admin"/></div>
+      <div class="ff"><label>Router password</label><input id="a-rpass" placeholder="router password"/></div>
+      <div class="ff"><label>MAC Address</label><input id="a-mac" placeholder="AA:BB:CC:DD:EE:FF"/></div>
+      <div class="ff"><label>IPTV Details</label><input id="a-iptv" placeholder="IPTV box info"/></div>
+      <div class="ff"><label>PON Port</label>
+        <select id="a-pon-port"><option value="">— Select —</option><option value="0/1">PON 0/1</option><option value="0/2">PON 0/2</option><option value="0/3">PON 0/3</option><option value="0/4">PON 0/4</option></select>
+      </div>
+      <div class="ff"><label>ONU ID</label><input id="a-onu-id" type="number" placeholder="e.g. 22"/></div>
+      <div class="ff"><label>Current WiFi SSID</label><input id="a-wifi-ssid" placeholder="e.g. Naveen_Home"/></div>
+      <div class="ff"><label>WiFi Band</label>
+        <select id="a-wifi-band"><option value="single">Single Band (2.4GHz)</option><option value="dual">Dual Band (2.4GHz + 5GHz)</option></select>
+      </div>
+    </div>
+    <div class="errmsg" id="a-err"></div>
+    <div class="mactions">
+      <button class="btn" onclick="closeM('m-add')">Cancel</button>
+      <button class="btn bblu" id="a-btn" onclick="submitAdd()">Add customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW CUSTOMER -->
+<div class="modal-bg" id="m-view" style="display:none">
+  <div class="modal modal-lg">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="modal-title" style="margin:0" id="v-title">Customer</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn bsm bedit" id="v-edit-btn">✏ Edit</button>
+        <button class="btn bsm" onclick="closeM('m-view')">✕ Close</button>
+      </div>
+    </div>
+    <div class="sec-title">Customer Details</div>
+    <div class="dgrid" id="v-cust"></div>
+    <div class="sec-title">ISP Details</div>
+    <div class="dgrid" id="v-isp"></div>
+    <div class="sec-title">Hardware Details</div>
+    <div class="dgrid" id="v-hw"></div>
+    <div class="sec-title">Billing</div>
+    <div class="dgrid" id="v-bill"></div>
+  </div>
+</div>
+
+<!-- EDIT CUSTOMER -->
+<div class="modal-bg" id="m-edit" style="display:none">
+  <div class="modal modal-lg">
+    <div class="modal-title">Edit customer <span id="e-label" style="font-size:13px;color:var(--muted);font-family:var(--mono)"></span></div>
+    <div class="sec-title">Customer Details</div>
+    <div class="fgrid">
+      <input type="hidden" id="e-id"/>
+      <div class="ff"><label>Full name *</label><input id="e-name"/></div>
+      <div class="ff"><label>Phone *</label><input id="e-phone" type="tel"/></div>
+      <div class="ff"><label>Email</label><input id="e-email" type="email"/></div>
+      <div class="ff"><label>New password (blank = keep)</label><input id="e-pass" placeholder="Leave blank"/></div>
+      <div class="ff full"><label>Address</label><input id="e-addr"/></div>
+      <div class="ff"><label>Membership No.</label><input id="e-mem"/></div>
+      <div class="ff"><label>Status</label><select id="e-status"><option value="active">Active</option><option value="expired">Expired</option><option value="suspended">Suspended</option><option value="lead">Lead</option><option value="disconnected">Disconnected</option></select></div>
+      <div class="ff full"><label>Comments</label><textarea id="e-comments"></textarea></div>
+    </div>
+    <div class="sec-title">ISP Details</div>
+    <div class="fgrid">
+      <div class="ff"><label>ISP Server *</label><select id="e-isp"><option value="1">Jaze ISP Server</option><option value="2">NetAdmin Server</option></select></div>
+      <div class="ff"><label>ISP Customer ID *</label><input id="e-cid"/></div>
+      <div class="ff full"><label>ISP Username (PPPoE)</label><input id="e-iuser"/></div>
+      <div class="ff"><label>Expiry date</label><input id="e-expiry" type="date"/></div>
+      <div class="ff"><label>Plan</label><select id="e-plan"><option value="">— Select Plan —</option></select></div>
+    </div>
+    <div class="sec-title">Hardware Details</div>
+    <div class="fgrid">
+      <div class="ff"><label>Router brand</label><select id="e-brand"><option value="">— Select —</option><option value="1">Syrotech (192.168.1.1)</option><option value="2">Ubiquiti (192.168.1.200)</option></select></div>
+      <div class="ff"><label>Router IP</label><input id="e-rip"/></div>
+      <div class="ff"><label>Router username</label><input id="e-ruser"/></div>
+      <div class="ff"><label>Router password</label><input id="e-rpass"/></div>
+      <div class="ff"><label>MAC Address</label><input id="e-mac"/></div>
+      <div class="ff"><label>IPTV Details</label><input id="e-iptv"/></div>
+      <div class="ff"><label>PON Port</label>
+        <select id="e-pon-port"><option value="">— Select —</option><option value="0/1">PON 0/1</option><option value="0/2">PON 0/2</option><option value="0/3">PON 0/3</option><option value="0/4">PON 0/4</option></select>
+      </div>
+      <div class="ff"><label>ONU ID</label><input id="e-onu-id" type="number"/></div>
+      <div class="ff"><label>Current WiFi SSID</label><input id="e-wifi-ssid"/></div>
+      <div class="ff"><label>WiFi Band</label>
+        <select id="e-wifi-band"><option value="single">Single Band (2.4GHz)</option><option value="dual">Dual Band (2.4GHz + 5GHz)</option></select>
+      </div>
+    </div>
+    <div class="errmsg" id="e-err"></div>
+    <div class="mactions">
+      <button class="btn" onclick="closeM('m-edit')">Cancel</button>
+      <button class="btn bblu" id="e-btn" onclick="submitEdit()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- CASH PAYMENT -->
+<div class="modal-bg" id="m-cash" style="display:none">
+  <div class="modal">
+    <div class="modal-title">Record cash payment</div>
+    <div class="fgrid">
+      <div class="ff full"><label>Customer ID *</label><input id="cc-id" placeholder="Customer ID"/></div>
+      <div class="ff full"><label>Plan *</label><select id="cc-plan"><option value="">— Select Plan —</option></select></div>
+      <div class="ff"><label>Amount (₹) *</label><input id="cc-amt" type="number" placeholder="600"/></div>
+      <div class="ff"><label>Notes</label><input id="cc-notes" placeholder="Collected by agent..."/></div>
+    </div>
+    <div class="errmsg" id="cc-err"></div>
+    <div class="mactions">
+      <button class="btn" onclick="closeM('m-cash')">Cancel</button>
+      <button class="btn bblu" id="cc-btn" onclick="submitCash()">Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- SAVE TEMPLATE -->
+<div class="modal-bg" id="m-tpl" style="display:none">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title">Save Template</div>
+    <div class="ff" style="margin-bottom:12px"><label>Title *</label><input id="tpl-t" placeholder="e.g. Renewal Reminder"/></div>
+    <div class="ff" style="margin-bottom:12px"><label>Message *</label><textarea id="tpl-m" rows="4" placeholder="Message text..."></textarea></div>
+    <div class="errmsg" id="tpl-err"></div>
+    <div class="mactions">
+      <button class="btn" onclick="closeM('m-tpl')">Cancel</button>
+      <button class="btn bblu" id="tpl-btn" onclick="submitTpl()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BASE='https://isp-billing-api.naveencablenetwork88.workers.dev';
+const PAGES=['dashboard','customers','activations','payments','notifications','plans'];
+let custCache=[];let plansCache=[];let audTab='f';
+
+function $(id){return document.getElementById(id);}
+function toast(msg,type='ok'){const t=$('toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(()=>t.className='toast',3000);}
+function closeM(id){$(id).style.display='none';}
+function showErr(el,msg){el.textContent=msg;el.style.display='block';}
+function getToken(){return localStorage.getItem('ngn_token');}
+function getUser(){return JSON.parse(localStorage.getItem('ngn_user')||'{}');}
+
+async function apiFetch(method,path,body){
+  const h={'Content-Type':'application/json'};
+  const t=getToken();if(t)h['Authorization']='Bearer '+t;
+  const r=await fetch(BASE+path,{method,headers:h,body:body?JSON.stringify(body):undefined});
+  return r.json();
+}
+
+function today(){return new Date().toISOString().split('T')[0];}
+function realSt(c){if(!c.expiry_date)return c.status||'unknown';if(c.expiry_date<today()&&c.status==='active')return 'expired';return c.status||'unknown';}
+function sbadge(s){const m={active:'bok',expired:'berr',suspended:'bwarn',lead:'bgray',disconnected:'bgray',confirmed:'bok',pending:'bwarn',failed:'berr',success:'bok'};return '<span class="badge '+(m[s]||'bgray')+'">'+(s||'—')+'</span>';}
+
+// ✅ FIX: Zoho payments now show as "Zoho" badge (amber), not Cash
+function mbadge(m){
+  if(m==='razorpay')return '<span class="badge binfo">Razorpay</span>';
+  if(m==='zoho')return '<span class="badge bzoho">Zoho</span>';
+  if(m==='cash')return '<span class="badge bgray">Cash</span>';
+  return '<span class="badge bgray">'+(m||'—')+'</span>';
+}
+function abadge(a){return a==='jaze_renew'?'<span class="badge bok">Jaze</span>':'<span class="badge bwarn">NetAdmin</span>';}
+
+// ✅ FIX: esc() had broken regex replace(/\/g,'\\') — missing closing /
+// Correct: replace(/\\/g,'\\\\')
+function esc(s){return(s||'').replace(/'/g,"&#39;").replace(/\\/g,'\\\\');}
+
+function doLogout(){localStorage.removeItem('ngn_token');localStorage.removeItem('ngn_user');$('app-shell').style.display='none';$('login-page').style.display='flex';}
+
+async function doLogin(){
+  const phone=$('login-phone').value.trim(),pass=$('login-pass').value;
+  const err=$('login-err'),btn=$('login-btn');
+  err.style.display='none';
+  if(!phone||!pass){err.textContent='Enter credentials';err.style.display='block';return;}
+  btn.disabled=true;btn.textContent='Signing in...';
+  try{
+    const r=await apiFetch('POST','/api/auth/admin/login',{phone,password:pass});
+    if(r.success){
+      localStorage.setItem('ngn_token',r.data.token);
+      localStorage.setItem('ngn_user',JSON.stringify(r.data.admin));
+      startApp();initVoiceAfterLogin();
+    }else{err.textContent=r.error||'Login failed';err.style.display='block';}
+  }catch(e){err.textContent='Network error';err.style.display='block';}
+  finally{btn.disabled=false;btn.textContent='Sign in';}
+}
+
+function startApp(){
+  $('login-page').style.display='none';$('app-shell').style.display='flex';
+  const u=getUser();
+  const ini=(u.name||'A').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  $('sb-avatar').textContent=ini;$('sb-name').textContent=u.name||'Admin';$('sb-role').textContent=u.role||'admin';
+  $('dash-date').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  loadPlans();// preload plans so dropdowns are ready
+  showPage('dashboard');
+}
+
+function showPage(name){
+  PAGES.forEach(p=>{$('page-'+p).style.display=p===name?'block':'none';$('nav-'+p).classList.toggle('active',p===name);});
+  if(name==='dashboard')loadDash();
+  if(name==='customers')loadCustomers();
+  if(name==='activations')loadActivations();
+  if(name==='payments')loadPayments();
+  if(name==='notifications'){loadTpls();loadNHistory();updateAudCount();}
+  if(name==='plans')loadPlans();
+}
+
+async function loadDash(){
+  try{
+    const[cr,ar]=await Promise.all([apiFetch('GET','/api/admin/customers'),apiFetch('GET','/api/admin/activations?status=pending&action=update')]);
+    const all=cr.data?.customers||[];custCache=all;
+    const td=today();
+    $('s-total').textContent=all.length;
+    $('s-active').textContent=all.filter(c=>c.status==='active'&&(!c.expiry_date||c.expiry_date>=td)).length;
+    $('s-expired').textContent=all.filter(c=>c.status==='expired'||(c.status==='active'&&c.expiry_date&&c.expiry_date<td)).length;
+    $('s-pending').textContent=ar.data?.activations?.length||0;
+    const rec=all.slice(0,5);
+    $('dash-cnt').textContent='('+all.length+' total)';
+    $('dash-recent').innerHTML=rec.length?rec.map(c=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(42,47,66,.4)"><div><div style="font-size:13px;font-weight:500">'+c.name+'</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">'+c.phone+' · '+(c.isp_server||'—')+'</div></div>'+sbadge(realSt(c))+'</div>').join(''):'<div class="empty">No customers yet</div>';
+  }catch(e){console.error(e);}
+}
+
+async function loadCustomers(){
+  const search=$('csearch').value.trim(),status=$('cstatus').value;
+  let p='?page=1&limit=100';
+  if(search)p+='&search='+encodeURIComponent(search);
+  if(status)p+='&status='+status;
+  $('ctbody').innerHTML='<tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+  try{
+    const r=await apiFetch('GET','/api/admin/customers'+p);
+    const cs=r.data?.customers||[];custCache=cs;
+    if(!cs.length){$('ctbody').innerHTML='<tr><td colspan="9"><div class="empty">No customers found</div></td></tr>';return;}
+    // ✅ FIX: deleteCustomer onclick uses data attribute to avoid quote-in-string bug
+    $('ctbody').innerHTML=cs.map(c=>{
+      const safeName=c.name.replace(/'/g,"\\'");
+      return '<tr><td style="padding-left:16px;font-weight:500">'+c.name+'</td><td style="font-family:var(--mono);color:var(--muted)">'+c.phone+'</td><td><span class="badge binfo">'+(c.isp_server||'—')+'</span></td><td style="font-family:var(--mono);font-size:12px;color:var(--muted)">'+(c.isp_username||'—')+'</td><td style="color:var(--muted)">'+(c.plan_name||'—')+'</td><td style="font-family:var(--mono);font-size:12px">'+(c.expiry_date||'—')+'</td><td style="color:'+(c.balance_due>0?'var(--danger)':'var(--muted)')+';font-family:var(--mono)">'+(c.balance_due>0?'₹'+c.balance_due:'—')+'</td><td>'+sbadge(realSt(c))+'</td><td style="padding-right:16px"><div class="abtns"><button class="btn bsm bview" onclick="openView('+c.id+')">👁 View</button><button class="btn bsm bedit" onclick="openEdit('+c.id+')">✏ Edit</button><button class="btn bsm" style="color:var(--danger);border-color:var(--danger)" onclick="deleteCustomer('+c.id+',\''+safeName+'\')">🗑</button></div></td></tr>';
+    }).join('');
+  }catch(e){console.error(e);}
+}
+function searchC(){loadCustomers();}
+function filterSt(s){$('cstatus').value=s;loadCustomers();}
+
+function openView(id){
+  const c=custCache.find(x=>x.id===id);if(!c){toast('Not found','err');return;}
+  $('v-title').textContent=c.name+' — #'+c.id;
+  $('v-edit-btn').onclick=()=>{closeM('m-view');openEdit(id);};
+  $('v-cust').innerHTML=di('Name',c.name)+di('Phone',c.phone)+di('Email',c.email)+di('Membership',c.membership)+di('Status',sbadge(realSt(c)),true)+di('Created',c.created_at)+di('Address',c.address,'full')+di('Comments',c.comments,'full');
+  $('v-isp').innerHTML=di('ISP Server',c.isp_server)+di('ISP Customer ID',c.isp_customer_id,'','mono')+di('ISP Username',c.isp_username,'full','mono')+di('Plan',c.plan_name)+di('Plan ID',c.plan_id);
+  $('v-hw').innerHTML=di('Router Brand',c.router_brand)+di('Router IP',c.router_ip,'','mono')+di('Router User',c.router_username,'','mono')+di('Router Pass',c.router_password,'','mono')+di('MAC Address',c.mac_address,'','mono')+di('IPTV',c.iptv);
+  $('v-bill').innerHTML=di('Expiry Date',c.expiry_date,'','mono')+di('Balance Due',c.balance_due>0?'₹'+c.balance_due:'₹0');
+  $('m-view').style.display='flex';
+}
+function di(label,val,cls,mono){return '<div class="ditem'+(cls?' '+cls:'')+'""><div class="dlabel">'+label+'</div><div class="dval'+(mono?' '+mono:'')+'">'+(val||'—')+'</div></div>';}
+
+function openAdd(){$('m-add').style.display='flex';}
+
+function openEdit(id){
+  const c=custCache.find(x=>x.id===id);if(!c){toast('Not found','err');return;}
+  $('e-id').value=c.id;$('e-label').textContent='#'+c.id+' — '+c.name;
+  $('e-name').value=c.name||'';$('e-phone').value=c.phone||'';$('e-email').value=c.email||'';
+  $('e-pass').value='';$('e-addr').value=c.address||'';$('e-isp').value=c.isp_server_id||'2';
+  $('e-cid').value=c.isp_customer_id||'';$('e-iuser').value=c.isp_username||'';
+  $('e-brand').value=c.router_brand_id||'';$('e-rip').value=c.router_ip||'192.168.1.1';
+  $('e-ruser').value=c.router_username||'admin';$('e-rpass').value=c.router_password||'';
+  $('e-expiry').value=c.expiry_date||'';
+  $('e-status').value=c.status||'active';$('e-mem').value=c.membership||'';
+  $('e-comments').value=c.comments||'';$('e-mac').value=c.mac_address||'';
+  $('e-iptv').value=c.iptv||'';$('e-err').style.display='none';
+  // Set current plan in dropdown (plans already loaded on startApp)
+  $('e-plan').value=c.plan_id?String(c.plan_id):'';
+  $('m-edit').style.display='flex';
+}
+
+async function submitAdd(){
+  const btn=$('a-btn'),err=$('a-err');err.style.display='none';
+  const d={name:$('a-name').value.trim(),phone:$('a-phone').value.trim(),email:$('a-email').value.trim(),password:$('a-pass').value.trim(),address:$('a-addr').value.trim(),isp_server_id:parseInt($('a-isp').value),isp_customer_id:$('a-cid').value.trim(),isp_username:$('a-iuser').value.trim(),router_brand_id:$('a-brand').value||null,router_ip:$('a-rip').value.trim()||'192.168.1.1',router_username:$('a-ruser').value.trim()||'admin',router_password:$('a-rpass').value.trim(),expiry_date:$('a-expiry').value||null,plan_id:$('a-plan').value?parseInt($('a-plan').value):null,membership:$('a-mem').value.trim(),comments:$('a-comments').value.trim(),mac_address:$('a-mac').value.trim(),iptv:$('a-iptv').value.trim()};
+  if(!d.name||!d.phone||!d.isp_customer_id){showErr(err,'Name, phone and ISP ID required');return;}
+  btn.disabled=true;btn.textContent='Adding...';
+  try{
+    const r=await apiFetch('POST','/api/admin/customers',d);
+    if(r.success){toast(d.name+' added! ID: '+r.data.id);closeM('m-add');loadCustomers();loadDash();}
+    else showErr(err,r.error||'Failed');
+  }catch(e){showErr(err,'Network error');}
+  finally{btn.disabled=false;btn.textContent='Add customer';}
+}
+
+async function submitEdit(){
+  const btn=$('e-btn'),err=$('e-err');err.style.display='none';
+  const id=$('e-id').value;
+  const d={name:$('e-name').value.trim(),phone:$('e-phone').value.trim(),email:$('e-email').value.trim(),address:$('e-addr').value.trim(),isp_server_id:parseInt($('e-isp').value),isp_customer_id:$('e-cid').value.trim(),isp_username:$('e-iuser').value.trim(),router_brand_id:$('e-brand').value||null,router_ip:$('e-rip').value.trim(),router_username:$('e-ruser').value.trim(),router_password:$('e-rpass').value.trim(),expiry_date:$('e-expiry').value||null,plan_id:$('e-plan').value?parseInt($('e-plan').value):null,status:$('e-status').value,membership:$('e-mem').value.trim(),comments:$('e-comments').value.trim(),mac_address:$('e-mac').value.trim(),iptv:$('e-iptv').value.trim()};
+  const np=$('e-pass').value.trim();if(np)d.password=np;
+  if(!d.name||!d.phone){showErr(err,'Name and phone required');return;}
+  btn.disabled=true;btn.textContent='Saving...';
+  try{
+    const r=await apiFetch('PUT','/api/admin/customers/'+id,d);
+    if(r.success){toast(d.name+' updated!');closeM('m-edit');loadCustomers();}
+    else showErr(err,r.error||'Failed');
+  }catch(e){showErr(err,'Network error');}
+  finally{btn.disabled=false;btn.textContent='Save changes';}
+}
+
+async function loadActivations(){
+  const st=$('af-status').value,tp=$('af-type').value;
+  let p='?';if(st)p+='status='+st+'&';if(tp)p+='action='+tp;
+  $('atbody').innerHTML='<tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+  try{
+    const[fr,al]=await Promise.all([apiFetch('GET','/api/admin/activations'+p),apiFetch('GET','/api/admin/activations')]);
+    const all=al.data?.activations||[];
+    $('ap').textContent=all.filter(a=>a.status==='pending').length;
+    $('ac').textContent=all.filter(a=>a.status==='confirmed').length;
+    $('af').textContent=all.filter(a=>a.status==='failed').length;
+    $('s-pending').textContent=all.filter(a=>a.status==='pending'&&a.action==='update').length;
+    const acts=fr.data?.activations||[];
+    if(!acts.length){$('atbody').innerHTML='<tr><td colspan="9"><div class="empty">No activations found</div></td></tr>';return;}
+    $('atbody').innerHTML=acts.map(a=>'<tr><td style="padding-left:16px;font-family:var(--mono);color:var(--muted)">#'+a.id+'</td><td><div style="font-weight:500">'+(a.customer_name||'—')+'</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">'+(a.customer_phone||'')+'</div></td><td style="font-family:var(--mono);font-size:12px">'+(a.isp_username||'—')+'</td><td>'+abadge(a.action)+'</td><td style="color:var(--muted);font-size:12px">'+(a.mikrotik_profile&&a.mikrotik_profile!=='jaze'?a.mikrotik_profile:'—')+'</td><td style="font-family:var(--mono);font-size:12px">'+(a.expiry_date||'—')+'</td><td>'+sbadge(a.status)+'</td><td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(a.created_at||'').slice(0,16).replace('T',' ')+'</td><td style="padding-right:16px;font-family:var(--mono);font-size:11px;color:var(--muted)">'+(a.confirmed_at?(a.confirmed_at||'').slice(0,16).replace('T',' '):'—')+'</td></tr>').join('');
+  }catch(e){console.error(e);}
+}
+
+async function loadPayments(){
+  $('ptbody').innerHTML='<tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+  try{
+    const r=await apiFetch('GET','/api/admin/payments');
+    const pays=r.data?.payments||[];
+    const succ=pays.filter(p=>p.status==='success');
+    const tot=succ.reduce((s,p)=>s+(p.amount_total||0),0);
+    // ✅ FIX: zoho counted as online, not cash
+    const onl=succ.filter(p=>p.payment_method==='razorpay'||p.payment_method==='zoho').reduce((s,p)=>s+(p.amount_total||0),0);
+    const csh=succ.filter(p=>p.payment_method==='cash').reduce((s,p)=>s+(p.amount_total||0),0);
+    $('pt').textContent='₹'+tot.toLocaleString('en-IN');
+    $('po').textContent='₹'+onl.toLocaleString('en-IN');
+    $('pc').textContent='₹'+csh.toLocaleString('en-IN');
+    if(!pays.length){$('ptbody').innerHTML='<tr><td colspan="9"><div class="empty">No payments yet</div></td></tr>';return;}
+    $('ptbody').innerHTML=pays.map(p=>'<tr><td style="padding-left:16px;font-family:var(--mono);color:var(--muted)">#'+p.id+'</td><td><div style="font-weight:500">'+(p.customer_name||'—')+'</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">'+(p.customer_phone||'')+'</div></td><td style="font-family:var(--mono);font-weight:600;color:var(--accent2)">₹'+(p.amount_total||0).toLocaleString('en-IN')+'</td><td>'+mbadge(p.payment_method)+'</td><td style="color:var(--muted)">'+(p.recharge_type||'').replace(/_/g,' ')+'</td><td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(p.payu_order_id||'—')+'</td><td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(p.payu_txn_id||'—')+'</td><td>'+sbadge(p.status)+'</td><td style="padding-right:16px;font-family:var(--mono);font-size:11px;color:var(--muted)">'+(p.created_at||'').slice(0,16).replace('T',' ')+'</td></tr>').join('');
+  }catch(e){console.error(e);}
+}
+
+function openCash(){$('m-cash').style.display='flex';}
+async function submitCash(){
+  const btn=$('cc-btn'),err=$('cc-err');err.style.display='none';
+  const d={customer_id:parseInt($('cc-id').value),plan_id:$('cc-plan').value?parseInt($('cc-plan').value):null,amount_received:parseFloat($('cc-amt').value),notes:$('cc-notes').value.trim()};
+  if(!d.customer_id||!d.plan_id||!d.amount_received){showErr(err,'All fields required');return;}
+  btn.disabled=true;btn.textContent='Recording...';
+  try{
+    const r=await apiFetch('POST','/api/admin/payments/cash',d);
+    if(r.success){toast(r.data.message||'Recorded!');closeM('m-cash');['cc-id','cc-amt','cc-notes'].forEach(i=>$(i).value='');$('cc-plan').value='';}
+    else showErr(err,r.error||'Failed');
+  }catch(e){showErr(err,'Network error');}
+  finally{btn.disabled=false;btn.textContent='Record';}
+}
+
+function switchTab(t){
+  audTab=t;$('tab-f').classList.toggle('active',t==='f');$('tab-s').classList.toggle('active',t==='s');
+  $('aud-f').style.display=t==='f'?'block':'none';$('aud-s').style.display=t==='s'?'block':'none';
+  if(t==='s')loadChklist();
+}
+
+async function loadChklist(){
+  const el=$('chklist');
+  try{
+    const r=await apiFetch('GET','/api/admin/customers?page=1&limit=200');
+    const cs=r.data?.customers||[];
+    el.innerHTML=cs.map(c=>'<div class="chk-row"><input type="checkbox" id="chk'+c.id+'" value="'+c.id+'"/><label for="chk'+c.id+'" style="cursor:pointer;flex:1"><span style="font-weight:500">'+c.name+'</span><span style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-left:8px">'+c.phone+' · '+(c.isp_username||'—')+'</span></label>'+sbadge(realSt(c))+'</div>').join('');
+  }catch(e){el.innerHTML='<div class="empty">Failed</div>';}
+}
+
+async function updateAudCount(){
+  try{
+    const r=await apiFetch('GET','/api/admin/customers?page=1&limit=200');
+    const all=r.data?.customers||[];const td=today();const f=$('nfilter').value;
+    let n=0;
+    if(f==='all')n=all.filter(c=>c.fcm_token).length;
+    else if(f==='active')n=all.filter(c=>c.status==='active'&&c.expiry_date>=td&&c.fcm_token).length;
+    else if(f==='expired')n=all.filter(c=>(c.status==='expired'||(c.status==='active'&&c.expiry_date<td))&&c.fcm_token).length;
+    else if(f==='expiring_7'){const in7=new Date();in7.setDate(in7.getDate()+7);const s=in7.toISOString().split('T')[0];n=all.filter(c=>c.expiry_date<=s&&c.expiry_date>=td&&c.fcm_token).length;}
+    $('aud-count').textContent='📱 '+n+' customers with app will receive this';
+  }catch(e){}
+}
+
+function updatePrev(){
+  const t=$('ntitle').value,m=$('nmsg').value,p=$('nprev');
+  if(t||m){p.style.display='block';$('pv-title').textContent=t||'(no title)';$('pv-msg').textContent=m||'(no message)';}
+  else p.style.display='none';
+}
+
+async function sendNotif(){
+  const title=$('ntitle').value.trim(),message=$('nmsg').value.trim();
+  if(!title||!message){toast('Title and message required','err');return;}
+  const btn=$('send-btn');btn.disabled=true;btn.textContent='Sending...';
+  try{
+    let b={title,message};
+    if(audTab==='f'){b.filter=$('nfilter').value;}
+    else{const chk=[...document.querySelectorAll('#chklist input:checked')].map(i=>parseInt(i.value));if(!chk.length){toast('Select customers','err');btn.disabled=false;btn.textContent='📢 Send Now';return;}b.customer_ids=chk;}
+    const r=await apiFetch('POST','/api/admin/notifications/send',b);
+    if(r.success){toast('✅ Sent to '+r.data.sent+' customers!');loadNHistory();}
+    else toast(r.error||'Failed','err');
+  }catch(e){toast('Network error','err');}
+  finally{btn.disabled=false;btn.textContent='📢 Send Now';}
+}
+
+function clearNotif(){$('ntitle').value='';$('nmsg').value='';$('nprev').style.display='none';}
+
+async function loadTpls(){
+  const el=$('tpl-list');
+  try{
+    const r=await apiFetch('GET','/api/admin/notification-templates');
+    const ts=r.data?.templates||[];
+    if(!ts.length){el.innerHTML='<div class="empty" style="padding:20px">No templates yet</div>';return;}
+    el.innerHTML=ts.map(t=>'<div class="tpl-item" onclick="useTpl(\''+esc(t.title)+'\',\''+esc(t.message)+'\')"><div style="display:flex;align-items:center;justify-content:space-between"><div class="tpl-title">'+t.title+'</div><button class="btn bsm" style="color:var(--danger);border-color:var(--danger)" onclick="event.stopPropagation();delTpl('+t.id+')">✕</button></div><div class="tpl-msg">'+t.message+'</div></div>').join('');
+  }catch(e){el.innerHTML='<div class="empty">Failed</div>';}
+}
+
+function useTpl(title,msg){$('ntitle').value=title.replace(/&#39;/g,"'");$('nmsg').value=msg.replace(/&#39;/g,"'");updatePrev();toast('Template loaded!');}
+function openSaveTpl(){$('tpl-t').value='';$('tpl-m').value='';$('tpl-err').style.display='none';$('m-tpl').style.display='flex';}
+
+async function submitTpl(){
+  const t=$('tpl-t').value.trim(),m=$('tpl-m').value.trim(),err=$('tpl-err'),btn=$('tpl-btn');
+  if(!t||!m){showErr(err,'Title and message required');return;}
+  btn.disabled=true;btn.textContent='Saving...';
+  try{
+    const r=await apiFetch('POST','/api/admin/notification-templates',{title:t,message:m});
+    if(r.success){toast('Template saved!');closeM('m-tpl');loadTpls();}
+    else showErr(err,r.error||'Failed');
+  }catch(e){showErr(err,'Network error');}
+  finally{btn.disabled=false;btn.textContent='Save';}
+}
+
+async function delTpl(id){if(!confirm('Delete?'))return;await apiFetch('DELETE','/api/admin/notification-templates/'+id);loadTpls();toast('Deleted');}
+
+async function loadNHistory(){
+  const el=$('nhtbody');
+  try{
+    const r=await apiFetch('GET','/api/admin/notifications-history');
+    const rows=r.data?.notifications||[];
+    if(!rows.length){el.innerHTML='<tr><td colspan="5"><div class="empty">No notifications sent yet</div></td></tr>';return;}
+    el.innerHTML=rows.map(n=>'<tr><td style="padding-left:12px;font-weight:500">'+(n.customer_name||'—')+'</td><td><span class="badge binfo">'+(n.type||'—')+'</span></td><td style="font-size:12px;color:var(--muted);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(n.message||'—')+'</td><td>'+sbadge(n.status)+'</td><td style="padding-right:12px;font-family:var(--mono);font-size:11px;color:var(--muted)">'+(n.sent_at||'').slice(0,16).replace('T',' ')+'</td></tr>').join('');
+  }catch(e){el.innerHTML='<tr><td colspan="5"><div class="empty">Failed</div></td></tr>';}
+}
+
+async function deleteCustomer(id,name){
+  if(!confirm('Delete '+name+'?\n\nThis will permanently delete all payments, recharge history, and notifications.'))return;
+  if(!confirm('Final confirmation — delete '+name+' permanently?'))return;
+  try{
+    const r=await apiFetch('DELETE','/api/admin/customers/'+id);
+    if(r.success){toast('🗑 '+name+' deleted');loadCustomers();loadDash();}
+    else toast(r.error||'Delete failed','err');
+  }catch(e){toast('Network error','err');}
+}
+
+// ── Plans ──────────────────────────────────────────────────
+async function loadPlans(){
+  try{
+    const r=await apiFetch('GET','/api/admin/plans');
+    const ps=r.data?.plans||[];plansCache=ps;
+
+    // ✅ Populate plan dropdowns in Add, Edit, Cash payment modals
+    ['a-plan','e-plan','cc-plan'].forEach(function(selId){
+      const sel=document.getElementById(selId);if(!sel)return;
+      const cur=sel.value;
+      sel.innerHTML='<option value="">— Select Plan —</option>';
+      ps.filter(p=>p.is_active).forEach(function(p){
+        const o=document.createElement('option');
+        o.value=p.id;
+        o.textContent=p.name+' — ₹'+p.price+' / '+p.validity_days+'d';
+        sel.appendChild(o);
+      });
+      if(cur)sel.value=cur;
+    });
+
+    // Update plans table if on plans page
+    const tbody=$('plan-tbody');
+    if(!tbody)return;
+    if(!ps.length){tbody.innerHTML='<tr><td colspan="10"><div class="empty">No plans yet</div></td></tr>';return;}
+    tbody.innerHTML=ps.map(p=>'<tr><td style="padding-left:16px;font-family:var(--mono);color:var(--muted)">#'+p.id+'</td><td style="font-weight:500">'+p.name+'</td><td style="font-family:var(--mono)">'+(p.speed_down_mbps||0)+' Mbps</td><td style="font-family:var(--mono)">'+(p.speed_up_mbps||0)+' Mbps</td><td style="font-family:var(--mono);font-weight:600;color:var(--accent2)">₹'+p.price+'</td><td style="font-family:var(--mono)">'+(p.validity_days||30)+' days</td><td><span class="badge binfo">'+(p.isp_server_name||'—')+'</span></td><td style="font-size:12px;color:var(--muted)">'+(p.mikrotik_profile||'—')+'</td><td>'+sbadge(p.is_active?'active':'inactive')+'</td><td style="padding-right:16px"><div class="abtns"><button class="btn bsm bedit" onclick="openEditPlan('+p.id+')">✏ Edit</button><button class="btn bsm" style="color:var(--danger);border-color:var(--danger)" onclick="deactivatePlan('+p.id+')">✕</button></div></td></tr>').join('');
+  }catch(e){console.error(e);}
+}
+
+function openAddPlan(){
+  $('plan-modal-title').textContent='Add Plan';$('pl-id').value='';
+  ['pl-name','pl-down','pl-up','pl-price','pl-days','pl-isp-id','pl-mk-profile'].forEach(i=>$(i).value='');
+  $('pl-mk-service').value='pppoe';$('pl-isp').value='1';$('pl-active').value='1';
+  $('pl-err').style.display='none';$('m-plan').style.display='flex';
+}
+
+function openEditPlan(id){
+  const p=plansCache.find(x=>x.id===id);if(!p){toast('Not found','err');return;}
+  $('plan-modal-title').textContent='Edit Plan — '+p.name;$('pl-id').value=p.id;
+  $('pl-name').value=p.name||'';$('pl-down').value=p.speed_down_mbps||'';
+  $('pl-up').value=p.speed_up_mbps||'';$('pl-price').value=p.price||'';
+  $('pl-days').value=p.validity_days||30;$('pl-isp').value=p.isp_server_id||1;
+  $('pl-isp-id').value=p.isp_plan_id||'';$('pl-mk-profile').value=p.mikrotik_profile||'';
+  $('pl-mk-service').value=p.mikrotik_service||'pppoe';$('pl-active').value=p.is_active?'1':'0';
+  $('pl-err').style.display='none';$('m-plan').style.display='flex';
+}
+
+async function submitPlan(){
+  const btn=$('pl-btn'),err=$('pl-err');err.style.display='none';
+  const id=$('pl-id').value;
+  const d={name:$('pl-name').value.trim(),speed_down_mbps:parseInt($('pl-down').value)||0,speed_up_mbps:parseInt($('pl-up').value)||0,price:parseFloat($('pl-price').value),validity_days:parseInt($('pl-days').value),isp_server_id:parseInt($('pl-isp').value),isp_plan_id:$('pl-isp-id').value.trim()||null,mikrotik_profile:$('pl-mk-profile').value.trim()||null,mikrotik_service:$('pl-mk-service').value.trim()||'pppoe',is_active:parseInt($('pl-active').value)};
+  if(!d.name||!d.price||!d.validity_days){showErr(err,'Name, price and validity required');return;}
+  btn.disabled=true;btn.textContent='Saving...';
+  try{
+    const r=id?await apiFetch('PUT','/api/admin/plans/'+id,d):await apiFetch('POST','/api/admin/plans',d);
+    if(r.success){toast(id?'Plan updated!':'Plan added! ID: '+r.data?.id);closeM('m-plan');loadPlans();}
+    else showErr(err,r.error||'Failed');
+  }catch(e){showErr(err,'Network error');}
+  finally{btn.disabled=false;btn.textContent='Save Plan';}
+}
+
+async function deactivatePlan(id){
+  if(!confirm('Deactivate this plan?'))return;
+  const r=await apiFetch('DELETE','/api/admin/plans/'+id);
+  if(r.success){toast('Plan deactivated');loadPlans();}
+  else toast(r.error||'Failed','err');
+}
+
+window.addEventListener('load',function(){
+  $('login-btn').addEventListener('click',doLogin);
+  $('login-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+  $('logout-btn').addEventListener('click',doLogout);
+  ['m-add','m-view','m-edit','m-cash','m-tpl','m-plan'].forEach(function(id){$(id).addEventListener('click',function(e){if(e.target===this)closeM(id);});});
+  if(getToken()){
+    startApp();
+    apiFetch('GET','/api/admin/voice-prefs').then(r=>{
+      if(r.success){
+        voiceEnabled=r.data.voice_enabled===1;
+        voiceLang=r.data.voice_language||'hi-IN';
+        updateVoiceUI();
+        $('voice-settings-btn').style.display='flex';
+        const banner=$('voice-banner');
+        if(banner)banner.style.display='block';
+      }
+    });
+  }else{$('login-page').style.display='flex';$('app-shell').style.display='none';}
+});
+
+// ── Voice ──────────────────────────────────────────────────
+let lastPaymentId=0;let voiceInterval=null;let voiceReady=false;let voiceEnabled=true;let voiceLang='hi-IN';
+const VOICE_MESSAGES={
+  'hi-IN':(amount,name,method)=>`नया भुगतान प्राप्त हुआ! ${name} से ${amount} रुपये ${method==='cash'?'नकद':'ऑनलाइन'} मिले!`,
+  'en-IN':(amount,name,method)=>`New payment received! Rupees ${amount} from ${name} via ${method}.`
+};
+
+async function initVoiceAfterLogin(){
+  try{const r=await apiFetch('GET','/api/admin/voice-prefs');if(r.success){voiceEnabled=r.data.voice_enabled===1;voiceLang=r.data.voice_language||'hi-IN';}}catch(e){}
+  voiceReady=true;if(voiceEnabled)startPaymentPolling();
+  const banner=$('voice-banner');if(banner)banner.style.display='none';
+  $('voice-settings-btn').style.display='flex';updateVoiceUI();
+  speak(voiceLang==='hi-IN'?'आवाज़ सूचनाएं चालू हैं!':'Voice notifications enabled!');
+}
+
+async function startPaymentPolling(){
+  try{const r=await apiFetch('GET','/api/admin/payments');const pays=r.data?.payments||[];const s=pays.filter(p=>p.status==='success');if(s.length>0)lastPaymentId=s[0].id;}catch(e){}
+  if(voiceInterval)clearInterval(voiceInterval);
+  voiceInterval=setInterval(checkNewPayments,15000);
+}
+
+async function checkNewPayments(){
+  if(!voiceReady||!voiceEnabled)return;
+  try{
+    const r=await apiFetch('GET','/api/admin/payments');
+    const pays=r.data?.payments||[];
+    const successPays=pays.filter(p=>p.status==='success');
+    if(!successPays.length)return;
+    const newPays=successPays.filter(p=>p.id>lastPaymentId);
+    if(newPays.length>0){
+      lastPaymentId=successPays[0].id;
+      for(const p of newPays){
+        const amount=p.amount_total||0,name=p.customer_name||'a customer',method=p.payment_method||'online';
+        toast('💰 ₹'+amount+' received from '+name+'!');
+        const msgFn=VOICE_MESSAGES[voiceLang]||VOICE_MESSAGES['en-IN'];
+        speak(msgFn(amount,name,method));
+        if($('page-payments').style.display!=='none')loadPayments();
+        await new Promise(resolve=>setTimeout(resolve,4000));
+      }
+    }
+  }catch(e){console.error('Poll error:',e);}
+}
+
+function speak(text){if(!voiceReady||!voiceEnabled)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=voiceLang;u.rate=0.9;u.pitch=1.0;u.volume=1.0;speechSynthesis.speak(u);}
+function updateVoiceUI(){const btn=$('voice-toggle');const ls=$('voice-lang-sel');if(!btn)return;btn.textContent=voiceEnabled?'🔊 Voice ON':'🔇 Voice OFF';btn.style.color=voiceEnabled?'var(--accent2)':'var(--muted)';btn.style.borderColor=voiceEnabled?'var(--accent2)':'var(--border)';if(ls)ls.value=voiceLang;}
+async function toggleVoice(){voiceEnabled=!voiceEnabled;if(voiceEnabled){startPaymentPolling();speak(voiceLang==='hi-IN'?'आवाज़ सूचनाएं चालू हैं!':'Voice notifications enabled!');}else{clearInterval(voiceInterval);speechSynthesis.cancel();}updateVoiceUI();await saveVoicePrefs();toast(voiceEnabled?'🔊 Voice enabled!':'🔇 Voice disabled!');}
+async function changeLanguage(lang){voiceLang=lang;updateVoiceUI();await saveVoicePrefs();speak(lang==='hi-IN'?'भाषा हिंदी में बदल दी गई!':'Language changed to English!');toast('Language saved!');}
+async function saveVoicePrefs(){try{await apiFetch('POST','/api/admin/voice-prefs',{voice_enabled:voiceEnabled,voice_language:voiceLang});}catch(e){}}
+function enableVoiceOnRefresh(){voiceReady=true;if(voiceEnabled)startPaymentPolling();const banner=document.getElementById('voice-banner');if(banner)banner.style.display='none';speak(voiceLang==='hi-IN'?'आवाज़ सूचनाएं चालू हैं!':'Voice notifications enabled!');toast('🔊 Voice active!');}
+</script>
+</body>
+</html>
