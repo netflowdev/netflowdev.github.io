@@ -16,7 +16,7 @@
   --danger:#e53e3e;
   --warn:#d97706;
   --text:#1a1f36;
-  --muted:#1f273c;
+  --muted:#7a849e;
   --font:'Syne',sans-serif;
   --mono:'DM Mono',monospace;
   --shadow:0 1px 4px rgba(30,40,80,.07),0 4px 16px rgba(30,40,80,.06);
@@ -190,6 +190,7 @@ tr:hover td{background:rgba(59,126,248,.03);}
   </div>
 
   <div class="main">
+    <!-- DASHBOARD -->
     <div id="page-dashboard">
       <div class="page-header">
         <div><div class="page-title">Dashboard</div><div class="page-sub">// <span id="dash-date"></span></div></div>
@@ -225,6 +226,7 @@ tr:hover td{background:rgba(59,126,248,.03);}
       </div>
     </div>
 
+    <!-- CUSTOMERS -->
     <div id="page-customers" style="display:none">
       <div class="page-header">
         <div><div class="page-title">Customers</div><div class="page-sub">// manage subscribers</div></div>
@@ -255,6 +257,7 @@ tr:hover td{background:rgba(59,126,248,.03);}
       </div>
     </div>
 
+    <!-- ACTIVATIONS -->
     <div id="page-activations" style="display:none">
       <div class="page-header">
         <div><div class="page-title">Activations</div><div class="page-sub">// ISP activation log</div></div>
@@ -275,14 +278,15 @@ tr:hover td{background:rgba(59,126,248,.03);}
             <thead><tr>
               <th style="padding-left:16px">#</th><th>Customer</th><th>Username</th>
               <th>Server</th><th>Profile</th><th>Expiry</th><th>Status</th><th>Created</th>
-              <th style="padding-right:16px">Confirmed</th>
+              <th>Confirmed</th><th style="padding-right:16px">Del</th>
             </tr></thead>
-            <tbody id="atbody"><tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
+            <tbody id="atbody"><tr><td colspan="10"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
           </table>
         </div>
       </div>
     </div>
 
+    <!-- PAYMENTS -->
     <div id="page-payments" style="display:none">
       <div class="page-header">
         <div><div class="page-title">Payments</div><div class="page-sub">// billing history</div></div>
@@ -299,14 +303,15 @@ tr:hover td{background:rgba(59,126,248,.03);}
             <thead><tr>
               <th style="padding-left:16px">#</th><th>Customer</th><th>Amount</th>
               <th>Method</th><th>Type</th><th>App Ref</th><th>Bank Txn</th>
-              <th>Status</th><th style="padding-right:16px">Date</th>
+              <th>Status</th><th>Date</th><th style="padding-right:16px">Del</th>
             </tr></thead>
-            <tbody id="ptbody"><tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
+            <tbody id="ptbody"><tr><td colspan="10"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
           </table>
         </div>
       </div>
     </div>
 
+    <!-- NOTIFICATIONS -->
     <div id="page-notifications" style="display:none">
       <div class="page-header">
         <div><div class="page-title">Notifications</div><div class="page-sub">// send push notifications</div></div>
@@ -362,6 +367,7 @@ tr:hover td{background:rgba(59,126,248,.03);}
       </div>
     </div>
 
+    <!-- PLANS -->
     <div id="page-plans" style="display:none">
       <div class="page-header">
         <div><div class="page-title">Plans</div><div class="page-sub">// manage broadband plans</div></div>
@@ -450,6 +456,10 @@ tr:hover td{background:rgba(59,126,248,.03);}
       <div class="ff"><label>WiFi Band</label>
         <select id="a-wifi-band"><option value="single">Single Band (2.4GHz)</option><option value="dual">Dual Band (2.4GHz + 5GHz)</option></select>
       </div>
+      <!-- ✅ BALANCE DUE in Add modal -->
+      <div class="ff"><label>Balance Due (₹)</label>
+        <input id="a-due" type="number" placeholder="0" min="0" value="0"/>
+      </div>
     </div>
     <div class="errmsg" id="a-err"></div>
     <div class="mactions">
@@ -521,6 +531,13 @@ tr:hover td{background:rgba(59,126,248,.03);}
         <select id="e-wifi-band"><option value="single">Single Band (2.4GHz)</option><option value="dual">Dual Band (2.4GHz + 5GHz)</option></select>
       </div>
     </div>
+    <!-- ✅ BILLING SECTION in Edit modal -->
+    <div class="sec-title">Billing</div>
+    <div class="fgrid">
+      <div class="ff"><label>Balance Due (₹)</label>
+        <input id="e-due" type="number" placeholder="0" min="0"/>
+      </div>
+    </div>
     <div class="errmsg" id="e-err"></div>
     <div class="mactions">
       <button class="btn" onclick="closeM('m-edit')">Cancel</button>
@@ -583,7 +600,6 @@ async function apiFetch(method,path,body){
 function today(){return new Date().toISOString().split('T')[0];}
 function realSt(c){if(!c.expiry_date)return c.status||'unknown';if(c.expiry_date<today()&&c.status==='active')return 'expired';return c.status||'unknown';}
 function sbadge(s){const m={active:'bok',expired:'berr',suspended:'bwarn',lead:'bgray',disconnected:'bgray',confirmed:'bok',pending:'bwarn',failed:'berr',success:'bok'};return '<span class="badge '+(m[s]||'bgray')+'">'+(s||'—')+'</span>';}
-
 function mbadge(m){
   if(m==='razorpay')return '<span class="badge binfo">Razorpay</span>';
   if(m==='zoho')return '<span class="badge bzoho">Zoho</span>';
@@ -673,12 +689,25 @@ function openView(id){
   $('v-cust').innerHTML=di('Name',c.name)+di('Phone',c.phone)+di('Email',c.email)+di('Membership',c.membership)+di('Status',sbadge(realSt(c)),true)+di('Created',c.created_at)+di('Address',c.address,'full')+di('Comments',c.comments,'full');
   $('v-isp').innerHTML=di('ISP Server',c.isp_server)+di('ISP Customer ID',c.isp_customer_id,'','mono')+di('ISP Username',c.isp_username,'full','mono')+di('Plan',c.plan_name)+di('Plan ID',c.plan_id);
   $('v-hw').innerHTML=di('Router Brand',c.router_brand)+di('Router IP',c.router_ip,'','mono')+di('Router User',c.router_username,'','mono')+di('Router Pass',c.router_password,'','mono')+di('MAC Address',c.mac_address,'','mono')+di('IPTV',c.iptv);
-  $('v-bill').innerHTML=di('Expiry Date',c.expiry_date,'','mono')+di('Balance Due',c.balance_due>0?'₹'+c.balance_due:'₹0');
+  $('v-bill').innerHTML=di('Expiry Date',c.expiry_date,'','mono')+di('Balance Due',c.balance_due>0?'<span style="color:var(--danger);font-weight:600">₹'+c.balance_due+'</span>':'<span style="color:var(--accent2)">₹0</span>',true);
   $('m-view').style.display='flex';
 }
 function di(label,val,cls,mono){return '<div class="ditem'+(cls?' '+cls:'')+'""><div class="dlabel">'+label+'</div><div class="dval'+(mono?' '+mono:'')+'">'+(val||'—')+'</div></div>';}
 
-function openAdd(){$('m-add').style.display='flex';}
+function openAdd(){
+  // Reset add form
+  ['a-name','a-phone','a-email','a-pass','a-addr','a-mem','a-comments','a-cid','a-iuser','a-rip','a-ruser','a-rpass','a-mac','a-iptv','a-wifi-ssid'].forEach(i=>{const el=$(i);if(el)el.value='';});
+  $('a-due').value='0';
+  $('a-expiry').value='';
+  $('a-isp').value='1';
+  $('a-brand').value='';
+  $('a-plan').value='';
+  $('a-pon-port').value='';
+  $('a-onu-id').value='';
+  $('a-wifi-band').value='single';
+  $('a-err').style.display='none';
+  $('m-add').style.display='flex';
+}
 
 function openEdit(id){
   const c=custCache.find(x=>x.id===id);if(!c){toast('Not found','err');return;}
@@ -693,12 +722,44 @@ function openEdit(id){
   $('e-comments').value=c.comments||'';$('e-mac').value=c.mac_address||'';
   $('e-iptv').value=c.iptv||'';$('e-err').style.display='none';
   $('e-plan').value=c.plan_id?String(c.plan_id):'';
+  // ✅ Populate PON, ONU, WiFi fields
+  if($('e-pon-port'))$('e-pon-port').value=c.pon_port||'';
+  if($('e-onu-id'))$('e-onu-id').value=c.onu_id||'';
+  if($('e-wifi-ssid'))$('e-wifi-ssid').value=c.wifi_ssid||'';
+  if($('e-wifi-band'))$('e-wifi-band').value=c.wifi_band||'single';
+  // ✅ Balance Due
+  $('e-due').value=c.balance_due||0;
   $('m-edit').style.display='flex';
 }
 
 async function submitAdd(){
   const btn=$('a-btn'),err=$('a-err');err.style.display='none';
-  const d={name:$('a-name').value.trim(),phone:$('a-phone').value.trim(),email:$('a-email').value.trim(),password:$('a-pass').value.trim(),address:$('a-addr').value.trim(),isp_server_id:parseInt($('a-isp').value),isp_customer_id:$('a-cid').value.trim(),isp_username:$('a-iuser').value.trim(),router_brand_id:$('a-brand').value||null,router_ip:$('a-rip').value.trim()||'192.168.1.1',router_username:$('a-ruser').value.trim()||'admin',router_password:$('a-rpass').value.trim(),expiry_date:$('a-expiry').value||null,plan_id:$('a-plan').value?parseInt($('a-plan').value):null,membership:$('a-mem').value.trim(),comments:$('a-comments').value.trim(),mac_address:$('a-mac').value.trim(),iptv:$('a-iptv').value.trim()};
+  const d={
+    name:$('a-name').value.trim(),
+    phone:$('a-phone').value.trim(),
+    email:$('a-email').value.trim(),
+    password:$('a-pass').value.trim(),
+    address:$('a-addr').value.trim(),
+    isp_server_id:parseInt($('a-isp').value),
+    isp_customer_id:$('a-cid').value.trim(),
+    isp_username:$('a-iuser').value.trim(),
+    router_brand_id:$('a-brand').value||null,
+    router_ip:$('a-rip').value.trim()||'192.168.1.1',
+    router_username:$('a-ruser').value.trim()||'admin',
+    router_password:$('a-rpass').value.trim(),
+    expiry_date:$('a-expiry').value||null,
+    plan_id:$('a-plan').value?parseInt($('a-plan').value):null,
+    membership:$('a-mem').value.trim(),
+    comments:$('a-comments').value.trim(),
+    mac_address:$('a-mac').value.trim(),
+    iptv:$('a-iptv').value.trim(),
+    pon_port:$('a-pon-port').value||null,
+    onu_id:$('a-onu-id').value?parseInt($('a-onu-id').value):null,
+    wifi_ssid:$('a-wifi-ssid').value.trim()||null,
+    wifi_band:$('a-wifi-band').value||'single',
+    // ✅ balance_due from a-due (own field, not e-due)
+    balance_due:parseFloat($('a-due').value)||0
+  };
   if(!d.name||!d.phone||!d.isp_customer_id){showErr(err,'Name, phone and ISP ID required');return;}
   btn.disabled=true;btn.textContent='Adding...';
   try{
@@ -712,7 +773,32 @@ async function submitAdd(){
 async function submitEdit(){
   const btn=$('e-btn'),err=$('e-err');err.style.display='none';
   const id=$('e-id').value;
-  const d={name:$('e-name').value.trim(),phone:$('e-phone').value.trim(),email:$('e-email').value.trim(),address:$('e-addr').value.trim(),isp_server_id:parseInt($('e-isp').value),isp_customer_id:$('e-cid').value.trim(),isp_username:$('e-iuser').value.trim(),router_brand_id:$('e-brand').value||null,router_ip:$('e-rip').value.trim(),router_username:$('e-ruser').value.trim(),router_password:$('e-rpass').value.trim(),expiry_date:$('e-expiry').value||null,plan_id:$('e-plan').value?parseInt($('e-plan').value):null,status:$('e-status').value,membership:$('e-mem').value.trim(),comments:$('e-comments').value.trim(),mac_address:$('e-mac').value.trim(),iptv:$('e-iptv').value.trim()};
+  const d={
+    name:$('e-name').value.trim(),
+    phone:$('e-phone').value.trim(),
+    email:$('e-email').value.trim(),
+    address:$('e-addr').value.trim(),
+    isp_server_id:parseInt($('e-isp').value),
+    isp_customer_id:$('e-cid').value.trim(),
+    isp_username:$('e-iuser').value.trim(),
+    router_brand_id:$('e-brand').value||null,
+    router_ip:$('e-rip').value.trim(),
+    router_username:$('e-ruser').value.trim(),
+    router_password:$('e-rpass').value.trim(),
+    expiry_date:$('e-expiry').value||null,
+    plan_id:$('e-plan').value?parseInt($('e-plan').value):null,
+    status:$('e-status').value,
+    membership:$('e-mem').value.trim(),
+    comments:$('e-comments').value.trim(),
+    mac_address:$('e-mac').value.trim(),
+    iptv:$('e-iptv').value.trim(),
+    pon_port:$('e-pon-port')?($('e-pon-port').value||null):null,
+    onu_id:$('e-onu-id')&&$('e-onu-id').value?parseInt($('e-onu-id').value):null,
+    wifi_ssid:$('e-wifi-ssid')?($('e-wifi-ssid').value.trim()||null):null,
+    wifi_band:$('e-wifi-band')?($('e-wifi-band').value||'single'):'single',
+    // ✅ balance_due
+    balance_due:parseFloat($('e-due').value)||0
+  };
   const np=$('e-pass').value.trim();if(np)d.password=np;
   if(!d.name||!d.phone){showErr(err,'Name and phone required');return;}
   btn.disabled=true;btn.textContent='Saving...';
@@ -727,7 +813,7 @@ async function submitEdit(){
 async function loadActivations(){
   const st=$('af-status').value,tp=$('af-type').value;
   let p='?';if(st)p+='status='+st+'&';if(tp)p+='action='+tp;
-  $('atbody').innerHTML='<tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+  $('atbody').innerHTML='<tr><td colspan="10"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
   try{
     const[fr,al]=await Promise.all([apiFetch('GET','/api/admin/activations'+p),apiFetch('GET','/api/admin/activations')]);
     const all=al.data?.activations||[];
@@ -736,13 +822,27 @@ async function loadActivations(){
     $('af').textContent=all.filter(a=>a.status==='failed').length;
     $('s-pending').textContent=all.filter(a=>a.status==='pending'&&a.action==='update').length;
     const acts=fr.data?.activations||[];
-    if(!acts.length){$('atbody').innerHTML='<tr><td colspan="9"><div class="empty">No activations found</div></td></tr>';return;}
-    $('atbody').innerHTML=acts.map(a=>'<tr><td style="padding-left:16px;font-family:var(--mono);color:var(--muted)">#'+a.id+'</td><td><div style="font-weight:600;color:var(--text)">'+(a.customer_name||'—')+'</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">'+(a.customer_phone||'')+'</div></td><td style="font-family:var(--mono);font-size:12px;color:var(--text)">'+(a.isp_username||'—')+'</td><td>'+abadge(a.action)+'</td><td style="color:var(--muted);font-size:12px">'+(a.mikrotik_profile&&a.mikrotik_profile!=='jaze'?a.mikrotik_profile:'—')+'</td><td style="font-family:var(--mono);font-size:12px;color:var(--text)">'+(a.expiry_date||'—')+'</td><td>'+sbadge(a.status)+'</td><td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(a.created_at||'').slice(0,16).replace('T',' ')+'</td><td style="padding-right:16px;font-family:var(--mono);font-size:11px;color:var(--muted)">'+(a.confirmed_at?(a.confirmed_at||'').slice(0,16).replace('T',' '):'—')+'</td></tr>').join('');
+    if(!acts.length){$('atbody').innerHTML='<tr><td colspan="10"><div class="empty">No activations found</div></td></tr>';return;}
+    // ✅ Added delete button column
+    $('atbody').innerHTML=acts.map(a=>
+      '<tr>'+
+      '<td style="padding-left:16px;font-family:var(--mono);color:var(--muted)">#'+a.id+'</td>'+
+      '<td><div style="font-weight:600;color:var(--text)">'+(a.customer_name||'—')+'</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">'+(a.customer_phone||'')+'</div></td>'+
+      '<td style="font-family:var(--mono);font-size:12px;color:var(--text)">'+(a.isp_username||'—')+'</td>'+
+      '<td>'+abadge(a.action)+'</td>'+
+      '<td style="color:var(--muted);font-size:12px">'+(a.mikrotik_profile&&a.mikrotik_profile!=='jaze'?a.mikrotik_profile:'—')+'</td>'+
+      '<td style="font-family:var(--mono);font-size:12px;color:var(--text)">'+(a.expiry_date||'—')+'</td>'+
+      '<td>'+sbadge(a.status)+'</td>'+
+      '<td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(a.created_at||'').slice(0,16).replace('T',' ')+'</td>'+
+      '<td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(a.confirmed_at?(a.confirmed_at||'').slice(0,16).replace('T',' '):'—')+'</td>'+
+      '<td style="padding-right:16px"><button class="btn bsm" style="color:var(--danger);border-color:var(--danger);background:rgba(229,62,62,.06)" onclick="deleteActivation('+a.id+')">🗑</button></td>'+
+      '</tr>'
+    ).join('');
   }catch(e){console.error(e);}
 }
 
 async function loadPayments(){
-  $('ptbody').innerHTML='<tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+  $('ptbody').innerHTML='<tr><td colspan="10"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
   try{
     const r=await apiFetch('GET','/api/admin/payments');
     const pays=r.data?.payments||[];
@@ -753,9 +853,43 @@ async function loadPayments(){
     $('pt').textContent='₹'+tot.toLocaleString('en-IN');
     $('po').textContent='₹'+onl.toLocaleString('en-IN');
     $('pc').textContent='₹'+csh.toLocaleString('en-IN');
-    if(!pays.length){$('ptbody').innerHTML='<tr><td colspan="9"><div class="empty">No payments yet</div></td></tr>';return;}
-    $('ptbody').innerHTML=pays.map(p=>'<tr><td style="padding-left:16px;font-family:var(--mono);color:var(--muted)">#'+p.id+'</td><td><div style="font-weight:600;color:var(--text)">'+(p.customer_name||'—')+'</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">'+(p.customer_phone||'')+'</div></td><td style="font-family:var(--mono);font-weight:700;color:var(--accent2)">₹'+(p.amount_total||0).toLocaleString('en-IN')+'</td><td>'+mbadge(p.payment_method)+'</td><td style="color:var(--muted)">'+(p.recharge_type||'').replace(/_/g,' ')+'</td><td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(p.payu_order_id||'—')+'</td><td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(p.payu_txn_id||'—')+'</td><td>'+sbadge(p.status)+'</td><td style="padding-right:16px;font-family:var(--mono);font-size:11px;color:var(--muted)">'+(p.created_at||'').slice(0,16).replace('T',' ')+'</td></tr>').join('');
+    if(!pays.length){$('ptbody').innerHTML='<tr><td colspan="10"><div class="empty">No payments yet</div></td></tr>';return;}
+    // ✅ Added delete button column
+    $('ptbody').innerHTML=pays.map(p=>
+      '<tr>'+
+      '<td style="padding-left:16px;font-family:var(--mono);color:var(--muted)">#'+p.id+'</td>'+
+      '<td><div style="font-weight:600;color:var(--text)">'+(p.customer_name||'—')+'</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">'+(p.customer_phone||'')+'</div></td>'+
+      '<td style="font-family:var(--mono);font-weight:700;color:var(--accent2)">₹'+(p.amount_total||0).toLocaleString('en-IN')+'</td>'+
+      '<td>'+mbadge(p.payment_method)+'</td>'+
+      '<td style="color:var(--muted)">'+(p.recharge_type||'').replace(/_/g,' ')+'</td>'+
+      '<td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(p.payu_order_id||'—')+'</td>'+
+      '<td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(p.payu_txn_id||'—')+'</td>'+
+      '<td>'+sbadge(p.status)+'</td>'+
+      '<td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(p.created_at||'').slice(0,16).replace('T',' ')+'</td>'+
+      '<td style="padding-right:16px"><button class="btn bsm" style="color:var(--danger);border-color:var(--danger);background:rgba(229,62,62,.06)" onclick="deletePayment('+p.id+')">🗑</button></td>'+
+      '</tr>'
+    ).join('');
   }catch(e){console.error(e);}
+}
+
+// ✅ Delete payment
+async function deletePayment(id){
+  if(!confirm('Delete this payment record permanently?'))return;
+  try{
+    const r=await apiFetch('DELETE','/api/admin/payments/'+id);
+    if(r.success){toast('Payment deleted');loadPayments();}
+    else toast(r.error||'Failed','err');
+  }catch(e){toast('Network error','err');}
+}
+
+// ✅ Delete activation
+async function deleteActivation(id){
+  if(!confirm('Delete this activation record permanently?'))return;
+  try{
+    const r=await apiFetch('DELETE','/api/admin/activations/'+id);
+    if(r.success){toast('Activation deleted');loadActivations();}
+    else toast(r.error||'Failed','err');
+  }catch(e){toast('Network error','err');}
 }
 
 function openCash(){$('m-cash').style.display='flex';}
