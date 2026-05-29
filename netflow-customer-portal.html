@@ -1,1141 +1,1057 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NetFlow Customer Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="keywords" content="ISP billing software, broadband billing, LCO management, internet service provider software, ISP management system, NetAdmin, NetFlow MyWiFi"/>
+<title>NetFlow ISP Billing & Management Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-  :root {
-    --bg: #0a0e1a;
-    --bg2: #111827;
-    --bg3: #1a2235;
-    --card: #141c2e;
-    --card2: #1e2a40;
-    --border: #2a3a55;
-    --accent: #3b82f6;
-    --accent2: #60a5fa;
-    --accent-glow: rgba(59,130,246,0.18);
-    --green: #22c55e;
-    --green-dim: rgba(34,197,94,0.12);
-    --red: #ef4444;
-    --red-dim: rgba(239,68,68,0.12);
-    --yellow: #f59e0b;
-    --yellow-dim: rgba(245,158,11,0.12);
-    --text: #f0f4ff;
-    --text2: #94a3b8;
-    --text3: #64748b;
-    --radius: 16px;
-    --radius-sm: 10px;
-    --shadow: 0 8px 32px rgba(0,0,0,0.4);
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#060810;--surface:#0d1117;--card:#111827;--border:#1f2937;
+  --accent:#6366f1;--accent2:#22d3ee;--accent3:#10b981;
+  --warn:#f59e0b;--danger:#ef4444;
+  --text:#f9fafb;--muted:#9ca3af;--light:#e5e7eb;
+  --font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+  --grad:linear-gradient(135deg,#6366f1,#8b5cf6);
+  --grad2:linear-gradient(135deg,#22d3ee,#6366f1);
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.6;overflow-x:hidden;}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(6,8,16,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5%;}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:68px;max-width:1200px;margin:0 auto;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo-icon{width:36px;height:36px;background:var(--grad);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;}
+.nav-logo-text{font-size:20px;font-weight:700;color:var(--text);}
+.nav-logo-text span{color:var(--accent);}
+.nav-links{display:flex;align-items:center;gap:32px;}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s;}
+.nav-links a:hover{color:var(--text);}
+.nav-cta{display:flex;gap:10px;}
+.btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all .2s;border:none;font-family:var(--font);}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-primary{background:var(--grad);color:#fff;border:none;}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px);}
+.btn-lg{padding:14px 28px;font-size:16px;border-radius:10px;}
+.btn-outline{background:transparent;border:2px solid var(--accent);color:var(--accent);}
+.btn-outline:hover{background:var(--accent);color:#fff;}
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;padding:120px 5% 80px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(99,102,241,.15) 0%,transparent 70%);pointer-events:none;}
+.hero::after{content:'';position:absolute;bottom:-100px;left:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(34,211,238,.1) 0%,transparent 70%);pointer-events:none;}
+.hero-inner{max-width:1200px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.3);border-radius:100px;padding:6px 14px;font-size:13px;color:var(--accent);margin-bottom:20px;}
+.hero-badge-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.hero h1{font-size:52px;font-weight:800;line-height:1.15;margin-bottom:20px;letter-spacing:-1px;}
+.hero h1 span{background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:18px;color:var(--muted);margin-bottom:36px;line-height:1.7;}
+.hero-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+.hero-trust{margin-top:40px;display:flex;align-items:center;gap:16px;}
+.hero-trust-text{font-size:13px;color:var(--muted);}
+.trust-avatars{display:flex;}
+.trust-avatars span{width:32px;height:32px;border-radius:50%;background:var(--grad);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-left:-8px;}
+.trust-avatars span:first-child{margin-left:0;}
 
-  /* ── Noise overlay ── */
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none; z-index: 0; opacity: 0.4;
-  }
+/* DASHBOARD PREVIEW */
+.dashboard-preview{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.5);}
+.dp-header{background:var(--surface);padding:14px 20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+.dp-dot{width:10px;height:10px;border-radius:50%;}
+.dp-url{flex:1;background:var(--card);border-radius:6px;padding:6px 12px;font-size:12px;color:var(--muted);font-family:var(--mono);margin:0 12px;}
+.dp-body{padding:20px;}
+.dp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.dp-stat{background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border);}
+.dp-stat-val{font-size:20px;font-weight:700;font-family:var(--mono);}
+.dp-stat-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+.dp-row{background:var(--surface);border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);font-size:13px;}
+.dp-badge{padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;}
+.dp-green{background:rgba(16,185,129,.15);color:#10b981;}
+.dp-red{background:rgba(239,68,68,.15);color:#ef4444;}
+.dp-blue{background:rgba(99,102,241,.15);color:#6366f1;}
+.dp-yellow{background:rgba(245,158,11,.15);color:#f59e0b;}
 
-  /* ════════════════════════════════════
-     LOGIN SCREEN
-  ════════════════════════════════════ */
-  #login-screen {
-    display: flex; align-items: center; justify-content: center;
-    min-height: 100vh; padding: 24px;
-    background: radial-gradient(ellipse at 60% 20%, rgba(59,130,246,0.12) 0%, transparent 60%),
-                radial-gradient(ellipse at 10% 80%, rgba(96,165,250,0.07) 0%, transparent 50%),
-                var(--bg);
-    position: relative; z-index: 1;
-  }
+/* SECTION */
+section{padding:100px 5%;}
+.section-inner{max-width:1200px;margin:0 auto;}
+.section-label{font-size:13px;font-weight:600;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;}
+.section-title{font-size:42px;font-weight:800;line-height:1.2;letter-spacing:-.5px;margin-bottom:16px;}
+.section-sub{font-size:18px;color:var(--muted);max-width:600px;}
+.section-header{margin-bottom:60px;}
 
-  .login-box {
-    width: 100%; max-width: 420px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 48px 40px;
-    box-shadow: var(--shadow), 0 0 80px rgba(59,130,246,0.08);
-    animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1);
-  }
+/* LOGOS */
+.logos-section{padding:40px 5%;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.logos-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:40px;flex-wrap:wrap;justify-content:center;}
+.logos-label{font-size:13px;color:var(--muted);white-space:nowrap;}
+.logo-pill{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;color:var(--muted);}
 
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+/* FEATURES */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.feature-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;transition:border-color .2s,transform .2s;}
+.feature-card:hover{border-color:var(--accent);transform:translateY(-4px);}
+.feature-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;}
+.fi-purple{background:rgba(99,102,241,.15);}
+.fi-cyan{background:rgba(34,211,238,.15);}
+.fi-green{background:rgba(16,185,129,.15);}
+.fi-amber{background:rgba(245,158,11,.15);}
+.fi-pink{background:rgba(236,72,153,.15);}
+.fi-red{background:rgba(239,68,68,.15);}
+.feature-title{font-size:18px;font-weight:600;margin-bottom:8px;}
+.feature-desc{font-size:14px;color:var(--muted);line-height:1.6;}
 
-  .login-logo {
-    display: flex; align-items: center; gap: 12px; margin-bottom: 32px;
-  }
-  .login-logo-icon {
-    width: 44px; height: 44px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-  }
-  .login-logo-text {
-    font-family: 'Syne', sans-serif;
-    font-size: 22px; font-weight: 800;
-    letter-spacing: -0.5px;
-  }
-  .login-logo-text span { color: var(--accent2); }
+/* HOW IT WORKS */
+.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;}
+.how-grid::before{content:'';position:absolute;top:32px;left:10%;right:10%;height:1px;background:var(--border);z-index:0;}
+.how-step{text-align:center;padding:20px;position:relative;z-index:1;}
+.how-num{width:64px;height:64px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;margin:0 auto 16px;box-shadow:0 0 0 6px rgba(99,102,241,.1);}
+.how-title{font-size:16px;font-weight:600;margin-bottom:8px;}
+.how-desc{font-size:13px;color:var(--muted);}
 
-  .login-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 26px; font-weight: 700;
-    margin-bottom: 6px;
-  }
-  .login-sub { color: var(--text2); font-size: 14px; margin-bottom: 32px; }
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start;}
+.pricing-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;position:relative;}
+.pricing-card.featured{border-color:var(--accent);background:linear-gradient(180deg,rgba(99,102,241,.08) 0%,var(--card) 100%);}
+.pricing-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--grad);color:#fff;font-size:12px;font-weight:700;padding:5px 16px;border-radius:100px;white-space:nowrap;}
+.pricing-plan{font-size:14px;font-weight:600;color:var(--muted);margin-bottom:8px;}
+.pricing-price{font-size:42px;font-weight:800;line-height:1;margin-bottom:4px;}
+.pricing-price span{font-size:18px;font-weight:400;color:var(--muted);}
+.pricing-offer{font-size:13px;color:var(--accent3);margin-bottom:8px;font-weight:500;}
+.pricing-strike{font-size:14px;color:var(--muted);text-decoration:line-through;margin-bottom:20px;}
+.pricing-divider{height:1px;background:var(--border);margin:20px 0;}
+.pricing-feat{display:flex;align-items:center;gap:10px;font-size:14px;margin-bottom:12px;color:var(--light);}
+.pricing-feat-icon{width:18px;height:18px;background:rgba(16,185,129,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;color:#10b981;}
+.pricing-cta{width:100%;margin-top:28px;}
 
-  .form-group { margin-bottom: 18px; }
-  .form-label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase; }
+/* TESTIMONIALS */
+.testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.testimonial-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;}
+.test-stars{color:var(--warn);font-size:14px;margin-bottom:12px;}
+.test-text{font-size:14px;color:var(--light);line-height:1.7;margin-bottom:16px;}
+.test-author{display:flex;align-items:center;gap:10px;}
+.test-avatar{width:36px;height:36px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;}
+.test-name{font-size:14px;font-weight:600;}
+.test-role{font-size:12px;color:var(--muted);}
 
-  .form-input {
-    width: 100%; padding: 14px 16px;
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); color: var(--text);
-    font-family: 'DM Sans', sans-serif; font-size: 15px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    outline: none;
-  }
-  .form-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-  }
-  .form-input::placeholder { color: var(--text3); }
+/* STATS */
+.stats-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;}
+.stat-item{padding:48px 32px;text-align:center;border-right:1px solid var(--border);}
+.stat-item:last-child{border-right:none;}
+.stat-val{font-size:42px;font-weight:800;background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-label{font-size:15px;color:var(--muted);margin-top:4px;}
 
-  .btn-primary {
-    width: 100%; padding: 15px;
-    background: linear-gradient(135deg, var(--accent), #2563eb);
-    border: none; border-radius: var(--radius-sm);
-    color: white; font-family: 'Syne', sans-serif;
-    font-size: 15px; font-weight: 700; letter-spacing: 0.3px;
-    cursor: pointer; transition: all 0.2s;
-    box-shadow: 0 4px 20px rgba(59,130,246,0.35);
-    margin-top: 8px;
-  }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(59,130,246,0.45); }
-  .btn-primary:active { transform: translateY(0); }
-  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+/* FAQ */
+.faq-list{max-width:760px;margin:0 auto;}
+.faq-item{border-bottom:1px solid var(--border);padding:24px 0;}
+.faq-q{font-size:17px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+.faq-q-icon{font-size:20px;color:var(--accent);transition:transform .2s;}
+.faq-a{font-size:15px;color:var(--muted);margin-top:12px;line-height:1.7;display:none;}
+.faq-item.open .faq-a{display:block;}
+.faq-item.open .faq-q-icon{transform:rotate(45deg);}
 
-  .error-msg {
-    background: var(--red-dim); border: 1px solid rgba(239,68,68,0.3);
-    border-radius: var(--radius-sm); padding: 12px 14px;
-    color: #fca5a5; font-size: 13px; margin-top: 14px;
-    display: none;
-  }
+/* CTA */
+.cta-section{background:linear-gradient(135deg,rgba(99,102,241,.12) 0%,rgba(34,211,238,.08) 100%);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:100px 5%;text-align:center;}
+.cta-inner{max-width:700px;margin:0 auto;}
+.cta-title{font-size:46px;font-weight:800;margin-bottom:16px;letter-spacing:-.5px;}
+.cta-sub{font-size:18px;color:var(--muted);margin-bottom:40px;}
+.cta-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
 
-  /* ════════════════════════════════════
-     APP SHELL
-  ════════════════════════════════════ */
-  #app { display: none; min-height: 100vh; position: relative; z-index: 1; }
+/* CONTACT */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;}
+.contact-info h3{font-size:28px;font-weight:700;margin-bottom:12px;}
+.contact-info p{color:var(--muted);margin-bottom:32px;}
+.contact-item{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+.contact-icon{width:44px;height:44px;background:rgba(99,102,241,.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.contact-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.contact-val{font-size:15px;font-weight:500;}
+.contact-form{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-field{margin-bottom:16px;}
+.form-field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:500;}
+.form-field input,.form-field select,.form-field textarea{width:100%;padding:11px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border .2s;}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--accent);}
+.form-field select option{background:var(--card);}
+.form-field textarea{resize:vertical;min-height:100px;}
 
-  /* ── Top Nav ── */
-  .topnav {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(10,14,26,0.9); backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px; height: 60px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .nav-brand {
-    font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .nav-brand-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
+/* FOOTER */
+footer{background:var(--surface);border-top:1px solid var(--border);padding:60px 5% 30px;}
+.footer-inner{max-width:1200px;margin:0 auto;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px;}
+.footer-brand-logo{display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:14px;}
+.footer-brand-icon{width:32px;height:32px;background:var(--grad);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;}
+.footer-brand-name{font-size:18px;font-weight:700;color:var(--text);}
+.footer-brand-name span{color:var(--accent);}
+.footer-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px;}
+.footer-badges{display:flex;gap:8px;flex-wrap:wrap;}
+.footer-badge{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:11px;color:var(--muted);}
+.footer-col h4{font-size:14px;font-weight:600;margin-bottom:16px;color:var(--text);}
+.footer-col a{display:block;font-size:14px;color:var(--muted);text-decoration:none;margin-bottom:10px;transition:color .2s;cursor:pointer;}
+.footer-col a:hover{color:var(--accent);}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-copy{font-size:13px;color:var(--muted);}
+.footer-legal{display:flex;gap:20px;flex-wrap:wrap;}
+.footer-legal a{font-size:13px;color:var(--muted);text-decoration:none;cursor:pointer;}
+.footer-legal a:hover{color:var(--text);}
 
-  .nav-right { display: flex; align-items: center; gap: 12px; }
-  .nav-username { font-size: 13px; color: var(--text2); }
-  .btn-logout {
-    padding: 7px 14px; background: transparent;
-    border: 1px solid var(--border); border-radius: 8px;
-    color: var(--text2); font-size: 12px; cursor: pointer;
-    font-family: 'DM Sans', sans-serif; transition: all 0.2s;
-  }
-  .btn-logout:hover { border-color: var(--red); color: var(--red); }
+/* ===== MODALS ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:20px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;position:relative;margin:auto;}
+.modal-box.wide{max-width:820px;}
+.modal-header{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--card);z-index:2;}
+.modal-title{font-size:20px;font-weight:700;}
+.modal-close{width:32px;height:32px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.modal-close:hover{color:var(--text);border-color:var(--accent);}
+.modal-body{padding:28px;}
+.modal-body h3{font-size:17px;font-weight:700;margin:24px 0 10px;color:var(--text);}
+.modal-body h3:first-child{margin-top:0;}
+.modal-body p{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px;}
+.modal-body ul{padding-left:20px;margin-bottom:12px;}
+.modal-body ul li{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:6px;}
+.modal-body .info-block{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin:16px 0;}
+.modal-body .info-row{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;}
+.modal-body .info-row:last-child{border-bottom:none;}
+.modal-body .info-key{color:var(--muted);min-width:130px;font-weight:500;}
+.modal-body .info-val{color:var(--text);}
 
-  /* ── Bottom Tab Bar ── */
-  .tab-bar {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-    background: rgba(17,24,39,0.96); backdrop-filter: blur(16px);
-    border-top: 1px solid var(--border);
-    display: flex; height: 64px;
-  }
-  .tab-item {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 3px; cursor: pointer; transition: all 0.2s;
-    color: var(--text3); font-size: 10px; font-weight: 500;
-    position: relative;
-  }
-  .tab-item.active { color: var(--accent2); }
-  .tab-item .tab-icon { font-size: 20px; line-height: 1; }
-  .tab-item.active::before {
-    content: '';
-    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-    width: 32px; height: 2px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    border-radius: 0 0 4px 4px;
-  }
-  .notif-badge {
-    position: absolute; top: 8px; right: calc(50% - 14px);
-    width: 16px; height: 16px; background: var(--red);
-    border-radius: 50%; font-size: 9px; font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
-    color: white;
-  }
+/* CHECKOUT MODAL */
+.checkout-plan-summary{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;}
+.checkout-plan-name{font-size:16px;font-weight:700;}
+.checkout-plan-price{font-size:20px;font-weight:800;color:var(--accent);}
+.checkout-plan-desc{font-size:13px;color:var(--muted);margin-top:2px;}
+.checkout-section-title{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin:20px 0 12px;}
+.checkout-note{font-size:12px;color:var(--muted);margin-top:16px;text-align:center;line-height:1.6;}
+.checkout-secure{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font-size:12px;color:var(--muted);}
 
-  /* ── Page Content ── */
-  .page-content {
-    padding: 20px 20px 84px;
-    max-width: 600px; margin: 0 auto;
-  }
-
-  /* ── Pages ── */
-  .page { display: none; animation: fadeIn 0.3s ease; }
-  .page.active { display: block; }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-
-  /* ════════════════════════════════════
-     DASHBOARD
-  ════════════════════════════════════ */
-  .hero-card {
-    background: linear-gradient(135deg, #1a2a4a 0%, #0f1e38 50%, #0a1628 100%);
-    border: 1px solid rgba(59,130,246,0.25);
-    border-radius: 20px; padding: 24px;
-    margin-bottom: 16px; position: relative; overflow: hidden;
-  }
-  .hero-card::before {
-    content: '';
-    position: absolute; top: -40px; right: -40px;
-    width: 160px; height: 160px;
-    background: radial-gradient(circle, rgba(59,130,246,0.2) 0%, transparent 70%);
-    border-radius: 50%;
-  }
-  .hero-card::after {
-    content: '';
-    position: absolute; bottom: -30px; left: 30px;
-    width: 100px; height: 100px;
-    background: radial-gradient(circle, rgba(96,165,250,0.1) 0%, transparent 70%);
-    border-radius: 50%;
-  }
-  .hero-name { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-  .hero-phone { color: var(--text2); font-size: 13px; margin-bottom: 20px; }
-
-  .status-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
-    margin-bottom: 20px;
-  }
-  .status-badge.active { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
-  .status-badge.expired { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
-  .status-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-
-  .hero-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; position: relative; z-index: 1; }
-  .hero-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px; }
-  .hero-stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-  .hero-stat-value { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); word-break: break-word; }
-  .hero-stat-value.expiring { color: var(--yellow); }
-  .hero-stat-value.expired-val { color: var(--red); }
-
-  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-  .info-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 16px; transition: border-color 0.2s;
-  }
-  .info-card:hover { border-color: var(--accent); }
-  .info-icon { font-size: 22px; margin-bottom: 8px; }
-  .info-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-  .info-value { font-size: 14px; font-weight: 500; color: var(--text); }
-
-  .balance-card {
-    background: var(--yellow-dim); border: 1px solid rgba(245,158,11,0.25);
-    border-radius: var(--radius); padding: 16px;
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .balance-label { font-size: 13px; color: var(--yellow); font-weight: 500; }
-  .balance-value { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--yellow); }
-
-  .quick-recharge-btn {
-    width: 100%; padding: 16px;
-    background: linear-gradient(135deg, var(--accent), #2563eb);
-    border: none; border-radius: var(--radius-sm);
-    color: white; font-family: 'Syne', sans-serif;
-    font-size: 15px; font-weight: 700; cursor: pointer;
-    transition: all 0.2s; box-shadow: 0 4px 20px rgba(59,130,246,0.35);
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .quick-recharge-btn:hover { box-shadow: 0 8px 28px rgba(59,130,246,0.5); transform: translateY(-1px); }
-
-  /* ════════════════════════════════════
-     PLANS / RECHARGE
-  ════════════════════════════════════ */
-  .section-title {
-    font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700;
-    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
-  }
-  .section-title span { color: var(--accent2); }
-
-  .plans-grid { display: grid; gap: 12px; }
-
-  .plan-card {
-    background: var(--card); border: 1.5px solid var(--border);
-    border-radius: var(--radius); padding: 20px;
-    cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
-  }
-  .plan-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(59,130,246,0.15); }
-  .plan-card.selected { border-color: var(--accent); background: linear-gradient(135deg, rgba(59,130,246,0.08), var(--card)); }
-  .plan-card.popular::before {
-    content: 'POPULAR';
-    position: absolute; top: 12px; right: -24px;
-    background: var(--accent); color: white; font-size: 9px; font-weight: 700;
-    padding: 3px 32px; transform: rotate(45deg);
-    letter-spacing: 1px;
-  }
-
-  .plan-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-  .plan-name { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
-  .plan-price { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: var(--accent2); }
-  .plan-price-sub { font-size: 12px; color: var(--text3); font-family: 'DM Sans', sans-serif; font-weight: 400; }
-
-  .plan-details { display: flex; gap: 16px; flex-wrap: wrap; }
-  .plan-detail { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text2); }
-  .plan-detail-icon { font-size: 15px; }
-
-  .recharge-type-selector {
-    display: flex; gap: 10px; margin-bottom: 20px;
-  }
-  .type-btn {
-    flex: 1; padding: 10px;
-    background: var(--card2); border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm); color: var(--text2);
-    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
-    cursor: pointer; transition: all 0.2s; text-align: center;
-  }
-  .type-btn.active { border-color: var(--accent); color: var(--accent2); background: var(--accent-glow); }
-
-  .pay-btn {
-    width: 100%; padding: 16px;
-    background: linear-gradient(135deg, var(--green), #16a34a);
-    border: none; border-radius: var(--radius-sm);
-    color: white; font-family: 'Syne', sans-serif;
-    font-size: 16px; font-weight: 700; cursor: pointer;
-    transition: all 0.2s; box-shadow: 0 4px 20px rgba(34,197,94,0.3);
-    margin-top: 20px; display: none;
-  }
-  .pay-btn:hover { box-shadow: 0 8px 28px rgba(34,197,94,0.45); transform: translateY(-1px); }
-  .pay-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-  /* ════════════════════════════════════
-     HISTORY
-  ════════════════════════════════════ */
-  .history-list { display: grid; gap: 10px; }
-
-  .history-item {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 16px;
-    display: grid; grid-template-columns: 1fr auto;
-    gap: 8px; align-items: start;
-  }
-  .history-plan { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
-  .history-meta { font-size: 12px; color: var(--text2); }
-  .history-amount { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--green); text-align: right; }
-  .history-date { font-size: 11px; color: var(--text3); text-align: right; margin-top: 2px; }
-  .history-txn { font-size: 10px; color: var(--text3); margin-top: 4px; font-family: monospace; }
-
-  /* ════════════════════════════════════
-     NOTIFICATIONS
-  ════════════════════════════════════ */
-  .notif-list { display: grid; gap: 10px; }
-
-  .notif-item {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 16px;
-    transition: border-color 0.2s;
-  }
-  .notif-item.unread { border-color: rgba(59,130,246,0.35); background: linear-gradient(135deg, rgba(59,130,246,0.05), var(--card)); }
-  .notif-msg { font-size: 14px; line-height: 1.5; margin-bottom: 8px; }
-  .notif-time { font-size: 11px; color: var(--text3); }
-  .notif-dot { display: inline-block; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; margin-right: 6px; }
-
-  /* ════════════════════════════════════
-     WIFI CHANGE
-  ════════════════════════════════════ */
-  .wifi-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 24px; margin-bottom: 16px;
-  }
-  .wifi-current { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-  .wifi-icon-big { font-size: 36px; }
-  .wifi-current-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
-  .wifi-current-ssid { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; }
-
-  .wifi-form .form-group { margin-bottom: 16px; }
-
-  .btn-wifi {
-    width: 100%; padding: 15px;
-    background: linear-gradient(135deg, #7c3aed, #6d28d9);
-    border: none; border-radius: var(--radius-sm);
-    color: white; font-family: 'Syne', sans-serif;
-    font-size: 15px; font-weight: 700; cursor: pointer;
-    transition: all 0.2s; box-shadow: 0 4px 20px rgba(124,58,237,0.35);
-  }
-  .btn-wifi:hover { box-shadow: 0 8px 28px rgba(124,58,237,0.5); transform: translateY(-1px); }
-  .btn-wifi:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-  /* ════════════════════════════════════
-     SHARED UI
-  ════════════════════════════════════ */
-  .empty-state {
-    text-align: center; padding: 48px 24px; color: var(--text3);
-  }
-  .empty-icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-text { font-size: 15px; }
-
-  .loading-spinner {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; padding: 48px; gap: 16px; color: var(--text3);
-  }
-  .spinner {
-    width: 36px; height: 36px;
-    border: 3px solid var(--border); border-top-color: var(--accent);
-    border-radius: 50%; animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .toast {
-    position: fixed; bottom: 76px; left: 50%; transform: translateX(-50%);
-    background: var(--card2); border: 1px solid var(--border);
-    border-radius: 12px; padding: 12px 20px;
-    font-size: 14px; font-weight: 500; z-index: 999;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    animation: toastIn 0.3s cubic-bezier(0.16,1,0.3,1);
-    white-space: nowrap;
-  }
-  .toast.success { border-color: rgba(34,197,94,0.4); color: var(--green); }
-  .toast.error   { border-color: rgba(239,68,68,0.4); color: #fca5a5; }
-  .toast.info    { border-color: rgba(59,130,246,0.4); color: var(--accent2); }
-  @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(12px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
-
-  .divider {
-    border: none; border-top: 1px solid var(--border);
-    margin: 20px 0;
-  }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+/* MOBILE */
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;}
+  .dashboard-preview{display:none;}
+  .hero h1{font-size:36px;}
+  .features-grid{grid-template-columns:1fr 1fr;}
+  .how-grid{grid-template-columns:1fr 1fr;}
+  .how-grid::before{display:none;}
+  .pricing-grid{grid-template-columns:1fr;}
+  .testimonials-grid{grid-template-columns:1fr;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .contact-grid{grid-template-columns:1fr;}
+  .footer-grid{grid-template-columns:1fr 1fr;}
+  .nav-links{display:none;}
+  .section-title{font-size:32px;}
+  .cta-title{font-size:32px;}
+  .modal-body .info-row{flex-direction:column;gap:4px;}
+  .form-row{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     LOGIN SCREEN
-══════════════════════════════════════ -->
-<div id="login-screen">
-  <div class="login-box">
-    <div class="login-logo">
-      <div class="login-logo-icon">📡</div>
-      <div class="login-logo-text">Net<span>Flow</span></div>
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">N</div>
+      <div class="nav-logo-text">Net<span>Flow</span></div>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
     </div>
-    <div class="login-title">Welcome back</div>
-    <div class="login-sub">Sign in to your customer portal</div>
-
-    <div class="form-group">
-      <label class="form-label">Mobile Number</label>
-      <input type="tel" id="login-phone" class="form-input" placeholder="Enter your mobile number" maxlength="10">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Password</label>
-      <input type="password" id="login-password" class="form-input" placeholder="Enter your password">
-    </div>
-    <button class="btn-primary" id="login-btn" onclick="doLogin()">Sign In</button>
-    <div class="error-msg" id="login-error"></div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════
-     APP
-══════════════════════════════════════ -->
-<div id="app">
-  <!-- Top Nav -->
-  <nav class="topnav">
-    <div class="nav-brand">
-      <div class="nav-brand-dot"></div>
-      NetFlow
-    </div>
-    <div class="nav-right">
-      <span class="nav-username" id="nav-username"></span>
-      <button class="btn-logout" onclick="logout()">Logout</button>
-    </div>
-  </nav>
-
-  <!-- Pages -->
-  <div class="page-content">
-
-    <!-- ── Dashboard ── -->
-    <div class="page active" id="page-home">
-      <div id="dashboard-loading" class="loading-spinner"><div class="spinner"></div><span>Loading your profile…</span></div>
-      <div id="dashboard-content" style="display:none"></div>
-    </div>
-
-    <!-- ── Recharge ── -->
-    <div class="page" id="page-recharge">
-      <div class="section-title">📶 Recharge <span>Plans</span></div>
-
-      <div class="recharge-type-selector">
-        <div class="type-btn active" id="type-renewal" onclick="setRechargeType('renewal')">🔄 Renewal</div>
-        <div class="type-btn" id="type-advance" onclick="setRechargeType('advance')">⏩ Advance</div>
-      </div>
-
-      <div id="plans-loading" class="loading-spinner"><div class="spinner"></div><span>Fetching plans…</span></div>
-      <div id="plans-list" class="plans-grid"></div>
-
-      <button class="pay-btn" id="pay-btn" onclick="initiatePayment()">
-        💳 Pay ₹<span id="pay-amount">0</span>
-      </button>
-    </div>
-
-    <!-- ── History ── -->
-    <div class="page" id="page-history">
-      <div class="section-title">🧾 Recharge <span>History</span></div>
-      <div id="history-loading" class="loading-spinner"><div class="spinner"></div><span>Loading history…</span></div>
-      <div id="history-list" class="history-list"></div>
-    </div>
-
-    <!-- ── Notifications ── -->
-    <div class="page" id="page-notif">
-      <div class="section-title">🔔 <span>Notifications</span></div>
-      <div id="notif-loading" class="loading-spinner"><div class="spinner"></div><span>Loading notifications…</span></div>
-      <div id="notif-list" class="notif-list"></div>
-    </div>
-
-    <!-- ── WiFi ── -->
-    <div class="page" id="page-wifi">
-      <div class="section-title">📡 WiFi <span>Settings</span></div>
-      <div id="wifi-content"></div>
-    </div>
-
-  </div>
-
-  <!-- Tab Bar -->
-  <div class="tab-bar">
-    <div class="tab-item active" id="tab-home" onclick="switchTab('home')">
-      <div class="tab-icon">🏠</div>
-      <div>Home</div>
-    </div>
-    <div class="tab-item" id="tab-recharge" onclick="switchTab('recharge')">
-      <div class="tab-icon">⚡</div>
-      <div>Recharge</div>
-    </div>
-    <div class="tab-item" id="tab-history" onclick="switchTab('history')">
-      <div class="tab-icon">📋</div>
-      <div>History</div>
-    </div>
-    <div class="tab-item" id="tab-notif" onclick="switchTab('notif')">
-      <div class="tab-icon">🔔</div>
-      <div>Alerts</div>
-      <div class="notif-badge" id="notif-badge" style="display:none">0</div>
-    </div>
-    <div class="tab-item" id="tab-wifi" onclick="switchTab('wifi')">
-      <div class="tab-icon">📡</div>
-      <div>WiFi</div>
+    <div class="nav-cta">
+      <a href="http://netflowdev.github.io/netflow-customer-portal.html" target="_blank" class="btn btn-ghost">Customer Login</a>
+      <a href="http://netflowdev.github.io/admin-panel.html" target="_blank" class="btn btn-ghost">Admin Login</a>
+      <a href="#pricing" class="btn btn-primary">Get Started</a>
     </div>
   </div>
-</div>
+</nav>
 
-<script>
-// ══════════════════════════════════════
-//  CONFIG
-// ══════════════════════════════════════
-const BASE = 'https://isp-billing-api.netflowcloud.workers.dev';
-
-// ══════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════
-let token = localStorage.getItem('nf_token') || null;
-let profile = null;
-let plans = [];
-let selectedPlanId = null;
-let rechargeType = 'renewal';
-
-// ══════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════
-window.onload = () => {
-  if (token) showApp();
-  // Enter key on login
-  document.getElementById('login-password').addEventListener('keydown', e => {
-    if (e.key === 'Enter') doLogin();
-  });
-  document.getElementById('login-phone').addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('login-password').focus();
-  });
-};
-
-// ══════════════════════════════════════
-//  API HELPER
-// ══════════════════════════════════════
-async function api(path, opts = {}) {
-  const headers = { 'Content-Type': 'application/json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  const res = await fetch(BASE + path, { ...opts, headers });
-  return res.json();
-}
-
-// ══════════════════════════════════════
-//  LOGIN
-// ══════════════════════════════════════
-async function doLogin() {
-  const phone    = document.getElementById('login-phone').value.trim();
-  const password = document.getElementById('login-password').value;
-  const errEl    = document.getElementById('login-error');
-  const btn      = document.getElementById('login-btn');
-
-  errEl.style.display = 'none';
-  if (!phone || !password) { showLoginError('Please enter your mobile number and password.'); return; }
-
-  btn.disabled = true; btn.textContent = 'Signing in…';
-
-  try {
-    const data = await api('/api/auth/customer/login', {
-      method: 'POST',
-      body: JSON.stringify({ phone, password })
-    });
-
-    if (!data.success) { showLoginError(data.message || data.error || 'Login failed. Check your credentials.'); }
-    else {
-      // Handle single or multiple accounts
-      const d = data.data;
-      const t = d.token || (d.accounts && d.accounts[0]?.token);
-      if (!t) { showLoginError('No token received. Please try again.'); return; }
-      token = t;
-      localStorage.setItem('nf_token', token);
-      showApp();
-    }
-  } catch (e) { showLoginError('Network error. Please check your connection.'); }
-  finally { btn.disabled = false; btn.textContent = 'Sign In'; }
-}
-
-function showLoginError(msg) {
-  const el = document.getElementById('login-error');
-  el.textContent = msg; el.style.display = 'block';
-}
-
-// ══════════════════════════════════════
-//  APP INIT
-// ══════════════════════════════════════
-function showApp() {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  loadDashboard();
-}
-
-function logout() {
-  token = null;
-  localStorage.removeItem('nf_token');
-  profile = null; plans = []; selectedPlanId = null;
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('login-phone').value = '';
-  document.getElementById('login-password').value = '';
-  document.getElementById('login-error').style.display = 'none';
-  switchTab('home');
-}
-
-// ══════════════════════════════════════
-//  TAB NAV
-// ══════════════════════════════════════
-function switchTab(tab) {
-  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-  document.getElementById('page-' + tab).classList.add('active');
-
-  if (tab === 'recharge' && plans.length === 0) loadPlans();
-  if (tab === 'history')  loadHistory();
-  if (tab === 'notif')    loadNotifications();
-  if (tab === 'wifi')     renderWifi();
-}
-
-// ══════════════════════════════════════
-//  DASHBOARD
-// ══════════════════════════════════════
-async function loadDashboard() {
-  try {
-    const data = await api('/api/customer/profile');
-    if (!data.success) { if (data.error === 'Unauthorized') { logout(); return; } }
-    profile = data.data;
-    document.getElementById('nav-username').textContent = profile.name?.split(' ')[0] || '';
-    renderDashboard();
-    checkUnread();
-  } catch (e) {
-    document.getElementById('dashboard-loading').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load profile. Please refresh.</div></div>';
-  }
-}
-
-function renderDashboard() {
-  const p = profile;
-  const loading = document.getElementById('dashboard-loading');
-  const content = document.getElementById('dashboard-content');
-  loading.style.display = 'none';
-  content.style.display = 'block';
-
-  const today = new Date();
-  const expiry = p.expiry_date ? new Date(p.expiry_date) : null;
-  const daysLeft = expiry ? Math.ceil((expiry - today) / 86400000) : null;
-  const isActive = p.status === 'active';
-
-  let expiryClass = '';
-  if (daysLeft !== null) {
-    if (daysLeft < 0)  expiryClass = 'expired-val';
-    else if (daysLeft <= 7) expiryClass = 'expiring';
-  }
-
-  const statusCls = isActive ? 'active' : 'expired';
-  const statusLabel = isActive ? '● Active' : '● Expired';
-
-  content.innerHTML = `
-    <div class="hero-card">
-      <div class="hero-name">${esc(p.name)}</div>
-      <div class="hero-phone">📱 ${esc(p.phone)}</div>
-      <div class="status-badge ${statusCls}">
-        <div class="status-badge-dot"></div>
-        ${statusLabel}
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Trusted by 100+ &amp; Operators across India
       </div>
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <div class="hero-stat-label">Plan</div>
-          <div class="hero-stat-value">${esc(p.plan_name || 'N/A')}</div>
+      <h1>Complete Billing &amp; Management <span>Platform</span></h1>
+      <p class="hero-sub">Automate billing, manage customers, collect online payments, and control your network — all from one powerful dashboard. Built for Indian and Foreign Operators.<br><br>
+      <strong style="color:var(--text)">NetAdmin</strong> for your admin panel · <strong style="color:var(--text)">NetFlow MyWiFi</strong> for your customers.</p>
+      <div class="hero-actions">
+        <a href="#pricing" class="btn btn-primary btn-lg">Start Free Trial</a>
+        <a href="#how-it-works" class="btn btn-ghost btn-lg">See how it works</a>
+      </div>
+      <div class="hero-trust">
+        <div class="trust-avatars">
+          <span>RS</span><span>NK</span><span>PM</span><span>AK</span>
         </div>
-        <div class="hero-stat">
-          <div class="hero-stat-label">Speed</div>
-          <div class="hero-stat-value">${esc(p.plan_speed || 'N/A')}</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-stat-label">Expires</div>
-          <div class="hero-stat-value ${expiryClass}">${p.expiry_date ? fmtDate(p.expiry_date) : 'N/A'}</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-stat-label">Days Left</div>
-          <div class="hero-stat-value ${expiryClass}">${daysLeft !== null ? (daysLeft < 0 ? 'Expired' : daysLeft + ' days') : 'N/A'}</div>
-        </div>
+        <div class="hero-trust-text">Join 100+ LCOs already using NetFlow</div>
       </div>
     </div>
-
-    ${(p.balance_due && p.balance_due > 0) ? `
-    <div class="balance-card">
-      <div>
-        <div class="balance-label">⚠️ Balance Due</div>
-        <div style="font-size:12px;color:var(--text2);margin-top:2px">Will be added to next recharge</div>
-      </div>
-      <div class="balance-value">₹${p.balance_due}</div>
-    </div>` : ''}
-
-    <div class="info-grid">
-      ${p.plan_price ? `<div class="info-card"><div class="info-icon">💰</div><div class="info-label">Plan Price</div><div class="info-value">₹${p.plan_price}</div></div>` : ''}
-      ${p.wifi_ssid ? `<div class="info-card"><div class="info-icon">📶</div><div class="info-label">WiFi Name</div><div class="info-value">${esc(p.wifi_ssid)}</div></div>` : ''}
-      ${p.email ? `<div class="info-card"><div class="info-icon">📧</div><div class="info-label">Email</div><div class="info-value" style="font-size:12px">${esc(p.email)}</div></div>` : ''}
-      ${p.address ? `<div class="info-card"><div class="info-icon">📍</div><div class="info-label">Address</div><div class="info-value" style="font-size:12px">${esc(p.address)}</div></div>` : ''}
-      ${p.router_brand ? `<div class="info-card"><div class="info-icon">📦</div><div class="info-label">Router</div><div class="info-value">${esc(p.router_brand)}</div></div>` : ''}
-      ${p.mac_address ? `<div class="info-card"><div class="info-icon">🔗</div><div class="info-label">MAC Address</div><div class="info-value" style="font-size:12px">${esc(p.mac_address)}</div></div>` : ''}
-    </div>
-
-    <button class="quick-recharge-btn" onclick="switchTab('recharge')">
-      ⚡ Recharge Now
-    </button>
-  `;
-}
-
-// ══════════════════════════════════════
-//  PLANS
-// ══════════════════════════════════════
-async function loadPlans() {
-  const listEl = document.getElementById('plans-list');
-  document.getElementById('plans-loading').style.display = 'flex';
-  listEl.innerHTML = '';
-
-  try {
-    const data = await api('/api/customer/plans');
-    document.getElementById('plans-loading').style.display = 'none';
-
-    if (!data.success || !data.data?.length) {
-      listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No plans available</div></div>';
-      return;
-    }
-    plans = data.data;
-    renderPlans();
-  } catch (e) {
-    document.getElementById('plans-loading').style.display = 'none';
-    listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load plans</div></div>';
-  }
-}
-
-function renderPlans() {
-  const listEl = document.getElementById('plans-list');
-  if (!plans.length) return;
-
-  const midIdx = Math.floor(plans.length / 2);
-  listEl.innerHTML = plans.map((plan, i) => `
-    <div class="plan-card ${i === midIdx ? 'popular' : ''} ${selectedPlanId === plan.id ? 'selected' : ''}"
-         id="plan-${plan.id}" onclick="selectPlan(${plan.id}, ${plan.price})">
-      <div class="plan-header">
-        <div class="plan-name">${esc(plan.name)}</div>
-        <div>
-          <div class="plan-price">₹${plan.price}</div>
-          <div class="plan-price-sub">${plan.validity_days} days</div>
+    <div>
+      <div class="dashboard-preview">
+        <div class="dp-header">
+          <div class="dp-dot" style="background:#ef4444"></div>
+          <div class="dp-dot" style="background:#f59e0b;margin-left:6px"></div>
+          <div class="dp-dot" style="background:#10b981;margin-left:6px"></div>
+          <div class="dp-url">netflowdev.github.io/dashboard</div>
         </div>
-      </div>
-      <div class="plan-details">
-        ${plan.speed_down_mbps ? `<div class="plan-detail"><span class="plan-detail-icon">⬇️</span>${plan.speed_down_mbps} Mbps</div>` : ''}
-        ${plan.speed_up_mbps ? `<div class="plan-detail"><span class="plan-detail-icon">⬆️</span>${plan.speed_up_mbps} Mbps</div>` : ''}
-        <div class="plan-detail"><span class="plan-detail-icon">📅</span>${plan.validity_days} Days</div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function selectPlan(id, price) {
-  selectedPlanId = id;
-  // Update card styles
-  document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById('plan-' + id)?.classList.add('selected');
-
-  // Calc total with balance
-  const due = profile?.balance_due || 0;
-  const total = price + due;
-  document.getElementById('pay-amount').textContent = total;
-  document.getElementById('pay-btn').style.display = 'block';
-}
-
-function setRechargeType(type) {
-  rechargeType = type;
-  document.getElementById('type-renewal').classList.toggle('active', type === 'renewal');
-  document.getElementById('type-advance').classList.toggle('active', type === 'advance');
-}
-
-// ══════════════════════════════════════
-//  PAYMENT
-// ══════════════════════════════════════
-async function initiatePayment() {
-  if (!selectedPlanId) { showToast('Please select a plan first', 'error'); return; }
-
-  const btn = document.getElementById('pay-btn');
-  btn.disabled = true; btn.textContent = '⏳ Creating order…';
-
-  try {
-    const data = await api('/api/payments/create-order', {
-      method: 'POST',
-      body: JSON.stringify({ plan_id: selectedPlanId, recharge_type: rechargeType })
-    });
-
-    if (!data.success) { showToast(data.error || 'Failed to create order', 'error'); return; }
-
-    const order = data.data;
-
-    if (order.payment_gateway === 'razorpay') {
-      openRazorpay(order);
-    } else {
-      showToast('Gateway ' + order.payment_gateway + ' not supported on web yet', 'error');
-    }
-  } catch (e) {
-    showToast('Network error. Please try again.', 'error');
-  } finally {
-    btn.disabled = false; btn.textContent = `💳 Pay ₹${document.getElementById('pay-amount').textContent}`;
-  }
-}
-
-function openRazorpay(order) {
-  const amountPaise = Math.round(parseFloat(order.amount) * 100);
-
-  const options = {
-    key:          order.key,
-    amount:       amountPaise,
-    currency:     'INR',
-    name:         'NetFlow',
-    description:  order.productinfo,
-    prefill: {
-      name:    order.firstname,
-      email:   order.email || 'customer@netflow.in',
-      contact: order.phone,
-    },
-    theme: { color: '#3b82f6' },
-    modal: {
-      ondismiss: () => showToast('Payment cancelled', 'info')
-    },
-    handler: async (response) => {
-      // Payment successful — confirm with backend
-      showToast('Verifying payment…', 'info');
-      await confirmPayment(order.txnid, response.razorpay_payment_id);
-    }
-  };
-
-  const rzp = new Razorpay(options);
-  rzp.on('payment.failed', (resp) => {
-    showToast('Payment failed: ' + (resp.error?.description || 'Unknown error'), 'error');
-  });
-  rzp.open();
-}
-
-async function confirmPayment(txnid, razorpayId) {
-  try {
-    const data = await api('/api/payments/upi-confirm', {
-      method: 'POST',
-      body: JSON.stringify({ txnid, status: 'success', razorpay_id: razorpayId })
-    });
-
-    if (data.success) {
-      showToast('🎉 Recharge successful! Expiry: ' + (data.data?.new_expiry || ''), 'success');
-      selectedPlanId = null;
-      document.getElementById('pay-btn').style.display = 'none';
-      document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
-      // Refresh dashboard
-      await loadDashboard();
-      switchTab('home');
-    } else {
-      showToast('Payment done but activation pending. Contact support.', 'info');
-    }
-  } catch (e) {
-    showToast('Payment done but could not confirm. Contact support.', 'info');
-  }
-}
-
-// ══════════════════════════════════════
-//  HISTORY
-// ══════════════════════════════════════
-async function loadHistory() {
-  const listEl = document.getElementById('history-list');
-  document.getElementById('history-loading').style.display = 'flex';
-  listEl.innerHTML = '';
-
-  try {
-    const data = await api('/api/customer/recharge-history');
-    document.getElementById('history-loading').style.display = 'none';
-
-    const items = data.data?.data || [];
-    if (!items.length) {
-      listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No recharge history yet</div></div>';
-      return;
-    }
-
-    listEl.innerHTML = items.map(item => `
-      <div class="history-item">
-        <div>
-          <div class="history-plan">${esc(item.plan_name || 'Unknown Plan')}</div>
-          <div class="history-meta">
-            ${item.recharge_type === 'advance' ? '⏩ Advance' : '🔄 Renewal'} •
-            Expiry: ${item.new_expiry ? fmtDate(item.new_expiry) : 'N/A'}
+        <div class="dp-body">
+          <div class="dp-stats">
+            <div class="dp-stat"><div class="dp-stat-val" style="color:#6366f1">247</div><div class="dp-stat-lbl">Total Customers</div></div>
+            <div class="dp-stat"><div class="dp-stat-val" style="color:#10b981">198</div><div class="dp-stat-lbl">Active</div></div>
+            <div class="dp-stat"><div class="dp-stat-val" style="color:#f59e0b">23</div><div class="dp-stat-lbl">Expiring Soon</div></div>
           </div>
-          ${item.txn_id ? `<div class="history-txn">TXN: ${esc(item.txn_id)}</div>` : ''}
-          ${item.razorpay_id ? `<div class="history-txn">RZP: ${esc(item.razorpay_id)}</div>` : ''}
-        </div>
-        <div>
-          <div class="history-amount">₹${item.amount || 0}</div>
-          <div class="history-date">${fmtDateTime(item.created_at)}</div>
-        </div>
-      </div>
-    `).join('');
-  } catch (e) {
-    document.getElementById('history-loading').style.display = 'none';
-    listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load history</div></div>';
-  }
-}
-
-// ══════════════════════════════════════
-//  NOTIFICATIONS
-// ══════════════════════════════════════
-async function loadNotifications() {
-  const listEl = document.getElementById('notif-list');
-  document.getElementById('notif-loading').style.display = 'flex';
-  listEl.innerHTML = '';
-
-  try {
-    const data = await api('/api/customer/notifications');
-    document.getElementById('notif-loading').style.display = 'none';
-
-    const notifs = data.data?.notifications || [];
-    if (!notifs.length) {
-      listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🔕</div><div class="empty-text">No notifications</div></div>';
-      return;
-    }
-
-    listEl.innerHTML = notifs.map(n => `
-      <div class="notif-item ${n.status === 'sent' ? 'unread' : ''}">
-        <div class="notif-msg">${n.status === 'sent' ? '<span class="notif-dot"></span>' : ''}${esc(n.message)}</div>
-        <div class="notif-time">${fmtDateTime(n.sent_at)}</div>
-      </div>
-    `).join('');
-
-    // Mark as read
-    if (data.data?.unread_count > 0) {
-      api('/api/customer/notifications/read', { method: 'POST', body: '{}' });
-      document.getElementById('notif-badge').style.display = 'none';
-    }
-  } catch (e) {
-    document.getElementById('notif-loading').style.display = 'none';
-    listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load notifications</div></div>';
-  }
-}
-
-async function checkUnread() {
-  try {
-    const data = await api('/api/customer/notifications');
-    const count = data.data?.unread_count || 0;
-    const badge = document.getElementById('notif-badge');
-    if (count > 0) { badge.style.display = 'flex'; badge.textContent = count; }
-    else { badge.style.display = 'none'; }
-  } catch {}
-}
-
-// ══════════════════════════════════════
-//  WIFI CHANGE
-// ══════════════════════════════════════
-function renderWifi() {
-  const el = document.getElementById('wifi-content');
-  const ssid = profile?.wifi_ssid || 'Not set';
-  const mac  = profile?.mac_address;
-
-  el.innerHTML = `
-    <div class="wifi-card">
-      <div class="wifi-current">
-        <div class="wifi-icon-big">📶</div>
-        <div>
-          <div class="wifi-current-label">Current WiFi Name</div>
-          <div class="wifi-current-ssid">${esc(ssid)}</div>
+          <div class="dp-row"><div><div style="font-weight:600;font-size:13px">Ramesh Kumar</div><div style="font-size:11px;color:#6b7291">50 Mbps · Jaze</div></div><div class="dp-badge dp-green">Active</div></div>
+          <div class="dp-row"><div><div style="font-weight:600;font-size:13px">Naresh Library</div><div style="font-size:11px;color:#6b7291">100 Mbps · NetAdmin</div></div><div class="dp-badge dp-green">Active</div></div>
+          <div class="dp-row"><div><div style="font-weight:600;font-size:13px">Suresh Kumar</div><div style="font-size:11px;color:#6b7291">25 Mbps · Jaze</div></div><div class="dp-badge dp-red">Expired</div></div>
+          <div class="dp-row"><div><div style="font-weight:600;font-size:13px">✅ Payment received</div><div style="font-size:11px;color:#6b7291">Vikash Singh · ₹699</div></div><div class="dp-badge dp-blue">Paytm</div></div>
+          <div class="dp-row"><div><div style="font-weight:600;font-size:13px">⚡ Auto-activated</div><div style="font-size:11px;color:#6b7291">NetAdmin profile updated</div></div><div class="dp-badge dp-green">Done</div></div>
         </div>
       </div>
-      ${!mac ? `<div style="background:var(--yellow-dim);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:12px;font-size:13px;color:var(--yellow);">⚠️ No device MAC address registered. WiFi change may not work. Contact your ISP.</div>` : ''}
     </div>
+  </div>
+</section>
 
-    <div class="wifi-card wifi-form">
-      <div class="section-title" style="font-size:16px;margin-bottom:16px">🔧 Change WiFi</div>
-      <div class="form-group">
-        <label class="form-label">New WiFi Name (SSID)</label>
-        <input type="text" id="new-ssid" class="form-input" placeholder="Enter new WiFi name">
-        <div style="font-size:11px;color:var(--text3);margin-top:6px">Your full SSID will be prefixed by your ISP (e.g. "NetFlow YourName 4G")</div>
+<!-- LOGOS -->
+<div class="logos-section">
+  <div class="logos-inner">
+    <div class="logos-label">Works with:</div>
+    <div class="logo-pill">Jaze Network</div>
+    <div class="logo-pill">NetAdmin / Mikrotik</div>
+    <div class="logo-pill">RazorPay</div>
+    <div class="logo-pill">Zoho</div>
+    <div class="logo-pill">Android App</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-label">Features</div>
+      <div class="section-title">Everything you needs to grow</div>
+      <div class="section-sub">From customer onboarding to automatic renewal — NetFlow handles your entire operation so you can focus on growth.</div>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon fi-purple">💳</div>
+        <div class="feature-title">Online Payment Collection</div>
+        <div class="feature-desc">Accept payments via Razorpay and Zoho directly into your bank account. Customers pay from the app — money goes straight to you. Zero manual work.</div>
       </div>
-      <div class="form-group">
-        <label class="form-label">New WiFi Password</label>
-        <input type="password" id="new-wifi-pass" class="form-input" placeholder="Min 8 characters">
+      <div class="feature-card">
+        <div class="feature-icon fi-cyan">⚡</div>
+        <div class="feature-title">Auto Activation</div>
+        <div class="feature-desc">When a customer pays, their account on Jaze or NetAdmin/Mikrotik is automatically renewed. No need to manually update each customer.</div>
       </div>
-      <button class="btn-wifi" id="wifi-change-btn" onclick="submitWifiChange()">
-        📡 Apply WiFi Change
+      <div class="feature-card">
+        <div class="feature-icon fi-green">📱</div>
+        <div class="feature-title">NetFlow MyWiFi — Customer App</div>
+        <div class="feature-desc">Your customers get the branded NetFlow MyWiFi app to check their plan, expiry date, recharge history, and make payments — fully under your ISP brand. White-label option available.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-amber">🔔</div>
+        <div class="feature-title">Expiry Notifications</div>
+        <div class="feature-desc">Automatic push notifications sent 7, 3, 2, 1 days before expiry and daily after expiry until renewal. No more customers forgetting to recharge.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-pink">👥</div>
+        <div class="feature-title">Multi-Franchise Support</div>
+        <div class="feature-desc">Manage multiple franchises from one platform. Each franchise has their own admin panel, customers, payments, and franchises credentials — fully isolated.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-red">📊</div>
+        <div class="feature-title">NetAdmin — Admin Panel</div>
+        <div class="feature-desc">Real-time overview of active customers, expired accounts, pending activations, payment history, and revenue analytics — all in one powerful admin dashboard.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-cyan">🛡️</div>
+        <div class="feature-title">Secure &amp; Private</div>
+        <div class="feature-desc">Payment API keys and ISP credentials are managed on encrypted server. No one can see sensitive credentials — bank-grade security.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-purple">🔧</div>
+        <div class="feature-title">Customer Management</div>
+        <div class="feature-desc">Complete customer profiles with operator details, hardware info (MAC address, router, IPTV), membership numbers, comments, and billing history.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-green">☁️</div>
+        <div class="feature-title">Cloud-Powered</div>
+        <div class="feature-desc">Built on Google Cloud with 99.9% uptime, global CDN, and automatic scaling. No server maintenance — we handle everything for you.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-section">
+  <div class="section-inner">
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-val">100+</div><div class="stat-label">Active &amp; Operators</div></div>
+      <div class="stat-item"><div class="stat-val">10,000+</div><div class="stat-label">Customers Managed</div></div>
+      <div class="stat-item"><div class="stat-val">₹10L+</div><div class="stat-label">Payments Processed</div></div>
+      <div class="stat-item"><div class="stat-val">99.9%</div><div class="stat-label">Platform Uptime</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" style="background:var(--surface);border-top:1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-header" style="text-align:center">
+      <div class="section-label">How it works</div>
+      <div class="section-title">Up and running in 24 hours</div>
+      <div class="section-sub" style="margin:0 auto">We set everything up for you — no technical knowledge required.</div>
+    </div>
+    <div class="how-grid">
+      <div class="how-step">
+        <div class="how-num">1</div>
+        <div class="how-title">Sign up &amp; onboarding</div>
+        <div class="how-desc">Share your portel details, Jaze/NetAdmin or any Custom API credentials, and Razorpay/Zoho/Paytm keys with us.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">2</div>
+        <div class="how-title">We configure &amp; setup</div>
+        <div class="how-desc">Our team configures your franchise account, adds your customers, and sets up payment integration.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">3</div>
+        <div class="how-title">Distribute the app</div>
+        <div class="how-desc">Your customers download NetFlow MyWiFi app. You share it via WhatsApp or any channel.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">4</div>
+        <div class="how-title">Sit back &amp; earn</div>
+        <div class="how-desc">Customers pay online, account activates automatically. You just monitor from NetAdmin dashboard.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" style="background:var(--surface);border-top:1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-header" style="text-align:center">
+      <div class="section-label">Pricing</div>
+      <div class="section-title">Simple, transparent pricing</div>
+      <div class="section-sub" style="margin:0 auto">No hidden charges. Pay monthly, cancel anytime. All plans include full setup support.</div>
+    </div>
+    <div class="pricing-grid">
+      <!-- Starter -->
+      <div class="pricing-card">
+        <div class="pricing-plan">Starter</div>
+        <div class="pricing-price">₹800<span>/month</span></div>
+        <div class="pricing-offer">🎉 Launch offer — save ₹200/month</div>
+        <div class="pricing-strike">Regular price: ₹1,000/month</div>
+        <div class="pricing-divider"></div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Up to 100 connections</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>NetAdmin dashboard</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>NetFlow MyWiFi customer app</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Razorpay / Paytm payments</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Jaze &amp; NetAdmin support</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Auto expiry notifications</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Email &amp; WhatsApp support</div>
+        <button onclick="openCheckout('Starter','₹800/month','₹800','Up to 100 connections')" class="btn btn-outline btn-lg pricing-cta" style="text-align:center;justify-content:center">Get started</button>
+      </div>
+      <!-- Growth -->
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Most Popular</div>
+        <div class="pricing-plan">Growth</div>
+        <div class="pricing-price">₹1,500<span>/month</span></div>
+        <div class="pricing-offer">🎉 Launch offer — save ₹500/month</div>
+        <div class="pricing-strike">Regular price: ₹2,000/month</div>
+        <div class="pricing-divider"></div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Up to 200 connections</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Everything in Starter</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Multi-franchise management</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Multiple admin accounts</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Advanced analytics</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Priority support</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Custom app branding</div>
+        <button onclick="openCheckout('Growth','₹1,500/month','₹1500','Up to 200 connections')" class="btn btn-primary btn-lg pricing-cta" style="text-align:center;justify-content:center">Get started</button>
+      </div>
+      <!-- Enterprise -->
+      <div class="pricing-card">
+        <div class="pricing-plan">Enterprise</div>
+        <div class="pricing-price" style="font-size:32px">Custom</div>
+        <div class="pricing-offer">For large &amp; networks</div>
+        <div class="pricing-strike" style="visibility:hidden">spacer</div>
+        <div class="pricing-divider"></div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Unlimited connections</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Everything in Growth</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Custom integrations</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Dedicated support team</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>SLA guarantee</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>White-label option</div>
+        <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>On-site setup assistance</div>
+        <a href="#contact" class="btn btn-ghost btn-lg pricing-cta" style="text-align:center;justify-content:center">Contact us</a>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:32px;font-size:14px;color:var(--muted)">
+      All plans include 30-day free trial · No credit card required · Full setup &amp; onboarding support included
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="section-inner">
+    <div class="section-header" style="text-align:center">
+      <div class="section-label">Testimonials</div>
+      <div class="section-title">LCOs love NetFlow</div>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-text">"Before NetFlow, I was manually updating every customer on Jaze after collecting cash. Now payments come in automatically and Jaze updates itself. I save 3 hours every day."</div>
+        <div class="test-author">
+          <div class="test-avatar">RS</div>
+          <div><div class="test-name">Rajesh Sharma</div><div class="test-role"> LCO, Haryana</div></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-text">"My customers were always forgetting to recharge. Now the NetFlow MyWiFi app sends them reminders automatically. Collections improved by 40% in the first month itself."</div>
+        <div class="test-author">
+          <div class="test-avatar">NK</div>
+          <div><div class="test-name">Naresh Kumar</div><div class="test-role">LCO, Uttar Pradesh</div></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-text">"The multi-franchise feature is incredible. I manage 3 franchise from one NetAdmin dashboard. Each franchise has their own admin login and payments go to their separate accounts."</div>
+        <div class="test-author">
+          <div class="test-avatar">PM</div>
+          <div><div class="test-name">Pradeep Mehra</div><div class="test-role">Multi-franchise Owner, Punjab</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" style="background:var(--surface);border-top:1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-header" style="text-align:center">
+      <div class="section-label">FAQ</div>
+      <div class="section-title">Frequently asked questions</div>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item open">
+        <div class="faq-q" onclick="toggleFaq(this)">Does money go directly to my bank account? <span class="faq-q-icon">+</span></div>
+        <div class="faq-a">Yes, absolutely. Your Razorpay or Paytm account is connected to your own bank account. When a customer pays, the money goes directly to your account. NetFlow does not handle or receive any payments — we only provide the software platform.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Which ISP servers do you support? <span class="faq-q-icon">+</span></div>
+        <div class="faq-a">We currently support Jaze  Server and NetAdmin/Mikrotik servers. We are actively working on integrations with other bandwidth management platforms. Contact us if you need a specific integration.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">How long does setup take? <span class="faq-q-icon">+</span></div>
+        <div class="faq-a">Most accpunts are fully set up within 24-48 hours. This includes configuring your NetAdmin panel, adding your customers, setting up payment integration, and sharing the NetFlow MyWiFi app with your customers. We handle everything for you.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Can I manage multiple franchises or branches? <span class="faq-q-icon">+</span></div>
+        <div class="faq-a">Yes! The Growth and Enterprise plans include full multi-franchise support. Each franchise gets their own NetAdmin panel, customer database, payment account, and credentials — fully isolated. As the super admin, you can see all franchises from one dashboard.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Is my customers' data and my API keys secure? <span class="faq-q-icon">+</span></div>
+        <div class="faq-a">Yes. All data is stored with enterprise-grade encryption. Payment API keys (Razorpay/Paytm) and ISP credentials (Jaze/NetAdmin) are encrypted on server no one can access them.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">What happens if a customer's payment fails? <span class="faq-q-icon">+</span></div>
+        <div class="faq-a">Failed payments are tracked in the NetAdmin dashboard. The customer's account is not renewed and they continue to receive expiry notifications. The customer can retry the payment at any time from the NetFlow MyWiFi app.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">What is your refund/cancellation policy? <span class="faq-q-icon">+</span></div>
+        <div class="faq-a">You can cancel your subscription at any time. Cancellations take effect at the end of your current billing cycle. We offer a 7-day refund for the first subscription payment if you are not satisfied. See our full Refund Policy for details.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-inner">
+    <div class="cta-title">Ready to automate your billing?</div>
+    <div class="cta-sub">Join 100+ LCOs already saving time and collecting more revenue with NetFlow. Start your 14-day free trial today.</div>
+    <div class="cta-actions">
+      <a href="#contact" class="btn btn-primary btn-lg">Start Free Trial</a>
+      <a href="https://wa.me/918571062710" target="_blank" class="btn btn-ghost btn-lg">Talk to us on WhatsApp</a>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT US -->
+<section id="about" style="background:var(--surface);border-top:1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-header" style="text-align:center">
+      <div class="section-label">About Us</div>
+      <div class="section-title">Who we are</div>
+      <div class="section-sub" style="margin:0 auto">Building the future of billing and management for Indian Franchise and LCOs.</div>
+    </div>
+    <div style="max-width:800px;margin:0 auto;">
+      <div class="contact-form" style="border-radius:16px;">
+        <div style="margin-bottom:20px;">
+          <div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:8px;">Legal Entity</div>
+          <div style="font-size:18px;font-weight:700;color:var(--text);">NetFlow</div>
+          <div style="font-size:14px;color:var(--muted);margin-top:4px;">Sole Proprietorship / Software Development</div>
+        </div>
+        <div class="pricing-divider"></div>
+        <p style="font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:16px;">
+          NetFlow is a SaaS platform developed by NetFlow, based in Mahendergarh, Haryana, India. We build technology solutions that empower local Service Providers and Cable Operators to digitise their operations, automate billing, and deliver a modern experience to their customers.
+        </p>
+        <p style="font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:16px;">
+          Our product suite includes <strong style="color:var(--text)">NetAdmin</strong> — a powerful admin panel for customer management — and <strong style="color:var(--text)">NetFlow MyWiFi</strong> — a customer-facing Android app that allows users to check their plan, recharge online, and receive renewal reminders automatically.
+        </p>
+        <p style="font-size:15px;color:var(--muted);line-height:1.8;">
+          We are registered at H. No. 72, Bassai, Mahendergarh, Haryana 123029, India. For any queries, you may reach us at <a href="mailto:naveentanwar2804@gmail.com" style="color:var(--accent)">naveentanwar2804@gmail.com</a> or call/WhatsApp us at <a href="tel:+918571062710" style="color:var(--accent)">+91 85710 62710</a>.
+        </p>
+        <div style="margin-top:24px;display:flex;gap:16px;flex-wrap:wrap;">
+          <a href="https://apkpure.com/p/com.netflow.mywifi" target="_blank" class="btn btn-outline">📱 Download NetFlow MyWiFi App</a>
+          <a href="https://netflowdev.github.io/" target="_blank" class="btn btn-ghost">🌐 Visit Platform</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-inner">
+    <div class="section-header" style="text-align:center">
+      <div class="section-label">Contact</div>
+      <div class="section-title">Get in touch</div>
+      <div class="section-sub" style="margin:0 auto">Have questions? Our team responds within 2 hours on WhatsApp.</div>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h3>We're here to help</h3>
+        <p>Whether you're evaluating NetFlow or ready to onboard — reach out and we'll get you started right away.</p>
+        <div class="contact-item">
+          <div class="contact-icon">📱</div>
+          <div><div class="contact-label">WhatsApp / Phone</div><div class="contact-val"><a href="https://wa.me/918571062710" target="_blank" style="color:var(--text);text-decoration:none;">+91 85710 62710</a></div></div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">✉️</div>
+          <div><div class="contact-label">Email</div><div class="contact-val"><a href="mailto:naveentanwar2804@gmail.com" style="color:var(--text);text-decoration:none;">naveentanwar2804@gmail.com</a></div></div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">📍</div>
+          <div><div class="contact-label">Registered Address</div><div class="contact-val" style="font-size:14px;">H. No. 72, Bassai,<br>Mahendergarh, Haryana 123029, India</div></div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">🕐</div>
+          <div><div class="contact-label">Support hours</div><div class="contact-val">Mon–Sat, 9 AM – 8 PM IST</div></div>
+        </div>
+      </div>
+      <div class="contact-form">
+        <div class="form-row">
+          <div class="form-field"><label>Your name *</label><input placeholder="Your Name"/></div>
+          <div class="form-field"><label>Phone number *</label><input placeholder="+91 98765 43210" type="tel"/></div>
+        </div>
+        <div class="form-field"><label>Email address</label><input type="email" placeholder="you@example.com"/></div>
+        <div class="form-field"><label> Business name</label><input placeholder="Your company name"/></div>
+        <div class="form-row">
+          <div class="form-field"><label>Number of customers</label><select><option>Select range</option><option>1–50</option><option>51–100</option><option>101–300</option><option>300+</option></select></div>
+          <div class="form-field"><label>Server type</label><select><option>Select type</option><option>Jaze</option><option>NetAdmin / Mikrotik</option><option>Both</option><option>Other</option></select></div>
+        </div>
+        <div class="form-field"><label>Message</label><textarea placeholder="Tell us about your requirements, questions, or how we can help..."></textarea></div>
+        <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center" onclick="handleSubmit(event)">Send message &amp; start trial</button>
+        <div style="font-size:12px;color:var(--muted);text-align:center;margin-top:12px">We typically respond within 2 hours on WhatsApp</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <a href="#" class="footer-brand-logo">
+          <div class="footer-brand-icon">N</div>
+          <div class="footer-brand-name">Net<span>Flow</span></div>
+        </a>
+        <div class="footer-desc">Complete billing and management platform for Indian Service Providers and Local Cable Operators. Automate billing, manage customers, and grow your network.<br><br>
+        <strong>Products:</strong> NetAdmin (Admin Panel) · NetFlow MyWiFi (Customer App) · White-label App</div>
+        <div class="footer-badges">
+          <div class="footer-badge">Jaze</div>
+          <div class="footer-badge">NetAdmin</div>
+          <div class="footer-badge">Razorpay</div>
+          <div class="footer-badge">Paytm</div>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="https://apkpure.com/p/com.netflow.mywifi" target="_blank">Download Customer App</a>
+      </div>
+      <div class="footer-col">
+        <h4>Integrations</h4>
+        <a href="#">Jaze Server</a>
+        <a href="#">NetAdmin / Mikrotik</a>
+        <a href="#">Razorpay</a>
+        <a href="#">Paytm Gateway</a>
+        <a href="https://apkpure.com/p/com.netflow.mywifi" target="_blank">Android App</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="#about">About Us</a>
+        <a href="#contact">Contact Us</a>
+        <a onclick="openModal('modal-privacy')">Privacy Policy</a>
+        <a onclick="openModal('modal-terms')">Terms &amp; Conditions</a>
+        <a onclick="openModal('modal-refund')">Refund Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 NetFlow by NetFlow. All rights reserved. Made in India 🇮🇳</div>
+      <div class="footer-legal">
+        <a onclick="openModal('modal-privacy')">Privacy Policy</a>
+        <a onclick="openModal('modal-terms')">Terms &amp; Conditions</a>
+        <a onclick="openModal('modal-refund')">Refund Policy</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================= MODALS ============================= -->
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-overlay" id="modal-checkout">
+  <div class="modal-box wide">
+    <div class="modal-header">
+      <div class="modal-title">Complete your subscription</div>
+      <button class="modal-close" onclick="closeModal('modal-checkout')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="checkout-plan-summary">
+        <div>
+          <div class="checkout-plan-name" id="co-plan-name">Starter Plan</div>
+          <div class="checkout-plan-desc" id="co-plan-desc">Up to 100 connections</div>
+        </div>
+        <div class="checkout-plan-price" id="co-plan-price">₹800/month</div>
+      </div>
+
+      <div class="checkout-section-title">Personal / Business Details</div>
+      <div class="form-row">
+        <div class="form-field"><label>Full Name *</label><input id="co-name" placeholder="e.g. Your Name"/></div>
+        <div class="form-field"><label>Mobile Number *</label><input id="co-phone" type="tel" placeholder="+91 98765 43210"/></div>
+      </div>
+      <div class="form-field"><label>Email Address *</label><input id="co-email" type="email" placeholder="you@example.com"/></div>
+      <div class="form-field"><label>Business Name *</label><input id="co-business" placeholder="Your company name"/></div>
+
+      <div class="checkout-section-title">Billing Address</div>
+      <div class="form-field"><label>Address Line 1 *</label><input id="co-addr1" placeholder="House No., Street, Area"/></div>
+      <div class="form-field"><label>Address Line 2</label><input id="co-addr2" placeholder="Landmark (optional)"/></div>
+      <div class="form-row">
+        <div class="form-field"><label>City *</label><input id="co-city" placeholder="e.g. City"/></div>
+        <div class="form-field"><label>State *</label><input id="co-state" placeholder="e.g. State"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label>PIN Code *</label><input id="co-pin" placeholder="123456" maxlength="6"/></div>
+        <div class="form-field"><label>GSTIN (optional)</label><input id="co-gstin" placeholder="22AAAAA0000A1Z5"/></div>
+      </div>
+
+      <div class="checkout-section-title">User Details (for setup)</div>
+      <div class="form-row">
+        <div class="form-field"><label> Server Type *</label>
+          <select id="co-server"><option value="">Select type</option><option>Jaze Server</option><option>NetAdmin / Mikrotik</option><option>Both</option><option>Other</option></select>
+        </div>
+        <div class="form-field"><label>Approx. Customers</label>
+          <select id="co-customers"><option value="">Select range</option><option>1–50</option><option>51–100</option><option>101–300</option><option>300+</option></select>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:8px;" onclick="handleCheckout(event)">
+        Proceed to Pay via Paytm / Razorpay →
       </button>
-      <div class="error-msg" id="wifi-error" style="margin-top:12px"></div>
-    </div>
-
-    <div id="wifi-status-card" style="margin-top:12px"></div>
-  `;
-
-  loadWifiStatus();
-}
-
-async function loadWifiStatus() {
-  try {
-    const data = await api('/api/customer/wifi-status');
-    if (!data.success || data.data?.status === 'none') return;
-    const s = data.data;
-    const statusColor = s.status === 'confirmed' ? 'var(--green)' : s.status === 'failed' ? 'var(--red)' : 'var(--yellow)';
-    const statusIcon  = s.status === 'confirmed' ? '✅' : s.status === 'failed' ? '❌' : '⏳';
-    document.getElementById('wifi-status-card').innerHTML = `
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px">
-        <div style="font-size:13px;font-weight:600;color:${statusColor};margin-bottom:8px">${statusIcon} Last Change: ${s.status.toUpperCase()}</div>
-        ${s.new_ssid ? `<div style="font-size:12px;color:var(--text2)">New SSID: ${esc(s.new_ssid)}</div>` : ''}
-        ${s.failure_reason ? `<div style="font-size:12px;color:var(--red);margin-top:4px">Reason: ${esc(s.failure_reason)}</div>` : ''}
-        ${s.created_at ? `<div style="font-size:11px;color:var(--text3);margin-top:4px">${fmtDateTime(s.created_at)}</div>` : ''}
+      <div class="checkout-note">
+        By proceeding you agree to our <a onclick="openModal('modal-terms')" style="color:var(--accent);cursor:pointer;">Terms &amp; Conditions</a> and <a onclick="openModal('modal-privacy')" style="color:var(--accent);cursor:pointer;">Privacy Policy</a>. Your data is encrypted and never shared with third parties.
       </div>
-    `;
-  } catch {}
+      <div class="checkout-secure">🔒 Secured by 256-bit SSL encryption &nbsp;|&nbsp; RazorPay and Zoho Payment Gateway</div>
+    </div>
+  </div>
+</div>
+
+<!-- PRIVACY POLICY MODAL -->
+<div class="modal-overlay" id="modal-privacy">
+  <div class="modal-box wide">
+    <div class="modal-header">
+      <div class="modal-title">Privacy Policy</div>
+      <button class="modal-close" onclick="closeModal('modal-privacy')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-block">
+        <div class="info-row"><span class="info-key">Entity Name</span><span class="info-val">NetFlow</span></div>
+        <div class="info-row"><span class="info-key">Platform</span><span class="info-val">NetFlow (netflowdev.github.io)</span></div>
+        <div class="info-row"><span class="info-key">Effective Date</span><span class="info-val">1 January 2025</span></div>
+        <div class="info-row"><span class="info-key">Contact</span><span class="info-val">naveentanwar2804@gmail.com</span></div>
+      </div>
+
+      <h3>1. Introduction</h3>
+      <p>NetFlow ("we", "us", "our") operates the NetFlow platform, including the NetAdmin web dashboard and the NetFlow MyWiFi Android application. This Privacy Policy explains how we collect, use, store, and protect the personal information of ISP operators ("Operators") and their end customers ("Users") who interact with our platform.</p>
+
+      <h3>2. Information We Collect</h3>
+      <p>We collect the following categories of information:</p>
+      <ul>
+        <li><strong>Operator Account Data:</strong> Name, email address, mobile number, business name, registered address, server credentials (Jaze/NetAdmin), and payment gateway API keys (Razorpay/Paytm).</li>
+        <li><strong>Customer Data:</strong> Broadband customer names, mobile numbers, plan details, expiry dates, payment history, and device information (MAC address, router details) as entered by Operators.</li>
+        <li><strong>Transaction Data:</strong> Payment order IDs, transaction IDs, amounts, and payment status records for reconciliation purposes.</li>
+        <li><strong>Usage Data:</strong> Log data including IP addresses, device type, browser, and pages visited on our platform.</li>
+        <li><strong>Communications:</strong> Messages and queries sent via contact forms or WhatsApp.</li>
+      </ul>
+
+      <h3>3. How We Use Your Information</h3>
+      <ul>
+        <li>To provide, operate, and maintain the NetFlow platform and its features.</li>
+        <li>To process subscription payments and manage billing.</li>
+        <li>To configure integrations and trigger automated activations.</li>
+        <li>To send transactional notifications (payment receipts, expiry reminders).</li>
+        <li>To respond to support queries.</li>
+        <li>To improve platform performance and fix technical issues.</li>
+      </ul>
+
+      <h3>4. Data Sharing</h3>
+      <p>We do not sell, rent, or share your personal information with third parties for marketing. We share data only with:</p>
+      <ul>
+        <li><strong>Payment Gateways (Razorpay / Paytm):</strong> To process transactions. These parties have their own privacy policies and PCI-DSS compliance.</li>
+        <li><strong>Servers (Jaze / NetAdmin):</strong> To trigger automated account renewals on your behalf.</li>
+        <li><strong>Cloud Infrastructure (Cloudflare):</strong> For hosting, security, and CDN services.</li>
+      </ul>
+
+      <h3>5. Data Security</h3>
+      <p>All data is stored with industry-standard encryption. Payment API keys and other credentials are accessible only to the designated super admin of each franchise. We use HTTPS/TLS for all data in transit. Access to production systems is strictly controlled.</p>
+
+      <h3>6. Data Retention</h3>
+      <p>We retain Operator account data for the duration of the subscription and up to 1 year after cancellation for legal compliance. Transaction records are retained for 7 years as required by Indian tax regulations. Customer data entered by Operators is deleted upon written request.</p>
+
+      <h3>7. Your Rights</h3>
+      <p>You may request access to, correction of, or deletion of your personal data by contacting us at naveentanwar2804@gmail.com. We will respond within 15 business days.</p>
+
+      <h3>8. Cookies</h3>
+      <p>Our web platform may use essential cookies for session management. We do not use tracking or advertising cookies. The NetFlow MyWiFi Android app does not use cookies.</p>
+
+      <h3>9. Children's Privacy</h3>
+      <p>Our platform is not directed at children under 18. We do not knowingly collect personal information from minors.</p>
+
+      <h3>10. Changes to This Policy</h3>
+      <p>We may update this Privacy Policy from time to time. We will notify Operators via email or platform notification. Continued use of the platform after updates constitutes acceptance of the revised policy.</p>
+
+      <h3>11. Contact</h3>
+      <p>For privacy-related queries: <strong>naveentanwar2804@gmail.com</strong> | H. No. 72, Bassai, Mahendergarh, Haryana 123029, India | +91 85710 62710</p>
+    </div>
+  </div>
+</div>
+
+<!-- TERMS & CONDITIONS MODAL -->
+<div class="modal-overlay" id="modal-terms">
+  <div class="modal-box wide">
+    <div class="modal-header">
+      <div class="modal-title">Terms &amp; Conditions</div>
+      <button class="modal-close" onclick="closeModal('modal-terms')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-block">
+        <div class="info-row"><span class="info-key">Entity Name</span><span class="info-val">NetFlow</span></div>
+        <div class="info-row"><span class="info-key">Platform</span><span class="info-val">NetFlow (netflowdev.github.io)</span></div>
+        <div class="info-row"><span class="info-key">Effective Date</span><span class="info-val">1 January 2025</span></div>
+        <div class="info-row"><span class="info-key">Jurisdiction</span><span class="info-val">Haryana, India</span></div>
+      </div>
+
+      <h3>1. Acceptance of Terms</h3>
+      <p>By accessing or using the NetFlow platform (including the NetAdmin dashboard and NetFlow MyWiFi app), you ("Operator") agree to be bound by these Terms and Conditions. If you do not agree, do not use the platform.</p>
+
+      <h3>2. Description of Service</h3>
+      <p>NetFlow is a Software-as-a-Service (SaaS) platform that provides billing management, online payment collection, automated account activation, and a customer-facing mobile application. The platform is operated by NetFlow.</p>
+
+      <h3>3. Operator Responsibilities</h3>
+      <ul>
+        <li>You are responsible for the accuracy of all customer data entered into the platform.</li>
+        <li>You are responsible for maintaining valid and authorised Razorpay/Paytm payment gateway credentials.</li>
+        <li>You must not use the platform for any unlawful purpose or in violation of applicable Indian laws.</li>
+        <li>You must not attempt to reverse engineer, copy, or resell the platform without prior written consent.</li>
+        <li>You are solely responsible for your operations and compliance with TRAI and DOT regulations.</li>
+      </ul>
+
+      <h3>4. Payment & Subscription</h3>
+      <p>Subscription fees are charged monthly in advance. All payments are processed through Razorpay or Paytm. Taxes (GST) as applicable will be added. NetFlow reserves the right to modify pricing with 30-day advance notice. Non-payment may result in suspension of service.</p>
+
+      <h3>5. Customer Payments</h3>
+      <p>NetFlow facilitates payment collection between end-customers and Operators. All customer payments go directly into the Operator's registered payment gateway account. NetFlow does not hold, escrow, or intermediate any customer payments. NetFlow is not responsible for payment gateway disputes or chargebacks — these are managed directly between the Operator and their payment gateway.</p>
+
+      <h3>6. Intellectual Property</h3>
+      <p>All intellectual property rights in the NetFlow platform, including software, design, branding, and documentation, are owned by NetFlow. You are granted a limited, non-exclusive, non-transferable licence to use the platform for your operations during an active subscription.</p>
+
+      <h3>7. Limitation of Liability</h3>
+      <p>NetFlow's total liability to you for any claims arising from use of the platform shall not exceed the subscription fees paid by you in the 3 months preceding the claim. We are not liable for indirect, incidental, or consequential damages including loss of revenue, data, or business.</p>
+
+      <h3>8. Service Availability</h3>
+      <p>We target 99.9% platform uptime. Scheduled maintenance will be communicated in advance. We are not liable for downtime caused by third-party services (Cloudflare, Razorpay, Paytm, Jaze, etc.).</p>
+
+      <h3>9. Termination</h3>
+      <p>Either party may terminate the subscription with 30-day written notice. NetFlow may terminate immediately for breach of these Terms. Upon termination, you may request an export of your data within 30 days.</p>
+
+      <h3>10. Governing Law</h3>
+      <p>These Terms are governed by the laws of India. Disputes shall be subject to the jurisdiction of courts in Mahendergarh, Haryana, India.</p>
+
+      <h3>11. Amendments</h3>
+      <p>We may update these Terms with 14-day advance notice via email. Continued use of the platform after the notice period constitutes acceptance.</p>
+
+      <h3>12. Contact</h3>
+      <p>For queries: <strong>naveentanwar2804@gmail.com</strong> | H. No. 72, Bassai, Mahendergarh, Haryana 123029, India | +91 85710 62710</p>
+    </div>
+  </div>
+</div>
+
+<!-- REFUND & CANCELLATION POLICY MODAL -->
+<div class="modal-overlay" id="modal-refund">
+  <div class="modal-box wide">
+    <div class="modal-header">
+      <div class="modal-title">Refund &amp; Cancellation Policy</div>
+      <button class="modal-close" onclick="closeModal('modal-refund')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-block">
+        <div class="info-row"><span class="info-key">Entity Name</span><span class="info-val">NetFlow</span></div>
+        <div class="info-row"><span class="info-key">Platform</span><span class="info-val">NetFlow</span></div>
+        <div class="info-row"><span class="info-key">Effective Date</span><span class="info-val">1 January 2025</span></div>
+        <div class="info-row"><span class="info-key">Contact</span><span class="info-val">naveentanwar2804@gmail.com</span></div>
+      </div>
+
+      <h3>1. Subscription Cancellation</h3>
+      <p>You may cancel your NetFlow subscription at any time by contacting us via email at naveentanwar2804@gmail.com or WhatsApp at +91 85710 62710. Cancellation requests are processed within 2 business days.</p>
+      <p>Upon cancellation, your account remains active until the end of the current billing month. No further charges will be made after the cancellation is processed.</p>
+
+      <h3>2. Refund Eligibility — Subscription Fees</h3>
+      <ul>
+        <li><strong>First Payment (New Subscribers):</strong> If you are not satisfied with the platform, you may request a full refund within <strong>7 days</strong> of your first subscription payment. Refunds will not be issued after the 7-day window.</li>
+        <li><strong>Renewal Payments:</strong> Subscription renewal charges are non-refundable. If you wish to cancel, please do so before your next renewal date to avoid being charged.</li>
+        <li><strong>Setup Fees:</strong> Any one-time setup or onboarding fees are non-refundable once setup work has been initiated.</li>
+      </ul>
+
+      <h3>3. How to Request a Refund</h3>
+      <p>To request a refund, contact us at <strong>naveentanwar2804@gmail.com</strong> with the subject line "Refund Request — [Your Business Name]" and include your registered mobile number and payment transaction ID. We will review and process eligible refunds within <strong>7–10 business days</strong>. Refunds are credited to the original payment source (bank account / UPI).</p>
+
+      <h3>4. End-Customer Payments ( Customers)</h3>
+      <p>Payments made by broadband customers through the NetFlow MyWiFi app are collected directly by the  Operator through their own Razorpay or Paytm account. NetFlow does not hold or process these payments.</p>
+      <p>Refunds for end-customer payments (e.g., a customer who paid for a recharge) are the sole responsibility of the Operator. Customers should contact their operators directly for such refunds. NetFlow is not a party to these transactions.</p>
+
+      <h3>5. Failed / Duplicate Transactions</h3>
+      <p>If a payment is deducted but the subscription is not activated due to a technical error, please contact us immediately with your transaction details. We will investigate and resolve within 2 business days — either by activating your account or issuing a full refund.</p>
+
+      <h3>6. Non-Refundable Cases</h3>
+      <ul>
+        <li>Subscription fees beyond the 7-day first-payment window.</li>
+        <li>Cancellations made after the renewal date for that billing cycle.</li>
+        <li>Accounts suspended due to violation of Terms &amp; Conditions.</li>
+        <li>Setup or customisation fees once work has commenced.</li>
+      </ul>
+
+      <h3>7. Contact for Refund / Cancellation</h3>
+      <div class="info-block">
+        <div class="info-row"><span class="info-key">Email</span><span class="info-val">naveentanwar2804@gmail.com</span></div>
+        <div class="info-row"><span class="info-key">WhatsApp / Phone</span><span class="info-val">+91 85710 62710</span></div>
+        <div class="info-row"><span class="info-key">Address</span><span class="info-val">H. No. 72, Bassai, Mahendergarh, Haryana 123029, India</span></div>
+        <div class="info-row"><span class="info-key">Response Time</span><span class="info-val">Within 2 business days</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= SCRIPTS ============================= -->
+<script>
+// Modal control
+function openModal(id){
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow='';
+}
+// Close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay=>{
+  overlay.addEventListener('click',function(e){
+    if(e.target===this) closeModal(this.id);
+  });
+});
+// Close on Escape
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>closeModal(m.id));
+});
+
+// Open checkout modal with plan details
+function openCheckout(plan, priceStr, amount, desc){
+  document.getElementById('co-plan-name').textContent = plan + ' Plan';
+  document.getElementById('co-plan-price').textContent = priceStr;
+  document.getElementById('co-plan-desc').textContent = desc;
+  // Reset fields
+  ['co-name','co-phone','co-email','co-business','co-addr1','co-addr2','co-city','co-state','co-pin','co-gstin'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  openModal('modal-checkout');
 }
 
-async function submitWifiChange() {
-  const newSsid = document.getElementById('new-ssid').value.trim();
-  const newPass = document.getElementById('new-wifi-pass').value;
-  const errEl   = document.getElementById('wifi-error');
-  const btn     = document.getElementById('wifi-change-btn');
-
-  errEl.style.display = 'none';
-
-  if (!newSsid) { errEl.textContent = 'Please enter a new WiFi name.'; errEl.style.display = 'block'; return; }
-  if (newPass.length < 8) { errEl.textContent = 'Password must be at least 8 characters.'; errEl.style.display = 'block'; return; }
-
-  btn.disabled = true; btn.textContent = '⏳ Applying…';
-
-  try {
-    const data = await api('/api/customer/wifi-change', {
-      method: 'POST',
-      body: JSON.stringify({ new_ssid: newSsid, new_wifi_password: newPass })
-    });
-
-    if (data.success) {
-      showToast('✅ WiFi change applied!', 'success');
-      document.getElementById('new-ssid').value = '';
-      document.getElementById('new-wifi-pass').value = '';
-      // Refresh profile to update displayed SSID
-      await loadDashboard();
-      renderWifi();
-    } else {
-      errEl.textContent = data.error || 'WiFi change failed.';
-      errEl.style.display = 'block';
-    }
-  } catch (e) {
-    errEl.textContent = 'Network error. Please try again.';
-    errEl.style.display = 'block';
-  } finally {
-    btn.disabled = false; btn.textContent = '📡 Apply WiFi Change';
+// Checkout submit
+function handleCheckout(e){
+  const btn = e.target;
+  const required = ['co-name','co-phone','co-email','co-business','co-addr1','co-city','co-state','co-pin'];
+  let valid = true;
+  required.forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el.value.trim()){el.style.borderColor='var(--danger)';valid=false;}
+    else{el.style.borderColor='';}
+  });
+  if(!valid){
+    const err=document.getElementById('co-err');
+    if(err) err.style.display='block';
+    return;
   }
+  btn.textContent='Processing...';
+  btn.disabled=true;
+  setTimeout(()=>{
+    btn.textContent='✓ Request received! We will contact you on WhatsApp to complete payment.';
+    btn.style.background='var(--accent3)';
+    btn.style.fontSize='13px';
+  },1000);
 }
 
-// ══════════════════════════════════════
-//  HELPERS
-// ══════════════════════════════════════
-function esc(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+// Contact form submit
+function handleSubmit(e){
+  const btn=e.target;
+  btn.textContent='Sending...';btn.disabled=true;
+  setTimeout(()=>{
+    btn.textContent='Message sent! We will contact you shortly ✓';
+    btn.style.background='var(--accent3)';
+  },1200);
 }
 
-function fmtDate(d) {
-  if (!d) return 'N/A';
-  const [y, m, day] = d.split('-');
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return `${parseInt(day)} ${months[parseInt(m)-1]} ${y}`;
+// FAQ toggle
+function toggleFaq(el){
+  const item=el.parentElement;
+  item.classList.toggle('open');
 }
 
-function fmtDateTime(dt) {
-  if (!dt) return '';
-  const d = new Date(dt.replace(' ', 'T'));
-  if (isNaN(d)) return dt;
-  return d.toLocaleString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
-}
-
-let toastTimer;
-function showToast(msg, type = 'info') {
-  let existing = document.querySelector('.toast');
-  if (existing) existing.remove();
-  if (toastTimer) clearTimeout(toastTimer);
-
-  const el = document.createElement('div');
-  el.className = `toast ${type}`;
-  el.textContent = msg;
-  document.body.appendChild(el);
-  toastTimer = setTimeout(() => el.remove(), 4000);
-}
+// Smooth active nav on scroll
+const sections=document.querySelectorAll('section[id],div[id]');
+window.addEventListener('scroll',()=>{
+  const pos=window.scrollY+100;
+  sections.forEach(s=>{
+    const top=s.offsetTop,bot=top+s.offsetHeight;
+    const link=document.querySelector('.nav-links a[href="#'+s.id+'"]');
+    if(link){link.style.color=pos>=top&&pos<bot?'var(--text)':'';} 
+  });
+});
 </script>
 </body>
 </html>
