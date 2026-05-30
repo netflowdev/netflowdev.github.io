@@ -6,6 +6,7 @@
 <meta name="keywords" content="ISP billing software, broadband billing, LCO management, internet service provider software, ISP management system, NetAdmin, NetFlow MyWiFi"/>
 <title>NetFlow ISP Billing & Management Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -197,7 +198,9 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
 .footer-legal a{font-size:13px;color:var(--muted);text-decoration:none;cursor:pointer;}
 .footer-legal a:hover{color:var(--text);}
 
-/* ===== MODALS ===== */
+/* ===========================
+   MODALS (shared base styles)
+   =========================== */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
 .modal-overlay.open{display:flex;}
 .modal-box{background:var(--card);border:1px solid var(--border);border-radius:20px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;position:relative;margin:auto;}
@@ -218,14 +221,94 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
 .modal-body .info-key{color:var(--muted);min-width:130px;font-weight:500;}
 .modal-body .info-val{color:var(--text);}
 
-/* CHECKOUT MODAL */
-.checkout-plan-summary{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;}
-.checkout-plan-name{font-size:16px;font-weight:700;}
-.checkout-plan-price{font-size:20px;font-weight:800;color:var(--accent);}
-.checkout-plan-desc{font-size:13px;color:var(--muted);margin-top:2px;}
-.checkout-section-title{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin:20px 0 12px;}
-.checkout-note{font-size:12px;color:var(--muted);margin-top:16px;text-align:center;line-height:1.6;}
-.checkout-secure{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font-size:12px;color:var(--muted);}
+/* ===========================
+   CHECKOUT MODAL (enhanced)
+   =========================== */
+.checkout-modal-body{padding:0;}
+
+/* Plan Summary Banner */
+.co-plan-banner{
+  background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(34,211,238,.08));
+  border-bottom:1px solid var(--border);
+  padding:24px 28px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  flex-wrap:wrap;
+}
+.co-plan-info{}
+.co-plan-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:4px;}
+.co-plan-name{font-size:20px;font-weight:800;color:var(--text);}
+.co-plan-desc{font-size:13px;color:var(--muted);margin-top:2px;}
+.co-plan-price-wrap{text-align:right;}
+.co-plan-price{font-size:36px;font-weight:800;color:var(--accent);line-height:1;}
+.co-plan-period{font-size:13px;color:var(--muted);margin-top:2px;}
+
+/* Steps */
+.co-steps{display:flex;gap:0;border-bottom:1px solid var(--border);}
+.co-step{flex:1;padding:14px 20px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;text-align:center;cursor:default;transition:all .2s;}
+.co-step.active{color:var(--accent);border-bottom-color:var(--accent);}
+.co-step.done{color:var(--accent3);}
+
+/* Step panels */
+.co-panel{display:none;padding:28px;}
+.co-panel.active{display:block;}
+
+.co-section-title{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin:0 0 14px;}
+.co-form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.co-form-field{margin-bottom:14px;}
+.co-form-field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500;}
+.co-form-field input,.co-form-field select{
+  width:100%;padding:11px 14px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);
+  font-family:var(--font);font-size:14px;outline:none;transition:border .2s;
+}
+.co-form-field input:focus,.co-form-field select:focus{border-color:var(--accent);}
+.co-form-field select option{background:var(--card);}
+.co-form-field input.error{border-color:var(--danger)!important;}
+
+/* Summary panel */
+.co-summary-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px;}
+.co-summary-row:last-child{border-bottom:none;}
+.co-summary-key{color:var(--muted);}
+.co-summary-val{font-weight:600;color:var(--text);}
+.co-summary-total{background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:16px 18px;margin:16px 0;}
+.co-summary-total-label{font-size:13px;color:var(--muted);margin-bottom:4px;}
+.co-summary-total-amount{font-size:32px;font-weight:800;color:var(--accent);}
+.co-summary-note{font-size:12px;color:var(--muted);margin-top:4px;}
+
+/* Navigation buttons */
+.co-nav{display:flex;gap:12px;margin-top:20px;}
+.co-btn-next{flex:1;padding:14px;background:var(--grad);border:none;border-radius:10px;color:#fff;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
+.co-btn-next:hover{opacity:.9;transform:translateY(-1px);}
+.co-btn-next:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.co-btn-back{padding:14px 20px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:var(--font);font-size:14px;cursor:pointer;transition:all .2s;}
+.co-btn-back:hover{border-color:var(--accent);color:var(--accent);}
+
+/* Pay button special */
+.co-btn-pay{
+  flex:1;padding:16px;
+  background:linear-gradient(135deg,#10b981,#059669);
+  border:none;border-radius:10px;color:#fff;
+  font-family:var(--font);font-size:16px;font-weight:700;
+  cursor:pointer;transition:all .2s;
+  box-shadow:0 4px 20px rgba(16,185,129,.3);
+}
+.co-btn-pay:hover{box-shadow:0 8px 28px rgba(16,185,129,.45);transform:translateY(-1px);}
+.co-btn-pay:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* Success screen */
+.co-success{text-align:center;padding:40px 28px;}
+.co-success-icon{font-size:64px;margin-bottom:16px;animation:successPop .5s cubic-bezier(0.16,1,0.3,1);}
+@keyframes successPop{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
+.co-success-title{font-size:24px;font-weight:800;margin-bottom:8px;color:var(--accent3);}
+.co-success-sub{font-size:15px;color:var(--muted);line-height:1.7;}
+
+/* Secure badges */
+.co-secure{display:flex;align-items:center;justify-content:center;gap:16px;padding:14px 20px;background:var(--surface);border-top:1px solid var(--border);flex-wrap:wrap;}
+.co-secure-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
+
+/* Error message */
+.co-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:#fca5a5;margin-bottom:14px;display:none;}
 
 /* MOBILE */
 @media(max-width:900px){
@@ -244,7 +327,9 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
   .section-title{font-size:32px;}
   .cta-title{font-size:32px;}
   .modal-body .info-row{flex-direction:column;gap:4px;}
-  .form-row{grid-template-columns:1fr;}
+  .form-row,.co-form-row{grid-template-columns:1fr;}
+  .co-plan-banner{flex-direction:column;align-items:flex-start;}
+  .co-plan-price-wrap{text-align:left;}
 }
 </style>
 </head>
@@ -311,7 +396,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
           <div class="dp-row"><div><div style="font-weight:600;font-size:13px">Ramesh Kumar</div><div style="font-size:11px;color:#6b7291">50 Mbps · Jaze</div></div><div class="dp-badge dp-green">Active</div></div>
           <div class="dp-row"><div><div style="font-weight:600;font-size:13px">Naresh Library</div><div style="font-size:11px;color:#6b7291">100 Mbps · NetAdmin</div></div><div class="dp-badge dp-green">Active</div></div>
           <div class="dp-row"><div><div style="font-weight:600;font-size:13px">Suresh Kumar</div><div style="font-size:11px;color:#6b7291">25 Mbps · Jaze</div></div><div class="dp-badge dp-red">Expired</div></div>
-          <div class="dp-row"><div><div style="font-weight:600;font-size:13px">✅ Payment received</div><div style="font-size:11px;color:#6b7291">Vikash Singh · ₹699</div></div><div class="dp-badge dp-blue">Paytm</div></div>
+          <div class="dp-row"><div><div style="font-weight:600;font-size:13px">✅ Payment received</div><div style="font-size:11px;color:#6b7291">Vikash Singh · ₹699</div></div><div class="dp-badge dp-blue">Razorpay</div></div>
           <div class="dp-row"><div><div style="font-weight:600;font-size:13px">⚡ Auto-activated</div><div style="font-size:11px;color:#6b7291">NetAdmin profile updated</div></div><div class="dp-badge dp-green">Done</div></div>
         </div>
       </div>
@@ -336,55 +421,19 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
   <div class="section-inner">
     <div class="section-header">
       <div class="section-label">Features</div>
-      <div class="section-title">Everything you needs to grow</div>
+      <div class="section-title">Everything you need to grow</div>
       <div class="section-sub">From customer onboarding to automatic renewal — NetFlow handles your entire operation so you can focus on growth.</div>
     </div>
     <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon fi-purple">💳</div>
-        <div class="feature-title">Online Payment Collection</div>
-        <div class="feature-desc">Accept payments via Razorpay and Zoho directly into your bank account. Customers pay from the app — money goes straight to you. Zero manual work.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon fi-cyan">⚡</div>
-        <div class="feature-title">Auto Activation</div>
-        <div class="feature-desc">When a customer pays, their account on Jaze or NetAdmin/Mikrotik is automatically renewed. No need to manually update each customer.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon fi-green">📱</div>
-        <div class="feature-title">NetFlow MyWiFi — Customer App</div>
-        <div class="feature-desc">Your customers get the branded NetFlow MyWiFi app to check their plan, expiry date, recharge history, and make payments — fully under your ISP brand. White-label option available.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon fi-amber">🔔</div>
-        <div class="feature-title">Expiry Notifications</div>
-        <div class="feature-desc">Automatic push notifications sent 7, 3, 2, 1 days before expiry and daily after expiry until renewal. No more customers forgetting to recharge.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon fi-pink">👥</div>
-        <div class="feature-title">Multi-Franchise Support</div>
-        <div class="feature-desc">Manage multiple franchises from one platform. Each franchise has their own admin panel, customers, payments, and franchises credentials — fully isolated.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon fi-red">📊</div>
-        <div class="feature-title">NetAdmin — Admin Panel</div>
-        <div class="feature-desc">Real-time overview of active customers, expired accounts, pending activations, payment history, and revenue analytics — all in one powerful admin dashboard.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon fi-cyan">🛡️</div>
-        <div class="feature-title">Secure &amp; Private</div>
-        <div class="feature-desc">Payment API keys and ISP credentials are managed on encrypted server. No one can see sensitive credentials — bank-grade security.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon fi-purple">🔧</div>
-        <div class="feature-title">Customer Management</div>
-        <div class="feature-desc">Complete customer profiles with operator details, hardware info (MAC address, router, IPTV), membership numbers, comments, and billing history.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon fi-green">☁️</div>
-        <div class="feature-title">Cloud-Powered</div>
-        <div class="feature-desc">Built on Google Cloud with 99.9% uptime, global CDN, and automatic scaling. No server maintenance — we handle everything for you.</div>
-      </div>
+      <div class="feature-card"><div class="feature-icon fi-purple">💳</div><div class="feature-title">Online Payment Collection</div><div class="feature-desc">Accept payments via Razorpay and Zoho directly into your bank account. Customers pay from the app — money goes straight to you. Zero manual work.</div></div>
+      <div class="feature-card"><div class="feature-icon fi-cyan">⚡</div><div class="feature-title">Auto Activation</div><div class="feature-desc">When a customer pays, their account on Jaze or NetAdmin/Mikrotik is automatically renewed. No need to manually update each customer.</div></div>
+      <div class="feature-card"><div class="feature-icon fi-green">📱</div><div class="feature-title">NetFlow MyWiFi — Customer App</div><div class="feature-desc">Your customers get the branded NetFlow MyWiFi app to check their plan, expiry date, recharge history, and make payments — fully under your ISP brand.</div></div>
+      <div class="feature-card"><div class="feature-icon fi-amber">🔔</div><div class="feature-title">Expiry Notifications</div><div class="feature-desc">Automatic push notifications sent 7, 3, 2, 1 days before expiry and daily after expiry until renewal. No more customers forgetting to recharge.</div></div>
+      <div class="feature-card"><div class="feature-icon fi-pink">👥</div><div class="feature-title">Multi-Franchise Support</div><div class="feature-desc">Manage multiple franchises from one platform. Each franchise has their own admin panel, customers, payments — fully isolated.</div></div>
+      <div class="feature-card"><div class="feature-icon fi-red">📊</div><div class="feature-title">NetAdmin — Admin Panel</div><div class="feature-desc">Real-time overview of active customers, expired accounts, pending activations, payment history, and revenue analytics — all in one dashboard.</div></div>
+      <div class="feature-card"><div class="feature-icon fi-cyan">🛡️</div><div class="feature-title">Secure &amp; Private</div><div class="feature-desc">Payment API keys and ISP credentials are managed on encrypted server. Bank-grade security with zero credential exposure.</div></div>
+      <div class="feature-card"><div class="feature-icon fi-purple">🔧</div><div class="feature-title">Customer Management</div><div class="feature-desc">Complete customer profiles with operator details, hardware info (MAC address, router, IPTV), membership numbers, comments, and billing history.</div></div>
+      <div class="feature-card"><div class="feature-icon fi-green">☁️</div><div class="feature-title">Cloud-Powered</div><div class="feature-desc">Built on Cloudflare with 99.9% uptime, global CDN, and automatic scaling. No server maintenance — we handle everything for you.</div></div>
     </div>
   </div>
 </section>
@@ -393,7 +442,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
 <div class="stats-section">
   <div class="section-inner">
     <div class="stats-grid">
-      <div class="stat-item"><div class="stat-val">100+</div><div class="stat-label">Active &amp; Operators</div></div>
+      <div class="stat-item"><div class="stat-val">100+</div><div class="stat-label">Active Operators</div></div>
       <div class="stat-item"><div class="stat-val">10,000+</div><div class="stat-label">Customers Managed</div></div>
       <div class="stat-item"><div class="stat-val">₹10L+</div><div class="stat-label">Payments Processed</div></div>
       <div class="stat-item"><div class="stat-val">99.9%</div><div class="stat-label">Platform Uptime</div></div>
@@ -410,26 +459,10 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
       <div class="section-sub" style="margin:0 auto">We set everything up for you — no technical knowledge required.</div>
     </div>
     <div class="how-grid">
-      <div class="how-step">
-        <div class="how-num">1</div>
-        <div class="how-title">Sign up &amp; onboarding</div>
-        <div class="how-desc">Share your portel details, Jaze/NetAdmin or any Custom API credentials, and Razorpay/Zoho/Paytm keys with us.</div>
-      </div>
-      <div class="how-step">
-        <div class="how-num">2</div>
-        <div class="how-title">We configure &amp; setup</div>
-        <div class="how-desc">Our team configures your franchise account, adds your customers, and sets up payment integration.</div>
-      </div>
-      <div class="how-step">
-        <div class="how-num">3</div>
-        <div class="how-title">Distribute the app</div>
-        <div class="how-desc">Your customers download NetFlow MyWiFi app. You share it via WhatsApp or any channel.</div>
-      </div>
-      <div class="how-step">
-        <div class="how-num">4</div>
-        <div class="how-title">Sit back &amp; earn</div>
-        <div class="how-desc">Customers pay online, account activates automatically. You just monitor from NetAdmin dashboard.</div>
-      </div>
+      <div class="how-step"><div class="how-num">1</div><div class="how-title">Sign up &amp; onboarding</div><div class="how-desc">Share your portal details, Jaze/NetAdmin credentials, and Razorpay/Zoho keys with us.</div></div>
+      <div class="how-step"><div class="how-num">2</div><div class="how-title">We configure &amp; setup</div><div class="how-desc">Our team configures your franchise account, adds your customers, and sets up payment integration.</div></div>
+      <div class="how-step"><div class="how-num">3</div><div class="how-title">Distribute the app</div><div class="how-desc">Your customers download NetFlow MyWiFi app. You share it via WhatsApp or any channel.</div></div>
+      <div class="how-step"><div class="how-num">4</div><div class="how-title">Sit back &amp; earn</div><div class="how-desc">Customers pay online, account activates automatically. You just monitor from NetAdmin dashboard.</div></div>
     </div>
   </div>
 </section>
@@ -457,7 +490,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
         <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Jaze &amp; NetAdmin support</div>
         <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Auto expiry notifications</div>
         <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Email &amp; WhatsApp support</div>
-        <button onclick="openCheckout('Starter','₹800/month','₹800','Up to 100 connections')" class="btn btn-outline btn-lg pricing-cta" style="text-align:center;justify-content:center">Get started</button>
+        <button onclick="openCheckout('Starter','₹800/month',800,'Up to 100 connections')" class="btn btn-outline btn-lg pricing-cta" style="justify-content:center">Get started</button>
       </div>
       <!-- Growth -->
       <div class="pricing-card featured">
@@ -474,13 +507,13 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
         <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Advanced analytics</div>
         <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Priority support</div>
         <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Custom app branding</div>
-        <button onclick="openCheckout('Growth','₹1,500/month','₹1500','Up to 200 connections')" class="btn btn-primary btn-lg pricing-cta" style="text-align:center;justify-content:center">Get started</button>
+        <button onclick="openCheckout('Growth','₹1,500/month',1500,'Up to 200 connections')" class="btn btn-primary btn-lg pricing-cta" style="justify-content:center">Get started</button>
       </div>
       <!-- Enterprise -->
       <div class="pricing-card">
         <div class="pricing-plan">Enterprise</div>
         <div class="pricing-price" style="font-size:32px">Custom</div>
-        <div class="pricing-offer">For large &amp; networks</div>
+        <div class="pricing-offer">For large networks</div>
         <div class="pricing-strike" style="visibility:hidden">spacer</div>
         <div class="pricing-divider"></div>
         <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>Unlimited connections</div>
@@ -490,7 +523,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
         <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>SLA guarantee</div>
         <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>White-label option</div>
         <div class="pricing-feat"><span class="pricing-feat-icon">✓</span>On-site setup assistance</div>
-        <a href="#contact" class="btn btn-ghost btn-lg pricing-cta" style="text-align:center;justify-content:center">Contact us</a>
+        <a href="#contact" class="btn btn-ghost btn-lg pricing-cta" style="justify-content:center">Contact us</a>
       </div>
     </div>
     <div style="text-align:center;margin-top:32px;font-size:14px;color:var(--muted)">
@@ -507,30 +540,9 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
       <div class="section-title">LCOs love NetFlow</div>
     </div>
     <div class="testimonials-grid">
-      <div class="testimonial-card">
-        <div class="test-stars">★★★★★</div>
-        <div class="test-text">"Before NetFlow, I was manually updating every customer on Jaze after collecting cash. Now payments come in automatically and Jaze updates itself. I save 3 hours every day."</div>
-        <div class="test-author">
-          <div class="test-avatar">RS</div>
-          <div><div class="test-name">Rajesh Sharma</div><div class="test-role"> LCO, Haryana</div></div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="test-stars">★★★★★</div>
-        <div class="test-text">"My customers were always forgetting to recharge. Now the NetFlow MyWiFi app sends them reminders automatically. Collections improved by 40% in the first month itself."</div>
-        <div class="test-author">
-          <div class="test-avatar">NK</div>
-          <div><div class="test-name">Naresh Kumar</div><div class="test-role">LCO, Uttar Pradesh</div></div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="test-stars">★★★★★</div>
-        <div class="test-text">"The multi-franchise feature is incredible. I manage 3 franchise from one NetAdmin dashboard. Each franchise has their own admin login and payments go to their separate accounts."</div>
-        <div class="test-author">
-          <div class="test-avatar">PM</div>
-          <div><div class="test-name">Pradeep Mehra</div><div class="test-role">Multi-franchise Owner, Punjab</div></div>
-        </div>
-      </div>
+      <div class="testimonial-card"><div class="test-stars">★★★★★</div><div class="test-text">"Before NetFlow, I was manually updating every customer on Jaze after collecting cash. Now payments come in automatically and Jaze updates itself. I save 3 hours every day."</div><div class="test-author"><div class="test-avatar">RS</div><div><div class="test-name">Rajesh Sharma</div><div class="test-role">LCO, Haryana</div></div></div></div>
+      <div class="testimonial-card"><div class="test-stars">★★★★★</div><div class="test-text">"My customers were always forgetting to recharge. Now the NetFlow MyWiFi app sends them reminders automatically. Collections improved by 40% in the first month itself."</div><div class="test-author"><div class="test-avatar">NK</div><div><div class="test-name">Naresh Kumar</div><div class="test-role">LCO, Uttar Pradesh</div></div></div></div>
+      <div class="testimonial-card"><div class="test-stars">★★★★★</div><div class="test-text">"The multi-franchise feature is incredible. I manage 3 franchises from one NetAdmin dashboard. Each franchise has their own admin login and payments go to their separate accounts."</div><div class="test-author"><div class="test-avatar">PM</div><div><div class="test-name">Pradeep Mehra</div><div class="test-role">Multi-franchise Owner, Punjab</div></div></div></div>
     </div>
   </div>
 </section>
@@ -543,34 +555,12 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
       <div class="section-title">Frequently asked questions</div>
     </div>
     <div class="faq-list">
-      <div class="faq-item open">
-        <div class="faq-q" onclick="toggleFaq(this)">Does money go directly to my bank account? <span class="faq-q-icon">+</span></div>
-        <div class="faq-a">Yes, absolutely. Your Razorpay or Paytm account is connected to your own bank account. When a customer pays, the money goes directly to your account. NetFlow does not handle or receive any payments — we only provide the software platform.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Which ISP servers do you support? <span class="faq-q-icon">+</span></div>
-        <div class="faq-a">We currently support Jaze  Server and NetAdmin/Mikrotik servers. We are actively working on integrations with other bandwidth management platforms. Contact us if you need a specific integration.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">How long does setup take? <span class="faq-q-icon">+</span></div>
-        <div class="faq-a">Most accpunts are fully set up within 24-48 hours. This includes configuring your NetAdmin panel, adding your customers, setting up payment integration, and sharing the NetFlow MyWiFi app with your customers. We handle everything for you.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Can I manage multiple franchises or branches? <span class="faq-q-icon">+</span></div>
-        <div class="faq-a">Yes! The Growth and Enterprise plans include full multi-franchise support. Each franchise gets their own NetAdmin panel, customer database, payment account, and credentials — fully isolated. As the super admin, you can see all franchises from one dashboard.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Is my customers' data and my API keys secure? <span class="faq-q-icon">+</span></div>
-        <div class="faq-a">Yes. All data is stored with enterprise-grade encryption. Payment API keys (Razorpay/Paytm) and ISP credentials (Jaze/NetAdmin) are encrypted on server no one can access them.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">What happens if a customer's payment fails? <span class="faq-q-icon">+</span></div>
-        <div class="faq-a">Failed payments are tracked in the NetAdmin dashboard. The customer's account is not renewed and they continue to receive expiry notifications. The customer can retry the payment at any time from the NetFlow MyWiFi app.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">What is your refund/cancellation policy? <span class="faq-q-icon">+</span></div>
-        <div class="faq-a">You can cancel your subscription at any time. Cancellations take effect at the end of your current billing cycle. We offer a 7-day refund for the first subscription payment if you are not satisfied. See our full Refund Policy for details.</div>
-      </div>
+      <div class="faq-item open"><div class="faq-q" onclick="toggleFaq(this)">Does money go directly to my bank account? <span class="faq-q-icon">+</span></div><div class="faq-a">Yes, absolutely. Your Razorpay or Paytm account is connected to your own bank account. When a customer pays, the money goes directly to your account. NetFlow does not handle or receive any payments — we only provide the software platform.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Which ISP servers do you support? <span class="faq-q-icon">+</span></div><div class="faq-a">We currently support Jaze Server and NetAdmin/Mikrotik servers. We are actively working on integrations with other bandwidth management platforms. Contact us if you need a specific integration.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">How long does setup take? <span class="faq-q-icon">+</span></div><div class="faq-a">Most accounts are fully set up within 24-48 hours. This includes configuring your NetAdmin panel, adding your customers, setting up payment integration, and sharing the NetFlow MyWiFi app with your customers.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Can I manage multiple franchises or branches? <span class="faq-q-icon">+</span></div><div class="faq-a">Yes! The Growth and Enterprise plans include full multi-franchise support. Each franchise gets their own NetAdmin panel, customer database, payment account, and credentials — fully isolated.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Is my customers' data and my API keys secure? <span class="faq-q-icon">+</span></div><div class="faq-a">Yes. All data is stored with enterprise-grade encryption. Payment API keys (Razorpay/Paytm) and ISP credentials (Jaze/NetAdmin) are encrypted on server — no one can access them.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">What is your refund/cancellation policy? <span class="faq-q-icon">+</span></div><div class="faq-a">You can cancel at any time. We offer a 7-day refund for the first subscription payment if you're not satisfied. See our full Refund Policy for details.</div></div>
     </div>
   </div>
 </section>
@@ -579,15 +569,15 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
 <div class="cta-section">
   <div class="cta-inner">
     <div class="cta-title">Ready to automate your billing?</div>
-    <div class="cta-sub">Join 100+ LCOs already saving time and collecting more revenue with NetFlow. Start your 14-day free trial today.</div>
+    <div class="cta-sub">Join 100+ LCOs already saving time and collecting more revenue with NetFlow. Start your 30-day free trial today.</div>
     <div class="cta-actions">
-      <a href="#contact" class="btn btn-primary btn-lg">Start Free Trial</a>
+      <a href="#pricing" class="btn btn-primary btn-lg">Start Free Trial</a>
       <a href="https://wa.me/918571062710" target="_blank" class="btn btn-ghost btn-lg">Talk to us on WhatsApp</a>
     </div>
   </div>
 </div>
 
-<!-- ABOUT US -->
+<!-- ABOUT -->
 <section id="about" style="background:var(--surface);border-top:1px solid var(--border);">
   <div class="section-inner">
     <div class="section-header" style="text-align:center">
@@ -597,21 +587,11 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
     </div>
     <div style="max-width:800px;margin:0 auto;">
       <div class="contact-form" style="border-radius:16px;">
-        <div style="margin-bottom:20px;">
-          <div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:8px;">Legal Entity</div>
-          <div style="font-size:18px;font-weight:700;color:var(--text);">NetFlow</div>
-          <div style="font-size:14px;color:var(--muted);margin-top:4px;">Sole Proprietorship / Software Development</div>
-        </div>
+        <div style="margin-bottom:20px;"><div style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:8px;">Legal Entity</div><div style="font-size:18px;font-weight:700;color:var(--text);">NetFlow</div><div style="font-size:14px;color:var(--muted);margin-top:4px;">Sole Proprietorship / Software Development</div></div>
         <div class="pricing-divider"></div>
-        <p style="font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:16px;">
-          NetFlow is a SaaS platform developed by NetFlow, based in Mahendergarh, Haryana, India. We build technology solutions that empower local Service Providers and Cable Operators to digitise their operations, automate billing, and deliver a modern experience to their customers.
-        </p>
-        <p style="font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:16px;">
-          Our product suite includes <strong style="color:var(--text)">NetAdmin</strong> — a powerful admin panel for customer management — and <strong style="color:var(--text)">NetFlow MyWiFi</strong> — a customer-facing Android app that allows users to check their plan, recharge online, and receive renewal reminders automatically.
-        </p>
-        <p style="font-size:15px;color:var(--muted);line-height:1.8;">
-          We are registered at H. No. 72, Bassai, Mahendergarh, Haryana 123029, India. For any queries, you may reach us at <a href="mailto:naveentanwar2804@gmail.com" style="color:var(--accent)">naveentanwar2804@gmail.com</a> or call/WhatsApp us at <a href="tel:+918571062710" style="color:var(--accent)">+91 85710 62710</a>.
-        </p>
+        <p style="font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:16px;">NetFlow is a SaaS platform developed by NetFlow, based in Mahendergarh, Haryana, India. We build technology solutions that empower local Service Providers and Cable Operators to digitise their operations, automate billing, and deliver a modern experience to their customers.</p>
+        <p style="font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:16px;">Our product suite includes <strong style="color:var(--text)">NetAdmin</strong> — a powerful admin panel for customer management — and <strong style="color:var(--text)">NetFlow MyWiFi</strong> — a customer-facing Android app that allows users to check their plan, recharge online, and receive renewal reminders automatically.</p>
+        <p style="font-size:15px;color:var(--muted);line-height:1.8;">We are registered at H. No. 72, Bassai, Mahendergarh, Haryana 123029, India. For any queries, you may reach us at <a href="mailto:naveentanwar2804@gmail.com" style="color:var(--accent)">naveentanwar2804@gmail.com</a> or call/WhatsApp us at <a href="tel:+918571062710" style="color:var(--accent)">+91 85710 62710</a>.</p>
         <div style="margin-top:24px;display:flex;gap:16px;flex-wrap:wrap;">
           <a href="https://apkpure.com/p/com.netflow.mywifi" target="_blank" class="btn btn-outline">📱 Download NetFlow MyWiFi App</a>
           <a href="https://netflowdev.github.io/" target="_blank" class="btn btn-ghost">🌐 Visit Platform</a>
@@ -633,36 +613,24 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
       <div class="contact-info">
         <h3>We're here to help</h3>
         <p>Whether you're evaluating NetFlow or ready to onboard — reach out and we'll get you started right away.</p>
-        <div class="contact-item">
-          <div class="contact-icon">📱</div>
-          <div><div class="contact-label">WhatsApp / Phone</div><div class="contact-val"><a href="https://wa.me/918571062710" target="_blank" style="color:var(--text);text-decoration:none;">+91 85710 62710</a></div></div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">✉️</div>
-          <div><div class="contact-label">Email</div><div class="contact-val"><a href="mailto:naveentanwar2804@gmail.com" style="color:var(--text);text-decoration:none;">naveentanwar2804@gmail.com</a></div></div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">📍</div>
-          <div><div class="contact-label">Registered Address</div><div class="contact-val" style="font-size:14px;">H. No. 72, Bassai,<br>Mahendergarh, Haryana 123029, India</div></div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">🕐</div>
-          <div><div class="contact-label">Support hours</div><div class="contact-val">Mon–Sat, 9 AM – 8 PM IST</div></div>
-        </div>
+        <div class="contact-item"><div class="contact-icon">📱</div><div><div class="contact-label">WhatsApp / Phone</div><div class="contact-val"><a href="https://wa.me/918571062710" target="_blank" style="color:var(--text);text-decoration:none;">+91 85710 62710</a></div></div></div>
+        <div class="contact-item"><div class="contact-icon">✉️</div><div><div class="contact-label">Email</div><div class="contact-val"><a href="mailto:naveentanwar2804@gmail.com" style="color:var(--text);text-decoration:none;">naveentanwar2804@gmail.com</a></div></div></div>
+        <div class="contact-item"><div class="contact-icon">📍</div><div><div class="contact-label">Registered Address</div><div class="contact-val" style="font-size:14px;">H. No. 72, Bassai,<br>Mahendergarh, Haryana 123029, India</div></div></div>
+        <div class="contact-item"><div class="contact-icon">🕐</div><div><div class="contact-label">Support hours</div><div class="contact-val">Mon–Sat, 9 AM – 8 PM IST</div></div></div>
       </div>
       <div class="contact-form">
         <div class="form-row">
-          <div class="form-field"><label>Your name *</label><input placeholder="Your Name"/></div>
-          <div class="form-field"><label>Phone number *</label><input placeholder="+91 98765 43210" type="tel"/></div>
+          <div class="form-field"><label>Your name *</label><input id="cf-name" placeholder="Your Name"/></div>
+          <div class="form-field"><label>Phone number *</label><input id="cf-phone" placeholder="+91 98765 43210" type="tel"/></div>
         </div>
-        <div class="form-field"><label>Email address</label><input type="email" placeholder="you@example.com"/></div>
-        <div class="form-field"><label> Business name</label><input placeholder="Your company name"/></div>
+        <div class="form-field"><label>Email address</label><input id="cf-email" type="email" placeholder="you@example.com"/></div>
+        <div class="form-field"><label>Business name</label><input id="cf-biz" placeholder="Your company name"/></div>
         <div class="form-row">
-          <div class="form-field"><label>Number of customers</label><select><option>Select range</option><option>1–50</option><option>51–100</option><option>101–300</option><option>300+</option></select></div>
-          <div class="form-field"><label>Server type</label><select><option>Select type</option><option>Jaze</option><option>NetAdmin / Mikrotik</option><option>Both</option><option>Other</option></select></div>
+          <div class="form-field"><label>Number of customers</label><select id="cf-size"><option>Select range</option><option>1–50</option><option>51–100</option><option>101–300</option><option>300+</option></select></div>
+          <div class="form-field"><label>Server type</label><select id="cf-server"><option>Select type</option><option>Jaze</option><option>NetAdmin / Mikrotik</option><option>Both</option><option>Other</option></select></div>
         </div>
-        <div class="form-field"><label>Message</label><textarea placeholder="Tell us about your requirements, questions, or how we can help..."></textarea></div>
-        <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center" onclick="handleSubmit(event)">Send message &amp; start trial</button>
+        <div class="form-field"><label>Message</label><textarea id="cf-msg" placeholder="Tell us about your requirements..."></textarea></div>
+        <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center" id="cf-btn" onclick="handleContactSubmit()">Send message &amp; start trial</button>
         <div style="font-size:12px;color:var(--muted);text-align:center;margin-top:12px">We typically respond within 2 hours on WhatsApp</div>
       </div>
     </div>
@@ -674,111 +642,141 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
   <div class="footer-inner">
     <div class="footer-grid">
       <div>
-        <a href="#" class="footer-brand-logo">
-          <div class="footer-brand-icon">N</div>
-          <div class="footer-brand-name">Net<span>Flow</span></div>
-        </a>
-        <div class="footer-desc">Complete billing and management platform for Indian Service Providers and Local Cable Operators. Automate billing, manage customers, and grow your network.<br><br>
-        <strong>Products:</strong> NetAdmin (Admin Panel) · NetFlow MyWiFi (Customer App) · White-label App</div>
-        <div class="footer-badges">
-          <div class="footer-badge">Jaze</div>
-          <div class="footer-badge">NetAdmin</div>
-          <div class="footer-badge">Razorpay</div>
-          <div class="footer-badge">Paytm</div>
-        </div>
+        <a href="#" class="footer-brand-logo"><div class="footer-brand-icon">N</div><div class="footer-brand-name">Net<span>Flow</span></div></a>
+        <div class="footer-desc">Complete billing and management platform for Indian Service Providers and Local Cable Operators. Automate billing, manage customers, and grow your network.<br><br><strong>Products:</strong> NetAdmin (Admin Panel) · NetFlow MyWiFi (Customer App) · White-label App</div>
+        <div class="footer-badges"><div class="footer-badge">Jaze</div><div class="footer-badge">NetAdmin</div><div class="footer-badge">Razorpay</div><div class="footer-badge">Paytm</div></div>
       </div>
-      <div class="footer-col">
-        <h4>Product</h4>
-        <a href="#features">Features</a>
-        <a href="#how-it-works">How it works</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#faq">FAQ</a>
-        <a href="https://apkpure.com/p/com.netflow.mywifi" target="_blank">Download Customer App</a>
-      </div>
-      <div class="footer-col">
-        <h4>Integrations</h4>
-        <a href="#">Jaze Server</a>
-        <a href="#">NetAdmin / Mikrotik</a>
-        <a href="#">Razorpay</a>
-        <a href="#">Paytm Gateway</a>
-        <a href="https://apkpure.com/p/com.netflow.mywifi" target="_blank">Android App</a>
-      </div>
-      <div class="footer-col">
-        <h4>Company</h4>
-        <a href="#about">About Us</a>
-        <a href="#contact">Contact Us</a>
-        <a onclick="openModal('modal-privacy')">Privacy Policy</a>
-        <a onclick="openModal('modal-terms')">Terms &amp; Conditions</a>
-        <a onclick="openModal('modal-refund')">Refund Policy</a>
-      </div>
+      <div class="footer-col"><h4>Product</h4><a href="#features">Features</a><a href="#how-it-works">How it works</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><a href="https://apkpure.com/p/com.netflow.mywifi" target="_blank">Download Customer App</a></div>
+      <div class="footer-col"><h4>Integrations</h4><a href="#">Jaze Server</a><a href="#">NetAdmin / Mikrotik</a><a href="#">Razorpay</a><a href="#">Paytm Gateway</a><a href="https://apkpure.com/p/com.netflow.mywifi" target="_blank">Android App</a></div>
+      <div class="footer-col"><h4>Company</h4><a href="#about">About Us</a><a href="#contact">Contact Us</a><a onclick="openModal('modal-privacy')">Privacy Policy</a><a onclick="openModal('modal-terms')">Terms &amp; Conditions</a><a onclick="openModal('modal-refund')">Refund Policy</a></div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 NetFlow by NetFlow. All rights reserved. Made in India 🇮🇳</div>
-      <div class="footer-legal">
-        <a onclick="openModal('modal-privacy')">Privacy Policy</a>
-        <a onclick="openModal('modal-terms')">Terms &amp; Conditions</a>
-        <a onclick="openModal('modal-refund')">Refund Policy</a>
-        <a href="#contact">Contact</a>
-      </div>
+      <div class="footer-copy">© 2025 NetFlow. All rights reserved. Made in India 🇮🇳</div>
+      <div class="footer-legal"><a onclick="openModal('modal-privacy')">Privacy Policy</a><a onclick="openModal('modal-terms')">Terms &amp; Conditions</a><a onclick="openModal('modal-refund')">Refund Policy</a><a href="#contact">Contact</a></div>
     </div>
   </div>
 </footer>
 
-<!-- ============================= MODALS ============================= -->
-
-<!-- CHECKOUT MODAL -->
+<!-- ═══════════════════════════════════════
+     CHECKOUT MODAL (multi-step + Razorpay)
+═══════════════════════════════════════ -->
 <div class="modal-overlay" id="modal-checkout">
   <div class="modal-box wide">
     <div class="modal-header">
-      <div class="modal-title">Complete your subscription</div>
+      <div class="modal-title">Subscribe to NetFlow</div>
       <button class="modal-close" onclick="closeModal('modal-checkout')">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="checkout-plan-summary">
-        <div>
-          <div class="checkout-plan-name" id="co-plan-name">Starter Plan</div>
-          <div class="checkout-plan-desc" id="co-plan-desc">Up to 100 connections</div>
+
+    <!-- Plan summary banner -->
+    <div class="co-plan-banner">
+      <div class="co-plan-info">
+        <div class="co-plan-label">Selected Plan</div>
+        <div class="co-plan-name" id="co-plan-name">Starter</div>
+        <div class="co-plan-desc" id="co-plan-desc">Up to 100 connections</div>
+      </div>
+      <div class="co-plan-price-wrap">
+        <div class="co-plan-price" id="co-plan-price-display">₹800</div>
+        <div class="co-plan-period">per month</div>
+      </div>
+    </div>
+
+    <!-- Steps indicator -->
+    <div class="co-steps">
+      <div class="co-step active" id="step-tab-1">① Details</div>
+      <div class="co-step" id="step-tab-2">② Address</div>
+      <div class="co-step" id="step-tab-3">③ Review &amp; Pay</div>
+    </div>
+
+    <!-- Step 1: Personal Details -->
+    <div class="co-panel active" id="co-step-1">
+      <div class="co-error" id="err-1"></div>
+      <div class="co-section-title">Personal / Business Details</div>
+      <div class="co-form-row">
+        <div class="co-form-field"><label>Full Name *</label><input id="co-name" placeholder="Your full name"/></div>
+        <div class="co-form-field"><label>Mobile Number *</label><input id="co-phone" type="tel" placeholder="+91 98765 43210"/></div>
+      </div>
+      <div class="co-form-field"><label>Email Address *</label><input id="co-email" type="email" placeholder="you@example.com"/></div>
+      <div class="co-form-field"><label>Business Name *</label><input id="co-biz" placeholder="Your ISP / company name"/></div>
+      <div class="co-form-row">
+        <div class="co-form-field"><label>ISP Server Type *</label>
+          <select id="co-server"><option value="">Select type</option><option>Jaze Server</option><option>NetAdmin / Mikrotik</option><option>Both</option><option>Other / Custom</option></select>
         </div>
-        <div class="checkout-plan-price" id="co-plan-price">₹800/month</div>
-      </div>
-
-      <div class="checkout-section-title">Personal / Business Details</div>
-      <div class="form-row">
-        <div class="form-field"><label>Full Name *</label><input id="co-name" placeholder="e.g. Your Name"/></div>
-        <div class="form-field"><label>Mobile Number *</label><input id="co-phone" type="tel" placeholder="+91 98765 43210"/></div>
-      </div>
-      <div class="form-field"><label>Email Address *</label><input id="co-email" type="email" placeholder="you@example.com"/></div>
-      <div class="form-field"><label>Business Name *</label><input id="co-business" placeholder="Your company name"/></div>
-
-      <div class="checkout-section-title">Billing Address</div>
-      <div class="form-field"><label>Address Line 1 *</label><input id="co-addr1" placeholder="House No., Street, Area"/></div>
-      <div class="form-field"><label>Address Line 2</label><input id="co-addr2" placeholder="Landmark (optional)"/></div>
-      <div class="form-row">
-        <div class="form-field"><label>City *</label><input id="co-city" placeholder="e.g. City"/></div>
-        <div class="form-field"><label>State *</label><input id="co-state" placeholder="e.g. State"/></div>
-      </div>
-      <div class="form-row">
-        <div class="form-field"><label>PIN Code *</label><input id="co-pin" placeholder="123456" maxlength="6"/></div>
-        <div class="form-field"><label>GSTIN (optional)</label><input id="co-gstin" placeholder="22AAAAA0000A1Z5"/></div>
-      </div>
-
-      <div class="checkout-section-title">User Details (for setup)</div>
-      <div class="form-row">
-        <div class="form-field"><label> Server Type *</label>
-          <select id="co-server"><option value="">Select type</option><option>Jaze Server</option><option>NetAdmin / Mikrotik</option><option>Both</option><option>Other</option></select>
-        </div>
-        <div class="form-field"><label>Approx. Customers</label>
-          <select id="co-customers"><option value="">Select range</option><option>1–50</option><option>51–100</option><option>101–300</option><option>300+</option></select>
+        <div class="co-form-field"><label>Approx. Customers</label>
+          <select id="co-customers"><option value="">Select range</option><option>1–50</option><option>51–100</option><option>101–200</option><option>200+</option></select>
         </div>
       </div>
-
-      <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:8px;" onclick="handleCheckout(event)">
-        Proceed to Pay via Paytm / Razorpay →
-      </button>
-      <div class="checkout-note">
-        By proceeding you agree to our <a onclick="openModal('modal-terms')" style="color:var(--accent);cursor:pointer;">Terms &amp; Conditions</a> and <a onclick="openModal('modal-privacy')" style="color:var(--accent);cursor:pointer;">Privacy Policy</a>. Your data is encrypted and never shared with third parties.
+      <div class="co-nav">
+        <button class="co-btn-next" onclick="goStep(2)">Continue → Address</button>
       </div>
-      <div class="checkout-secure">🔒 Secured by 256-bit SSL encryption &nbsp;|&nbsp; RazorPay and Zoho Payment Gateway</div>
+    </div>
+
+    <!-- Step 2: Address -->
+    <div class="co-panel" id="co-step-2">
+      <div class="co-error" id="err-2"></div>
+      <div class="co-section-title">Billing Address</div>
+      <div class="co-form-field"><label>Address Line 1 *</label><input id="co-addr1" placeholder="House No., Street, Area"/></div>
+      <div class="co-form-field"><label>Address Line 2</label><input id="co-addr2" placeholder="Landmark (optional)"/></div>
+      <div class="co-form-row">
+        <div class="co-form-field"><label>City *</label><input id="co-city" placeholder="e.g. Gurugram"/></div>
+        <div class="co-form-field"><label>State *</label><input id="co-state" placeholder="e.g. Haryana"/></div>
+      </div>
+      <div class="co-form-row">
+        <div class="co-form-field"><label>PIN Code *</label><input id="co-pin" placeholder="123456" maxlength="6" type="tel"/></div>
+        <div class="co-form-field"><label>GSTIN (optional)</label><input id="co-gstin" placeholder="22AAAAA0000A1Z5"/></div>
+      </div>
+      <div class="co-nav">
+        <button class="co-btn-back" onclick="goStep(1)">← Back</button>
+        <button class="co-btn-next" onclick="goStep(3)">Continue → Review</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Review & Pay -->
+    <div class="co-panel" id="co-step-3">
+      <div class="co-error" id="err-3"></div>
+      <div class="co-section-title">Order Summary</div>
+
+      <div id="co-summary-details">
+        <!-- Filled by JS -->
+      </div>
+
+      <div class="co-summary-total">
+        <div class="co-summary-total-label">Total Amount Due Today</div>
+        <div class="co-summary-total-amount" id="co-total-amount">₹800</div>
+        <div class="co-summary-note">First month · Renews monthly · Cancel anytime</div>
+      </div>
+
+      <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:12px 16px;margin-bottom:4px;font-size:13px;color:var(--muted);line-height:1.6;">
+        ✅ By clicking Pay, you agree to our <a onclick="openModal('modal-terms')" style="color:var(--accent);cursor:pointer;">Terms</a> &amp; <a onclick="openModal('modal-privacy')" style="color:var(--accent);cursor:pointer;">Privacy Policy</a>. After payment, our team will contact you on WhatsApp to complete your setup within 24 hours.
+      </div>
+
+      <div class="co-nav" style="margin-top:16px">
+        <button class="co-btn-back" onclick="goStep(2)">← Back</button>
+        <button class="co-btn-pay" id="co-pay-btn" onclick="startRazorpayPayment()">
+          🔒 Pay with Razorpay
+        </button>
+      </div>
+    </div>
+
+    <!-- Success screen (hidden until payment done) -->
+    <div class="co-panel" id="co-step-success">
+      <div class="co-success">
+        <div class="co-success-icon">🎉</div>
+        <div class="co-success-title">Payment Successful!</div>
+        <div class="co-success-sub">
+          Thank you for subscribing to NetFlow!<br><br>
+          Our team will contact you on <strong style="color:var(--text)" id="success-phone-display"></strong> via WhatsApp within <strong style="color:var(--text)">24 hours</strong> to complete your onboarding and get you set up.<br><br>
+          <span style="color:var(--accent3)">✓ Payment recorded &nbsp;·&nbsp; ✓ Team notified &nbsp;·&nbsp; ✓ Setup scheduled</span>
+        </div>
+        <button class="co-btn-next" style="margin-top:28px;max-width:280px;margin-left:auto;margin-right:auto;display:block" onclick="closeModal('modal-checkout')">Close</button>
+      </div>
+    </div>
+
+    <!-- Secure footer -->
+    <div class="co-secure">
+      <div class="co-secure-item">🔒 256-bit SSL</div>
+      <div class="co-secure-item">💳 Powered by Razorpay</div>
+      <div class="co-secure-item">🇮🇳 Made in India</div>
+      <div class="co-secure-item">🛡️ PCI-DSS Compliant</div>
     </div>
   </div>
 </div>
@@ -786,270 +784,335 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
 <!-- PRIVACY POLICY MODAL -->
 <div class="modal-overlay" id="modal-privacy">
   <div class="modal-box wide">
-    <div class="modal-header">
-      <div class="modal-title">Privacy Policy</div>
-      <button class="modal-close" onclick="closeModal('modal-privacy')">✕</button>
-    </div>
+    <div class="modal-header"><div class="modal-title">Privacy Policy</div><button class="modal-close" onclick="closeModal('modal-privacy')">✕</button></div>
     <div class="modal-body">
       <div class="info-block">
         <div class="info-row"><span class="info-key">Entity Name</span><span class="info-val">NetFlow</span></div>
-        <div class="info-row"><span class="info-key">Platform</span><span class="info-val">NetFlow (netflowdev.github.io)</span></div>
         <div class="info-row"><span class="info-key">Effective Date</span><span class="info-val">1 January 2025</span></div>
         <div class="info-row"><span class="info-key">Contact</span><span class="info-val">naveentanwar2804@gmail.com</span></div>
       </div>
-
-      <h3>1. Introduction</h3>
-      <p>NetFlow ("we", "us", "our") operates the NetFlow platform, including the NetAdmin web dashboard and the NetFlow MyWiFi Android application. This Privacy Policy explains how we collect, use, store, and protect the personal information of ISP operators ("Operators") and their end customers ("Users") who interact with our platform.</p>
-
-      <h3>2. Information We Collect</h3>
-      <p>We collect the following categories of information:</p>
-      <ul>
-        <li><strong>Operator Account Data:</strong> Name, email address, mobile number, business name, registered address, server credentials (Jaze/NetAdmin), and payment gateway API keys (Razorpay/Paytm).</li>
-        <li><strong>Customer Data:</strong> Broadband customer names, mobile numbers, plan details, expiry dates, payment history, and device information (MAC address, router details) as entered by Operators.</li>
-        <li><strong>Transaction Data:</strong> Payment order IDs, transaction IDs, amounts, and payment status records for reconciliation purposes.</li>
-        <li><strong>Usage Data:</strong> Log data including IP addresses, device type, browser, and pages visited on our platform.</li>
-        <li><strong>Communications:</strong> Messages and queries sent via contact forms or WhatsApp.</li>
-      </ul>
-
-      <h3>3. How We Use Your Information</h3>
-      <ul>
-        <li>To provide, operate, and maintain the NetFlow platform and its features.</li>
-        <li>To process subscription payments and manage billing.</li>
-        <li>To configure integrations and trigger automated activations.</li>
-        <li>To send transactional notifications (payment receipts, expiry reminders).</li>
-        <li>To respond to support queries.</li>
-        <li>To improve platform performance and fix technical issues.</li>
-      </ul>
-
-      <h3>4. Data Sharing</h3>
-      <p>We do not sell, rent, or share your personal information with third parties for marketing. We share data only with:</p>
-      <ul>
-        <li><strong>Payment Gateways (Razorpay / Paytm):</strong> To process transactions. These parties have their own privacy policies and PCI-DSS compliance.</li>
-        <li><strong>Servers (Jaze / NetAdmin):</strong> To trigger automated account renewals on your behalf.</li>
-        <li><strong>Cloud Infrastructure (Cloudflare):</strong> For hosting, security, and CDN services.</li>
-      </ul>
-
-      <h3>5. Data Security</h3>
-      <p>All data is stored with industry-standard encryption. Payment API keys and other credentials are accessible only to the designated super admin of each franchise. We use HTTPS/TLS for all data in transit. Access to production systems is strictly controlled.</p>
-
-      <h3>6. Data Retention</h3>
-      <p>We retain Operator account data for the duration of the subscription and up to 1 year after cancellation for legal compliance. Transaction records are retained for 7 years as required by Indian tax regulations. Customer data entered by Operators is deleted upon written request.</p>
-
-      <h3>7. Your Rights</h3>
-      <p>You may request access to, correction of, or deletion of your personal data by contacting us at naveentanwar2804@gmail.com. We will respond within 15 business days.</p>
-
-      <h3>8. Cookies</h3>
-      <p>Our web platform may use essential cookies for session management. We do not use tracking or advertising cookies. The NetFlow MyWiFi Android app does not use cookies.</p>
-
-      <h3>9. Children's Privacy</h3>
-      <p>Our platform is not directed at children under 18. We do not knowingly collect personal information from minors.</p>
-
-      <h3>10. Changes to This Policy</h3>
-      <p>We may update this Privacy Policy from time to time. We will notify Operators via email or platform notification. Continued use of the platform after updates constitutes acceptance of the revised policy.</p>
-
-      <h3>11. Contact</h3>
-      <p>For privacy-related queries: <strong>naveentanwar2804@gmail.com</strong> | H. No. 72, Bassai, Mahendergarh, Haryana 123029, India | +91 85710 62710</p>
+      <h3>1. Introduction</h3><p>NetFlow operates the NetFlow platform, including the NetAdmin web dashboard and the NetFlow MyWiFi Android application. This Privacy Policy explains how we collect, use, store, and protect personal information of ISP operators and their end customers.</p>
+      <h3>2. Information We Collect</h3><ul><li><strong>Operator Account Data:</strong> Name, email, mobile, business name, address, server credentials, and payment gateway API keys.</li><li><strong>Customer Data:</strong> Broadband customer names, mobile numbers, plan details, expiry dates, and payment history as entered by Operators.</li><li><strong>Transaction Data:</strong> Payment order IDs, transaction IDs, amounts, and payment status records.</li><li><strong>Usage Data:</strong> Log data including IP addresses, device type, and pages visited.</li></ul>
+      <h3>3. How We Use Your Information</h3><ul><li>To provide and maintain the NetFlow platform.</li><li>To process subscription payments.</li><li>To configure integrations and trigger automated activations.</li><li>To send transactional notifications.</li><li>To respond to support queries.</li></ul>
+      <h3>4. Data Sharing</h3><p>We do not sell your personal information. We share data only with payment gateways (Razorpay/Paytm), ISP servers (Jaze/NetAdmin), and cloud infrastructure (Cloudflare) as needed to operate the service.</p>
+      <h3>5. Data Security</h3><p>All data is stored with industry-standard encryption. Payment API keys are accessible only to designated super admins. We use HTTPS/TLS for all data in transit.</p>
+      <h3>6. Contact</h3><p>naveentanwar2804@gmail.com · H. No. 72, Bassai, Mahendergarh, Haryana 123029 · +91 85710 62710</p>
     </div>
   </div>
 </div>
 
-<!-- TERMS & CONDITIONS MODAL -->
+<!-- TERMS MODAL -->
 <div class="modal-overlay" id="modal-terms">
   <div class="modal-box wide">
-    <div class="modal-header">
-      <div class="modal-title">Terms &amp; Conditions</div>
-      <button class="modal-close" onclick="closeModal('modal-terms')">✕</button>
-    </div>
+    <div class="modal-header"><div class="modal-title">Terms &amp; Conditions</div><button class="modal-close" onclick="closeModal('modal-terms')">✕</button></div>
     <div class="modal-body">
       <div class="info-block">
         <div class="info-row"><span class="info-key">Entity Name</span><span class="info-val">NetFlow</span></div>
-        <div class="info-row"><span class="info-key">Platform</span><span class="info-val">NetFlow (netflowdev.github.io)</span></div>
         <div class="info-row"><span class="info-key">Effective Date</span><span class="info-val">1 January 2025</span></div>
         <div class="info-row"><span class="info-key">Jurisdiction</span><span class="info-val">Haryana, India</span></div>
       </div>
-
-      <h3>1. Acceptance of Terms</h3>
-      <p>By accessing or using the NetFlow platform (including the NetAdmin dashboard and NetFlow MyWiFi app), you ("Operator") agree to be bound by these Terms and Conditions. If you do not agree, do not use the platform.</p>
-
-      <h3>2. Description of Service</h3>
-      <p>NetFlow is a Software-as-a-Service (SaaS) platform that provides billing management, online payment collection, automated account activation, and a customer-facing mobile application. The platform is operated by NetFlow.</p>
-
-      <h3>3. Operator Responsibilities</h3>
-      <ul>
-        <li>You are responsible for the accuracy of all customer data entered into the platform.</li>
-        <li>You are responsible for maintaining valid and authorised Razorpay/Paytm payment gateway credentials.</li>
-        <li>You must not use the platform for any unlawful purpose or in violation of applicable Indian laws.</li>
-        <li>You must not attempt to reverse engineer, copy, or resell the platform without prior written consent.</li>
-        <li>You are solely responsible for your operations and compliance with TRAI and DOT regulations.</li>
-      </ul>
-
-      <h3>4. Payment & Subscription</h3>
-      <p>Subscription fees are charged monthly in advance. All payments are processed through Razorpay or Paytm. Taxes (GST) as applicable will be added. NetFlow reserves the right to modify pricing with 30-day advance notice. Non-payment may result in suspension of service.</p>
-
-      <h3>5. Customer Payments</h3>
-      <p>NetFlow facilitates payment collection between end-customers and Operators. All customer payments go directly into the Operator's registered payment gateway account. NetFlow does not hold, escrow, or intermediate any customer payments. NetFlow is not responsible for payment gateway disputes or chargebacks — these are managed directly between the Operator and their payment gateway.</p>
-
-      <h3>6. Intellectual Property</h3>
-      <p>All intellectual property rights in the NetFlow platform, including software, design, branding, and documentation, are owned by NetFlow. You are granted a limited, non-exclusive, non-transferable licence to use the platform for your operations during an active subscription.</p>
-
-      <h3>7. Limitation of Liability</h3>
-      <p>NetFlow's total liability to you for any claims arising from use of the platform shall not exceed the subscription fees paid by you in the 3 months preceding the claim. We are not liable for indirect, incidental, or consequential damages including loss of revenue, data, or business.</p>
-
-      <h3>8. Service Availability</h3>
-      <p>We target 99.9% platform uptime. Scheduled maintenance will be communicated in advance. We are not liable for downtime caused by third-party services (Cloudflare, Razorpay, Paytm, Jaze, etc.).</p>
-
-      <h3>9. Termination</h3>
-      <p>Either party may terminate the subscription with 30-day written notice. NetFlow may terminate immediately for breach of these Terms. Upon termination, you may request an export of your data within 30 days.</p>
-
-      <h3>10. Governing Law</h3>
-      <p>These Terms are governed by the laws of India. Disputes shall be subject to the jurisdiction of courts in Mahendergarh, Haryana, India.</p>
-
-      <h3>11. Amendments</h3>
-      <p>We may update these Terms with 14-day advance notice via email. Continued use of the platform after the notice period constitutes acceptance.</p>
-
-      <h3>12. Contact</h3>
-      <p>For queries: <strong>naveentanwar2804@gmail.com</strong> | H. No. 72, Bassai, Mahendergarh, Haryana 123029, India | +91 85710 62710</p>
+      <h3>1. Acceptance of Terms</h3><p>By accessing or using the NetFlow platform, you agree to be bound by these Terms and Conditions.</p>
+      <h3>2. Description of Service</h3><p>NetFlow is a SaaS platform providing billing management, online payment collection, automated account activation, and a customer-facing mobile application.</p>
+      <h3>3. Operator Responsibilities</h3><ul><li>You are responsible for the accuracy of all customer data entered.</li><li>You must maintain valid and authorised payment gateway credentials.</li><li>You must not use the platform for any unlawful purpose.</li><li>You are solely responsible for compliance with TRAI and DOT regulations.</li></ul>
+      <h3>4. Payment &amp; Subscription</h3><p>Subscription fees are charged monthly in advance. All payments are processed through Razorpay. GST as applicable will be added. Non-payment may result in suspension of service.</p>
+      <h3>5. Customer Payments</h3><p>All end-customer payments go directly to the Operator's payment gateway account. NetFlow does not hold or intermediate any customer payments.</p>
+      <h3>6. Limitation of Liability</h3><p>NetFlow's total liability shall not exceed subscription fees paid in the 3 months preceding the claim. We are not liable for indirect or consequential damages.</p>
+      <h3>7. Governing Law</h3><p>These Terms are governed by the laws of India. Disputes shall be subject to courts in Mahendergarh, Haryana, India.</p>
+      <h3>8. Contact</h3><p>naveentanwar2804@gmail.com · +91 85710 62710</p>
     </div>
   </div>
 </div>
 
-<!-- REFUND & CANCELLATION POLICY MODAL -->
+<!-- REFUND MODAL -->
 <div class="modal-overlay" id="modal-refund">
   <div class="modal-box wide">
-    <div class="modal-header">
-      <div class="modal-title">Refund &amp; Cancellation Policy</div>
-      <button class="modal-close" onclick="closeModal('modal-refund')">✕</button>
-    </div>
+    <div class="modal-header"><div class="modal-title">Refund &amp; Cancellation Policy</div><button class="modal-close" onclick="closeModal('modal-refund')">✕</button></div>
     <div class="modal-body">
       <div class="info-block">
         <div class="info-row"><span class="info-key">Entity Name</span><span class="info-val">NetFlow</span></div>
-        <div class="info-row"><span class="info-key">Platform</span><span class="info-val">NetFlow</span></div>
         <div class="info-row"><span class="info-key">Effective Date</span><span class="info-val">1 January 2025</span></div>
         <div class="info-row"><span class="info-key">Contact</span><span class="info-val">naveentanwar2804@gmail.com</span></div>
       </div>
-
-      <h3>1. Subscription Cancellation</h3>
-      <p>You may cancel your NetFlow subscription at any time by contacting us via email at naveentanwar2804@gmail.com or WhatsApp at +91 85710 62710. Cancellation requests are processed within 2 business days.</p>
-      <p>Upon cancellation, your account remains active until the end of the current billing month. No further charges will be made after the cancellation is processed.</p>
-
-      <h3>2. Refund Eligibility — Subscription Fees</h3>
-      <ul>
-        <li><strong>First Payment (New Subscribers):</strong> If you are not satisfied with the platform, you may request a full refund within <strong>7 days</strong> of your first subscription payment. Refunds will not be issued after the 7-day window.</li>
-        <li><strong>Renewal Payments:</strong> Subscription renewal charges are non-refundable. If you wish to cancel, please do so before your next renewal date to avoid being charged.</li>
-        <li><strong>Setup Fees:</strong> Any one-time setup or onboarding fees are non-refundable once setup work has been initiated.</li>
-      </ul>
-
-      <h3>3. How to Request a Refund</h3>
-      <p>To request a refund, contact us at <strong>naveentanwar2804@gmail.com</strong> with the subject line "Refund Request — [Your Business Name]" and include your registered mobile number and payment transaction ID. We will review and process eligible refunds within <strong>7–10 business days</strong>. Refunds are credited to the original payment source (bank account / UPI).</p>
-
-      <h3>4. End-Customer Payments ( Customers)</h3>
-      <p>Payments made by broadband customers through the NetFlow MyWiFi app are collected directly by the  Operator through their own Razorpay or Paytm account. NetFlow does not hold or process these payments.</p>
-      <p>Refunds for end-customer payments (e.g., a customer who paid for a recharge) are the sole responsibility of the Operator. Customers should contact their operators directly for such refunds. NetFlow is not a party to these transactions.</p>
-
-      <h3>5. Failed / Duplicate Transactions</h3>
-      <p>If a payment is deducted but the subscription is not activated due to a technical error, please contact us immediately with your transaction details. We will investigate and resolve within 2 business days — either by activating your account or issuing a full refund.</p>
-
-      <h3>6. Non-Refundable Cases</h3>
-      <ul>
-        <li>Subscription fees beyond the 7-day first-payment window.</li>
-        <li>Cancellations made after the renewal date for that billing cycle.</li>
-        <li>Accounts suspended due to violation of Terms &amp; Conditions.</li>
-        <li>Setup or customisation fees once work has commenced.</li>
-      </ul>
-
-      <h3>7. Contact for Refund / Cancellation</h3>
+      <h3>1. Subscription Cancellation</h3><p>You may cancel your NetFlow subscription at any time by contacting us via email or WhatsApp. Cancellation requests are processed within 2 business days. Your account remains active until the end of the current billing month.</p>
+      <h3>2. Refund Eligibility</h3><ul><li><strong>First Payment:</strong> Full refund within 7 days of first subscription payment if not satisfied.</li><li><strong>Renewal Payments:</strong> Non-refundable. Cancel before renewal date to avoid charges.</li><li><strong>Setup Fees:</strong> Non-refundable once setup work has been initiated.</li></ul>
+      <h3>3. How to Request a Refund</h3><p>Email naveentanwar2804@gmail.com with subject "Refund Request — [Your Business Name]" and include your registered mobile number and payment transaction ID. Eligible refunds processed within 7–10 business days.</p>
+      <h3>4. End-Customer Payments</h3><p>Payments made by broadband customers through the NetFlow MyWiFi app are collected directly by the Operator. Refunds for end-customer payments are the sole responsibility of the Operator.</p>
+      <h3>5. Contact</h3>
       <div class="info-block">
         <div class="info-row"><span class="info-key">Email</span><span class="info-val">naveentanwar2804@gmail.com</span></div>
-        <div class="info-row"><span class="info-key">WhatsApp / Phone</span><span class="info-val">+91 85710 62710</span></div>
-        <div class="info-row"><span class="info-key">Address</span><span class="info-val">H. No. 72, Bassai, Mahendergarh, Haryana 123029, India</span></div>
+        <div class="info-row"><span class="info-key">WhatsApp</span><span class="info-val">+91 85710 62710</span></div>
         <div class="info-row"><span class="info-key">Response Time</span><span class="info-val">Within 2 business days</span></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ============================= SCRIPTS ============================= -->
+<!-- ══════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════ -->
 <script>
-// Modal control
-function openModal(id){
+// ── CONFIG ─────────────────────────────
+// ⚠️  Replace with your live Razorpay key before going live
+const RAZORPAY_KEY = 'rzp_test_YourKeyHere';
+
+// ── STATE ──────────────────────────────
+let currentStep = 1;
+let checkoutPlan = { name: '', desc: '', price: 0, priceStr: '' };
+
+// ── MODAL HELPERS ──────────────────────
+function openModal(id) {
   document.getElementById(id).classList.add('open');
-  document.body.style.overflow='hidden';
+  document.body.style.overflow = 'hidden';
 }
-function closeModal(id){
+function closeModal(id) {
   document.getElementById(id).classList.remove('open');
-  document.body.style.overflow='';
+  document.body.style.overflow = '';
 }
-// Close on overlay click
-document.querySelectorAll('.modal-overlay').forEach(overlay=>{
-  overlay.addEventListener('click',function(e){
-    if(e.target===this) closeModal(this.id);
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) closeModal(this.id);
   });
 });
-// Close on Escape
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>closeModal(m.id));
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape')
+    document.querySelectorAll('.modal-overlay.open').forEach(m => closeModal(m.id));
 });
 
-// Open checkout modal with plan details
-function openCheckout(plan, priceStr, amount, desc){
-  document.getElementById('co-plan-name').textContent = plan + ' Plan';
-  document.getElementById('co-plan-price').textContent = priceStr;
+// ── CHECKOUT OPEN ──────────────────────
+function openCheckout(planName, priceStr, amount, desc) {
+  checkoutPlan = { name: planName, desc, price: amount, priceStr };
+
+  // Update banner
+  document.getElementById('co-plan-name').textContent = planName + ' Plan';
   document.getElementById('co-plan-desc').textContent = desc;
-  // Reset fields
-  ['co-name','co-phone','co-email','co-business','co-addr1','co-addr2','co-city','co-state','co-pin','co-gstin'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.value='';
+  document.getElementById('co-plan-price-display').textContent = '₹' + amount;
+
+  // Reset all fields
+  ['co-name','co-phone','co-email','co-biz','co-addr1','co-addr2',
+   'co-city','co-state','co-pin','co-gstin'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('error'); }
   });
+  document.getElementById('co-server').value = '';
+  document.getElementById('co-customers').value = '';
+
+  // Reset pay button
+  const payBtn = document.getElementById('co-pay-btn');
+  payBtn.disabled = false;
+  payBtn.textContent = '🔒 Pay with Razorpay';
+
+  // Go to step 1
+  goStepDirect(1);
   openModal('modal-checkout');
 }
 
-// Checkout submit
-function handleCheckout(e){
-  const btn = e.target;
-  const required = ['co-name','co-phone','co-email','co-business','co-addr1','co-city','co-state','co-pin'];
-  let valid = true;
-  required.forEach(id=>{
-    const el=document.getElementById(id);
-    if(!el.value.trim()){el.style.borderColor='var(--danger)';valid=false;}
-    else{el.style.borderColor='';}
+// ── STEP NAVIGATION ────────────────────
+function goStep(step) {
+  // Validate current step before going forward
+  if (step > currentStep) {
+    if (!validateStep(currentStep)) return;
+  }
+  goStepDirect(step);
+}
+
+function goStepDirect(step) {
+  currentStep = step;
+
+  // Hide all panels
+  [1, 2, 3, 'success'].forEach(s => {
+    const el = document.getElementById('co-step-' + s);
+    if (el) el.classList.remove('active');
   });
-  if(!valid){
-    const err=document.getElementById('co-err');
-    if(err) err.style.display='block';
+
+  // Show target panel
+  const target = document.getElementById('co-step-' + step);
+  if (target) target.classList.add('active');
+
+  // Update step tabs
+  for (let i = 1; i <= 3; i++) {
+    const tab = document.getElementById('step-tab-' + i);
+    if (!tab) continue;
+    tab.classList.remove('active', 'done');
+    if (i === step) tab.classList.add('active');
+    else if (i < step) tab.classList.add('done');
+  }
+
+  // If going to step 3, populate summary
+  if (step === 3) buildSummary();
+}
+
+// ── VALIDATION ─────────────────────────
+function validateStep(step) {
+  const errEl = document.getElementById('err-' + step);
+  errEl.style.display = 'none';
+
+  if (step === 1) {
+    const name  = document.getElementById('co-name').value.trim();
+    const phone = document.getElementById('co-phone').value.trim();
+    const email = document.getElementById('co-email').value.trim();
+    const biz   = document.getElementById('co-biz').value.trim();
+    const srv   = document.getElementById('co-server').value;
+
+    if (!name)  { showErr(errEl, 'Please enter your full name.'); markError('co-name'); return false; }
+    if (!phone || phone.replace(/\D/g,'').length < 10) { showErr(errEl, 'Please enter a valid 10-digit mobile number.'); markError('co-phone'); return false; }
+    if (!email || !email.includes('@')) { showErr(errEl, 'Please enter a valid email address.'); markError('co-email'); return false; }
+    if (!biz)   { showErr(errEl, 'Please enter your business name.'); markError('co-biz'); return false; }
+    if (!srv)   { showErr(errEl, 'Please select your ISP server type.'); return false; }
+  }
+
+  if (step === 2) {
+    const addr1 = document.getElementById('co-addr1').value.trim();
+    const city  = document.getElementById('co-city').value.trim();
+    const state = document.getElementById('co-state').value.trim();
+    const pin   = document.getElementById('co-pin').value.trim();
+
+    if (!addr1) { showErr(errEl, 'Please enter your address.'); markError('co-addr1'); return false; }
+    if (!city)  { showErr(errEl, 'Please enter your city.'); markError('co-city'); return false; }
+    if (!state) { showErr(errEl, 'Please enter your state.'); markError('co-state'); return false; }
+    if (!pin || pin.length !== 6 || !/^\d+$/.test(pin)) { showErr(errEl, 'Please enter a valid 6-digit PIN code.'); markError('co-pin'); return false; }
+  }
+
+  return true;
+}
+
+function showErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+function markError(id) {
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('error'); el.addEventListener('input', () => el.classList.remove('error'), { once: true }); }
+}
+
+// ── BUILD SUMMARY ──────────────────────
+function buildSummary() {
+  const vals = {
+    'Plan':         checkoutPlan.name + ' (' + checkoutPlan.desc + ')',
+    'Name':         document.getElementById('co-name').value,
+    'Mobile':       document.getElementById('co-phone').value,
+    'Email':        document.getElementById('co-email').value,
+    'Business':     document.getElementById('co-biz').value,
+    'Server Type':  document.getElementById('co-server').value,
+    'City':         document.getElementById('co-city').value + ', ' + document.getElementById('co-state').value,
+    'PIN':          document.getElementById('co-pin').value,
+  };
+  const gstin = document.getElementById('co-gstin').value;
+  if (gstin) vals['GSTIN'] = gstin;
+
+  const html = Object.entries(vals).map(([k, v]) => `
+    <div class="co-summary-row">
+      <span class="co-summary-key">${k}</span>
+      <span class="co-summary-val">${v || '—'}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('co-summary-details').innerHTML = html;
+  document.getElementById('co-total-amount').textContent = '₹' + checkoutPlan.price;
+}
+
+// ── RAZORPAY PAYMENT ───────────────────
+function startRazorpayPayment() {
+  const btn   = document.getElementById('co-pay-btn');
+  const errEl = document.getElementById('err-3');
+  errEl.style.display = 'none';
+
+  const name  = document.getElementById('co-name').value.trim();
+  const phone = document.getElementById('co-phone').value.replace(/\D/g, '');
+  const email = document.getElementById('co-email').value.trim();
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Opening payment…';
+
+  const options = {
+    key:         RAZORPAY_KEY,
+    amount:      checkoutPlan.price * 100,   // paise
+    currency:    'INR',
+    name:        'NetFlow',
+    description: checkoutPlan.name + ' Plan Subscription — ' + checkoutPlan.desc,
+    image:       'https://netflowdev.github.io/logo.png',  // optional logo
+    prefill: {
+      name:    name,
+      email:   email,
+      contact: phone,
+    },
+    notes: {
+      plan:     checkoutPlan.name,
+      business: document.getElementById('co-biz').value,
+      server:   document.getElementById('co-server').value,
+      city:     document.getElementById('co-city').value,
+      state:    document.getElementById('co-state').value,
+    },
+    theme: { color: '#6366f1' },
+    modal: {
+      ondismiss: () => {
+        btn.disabled = false;
+        btn.textContent = '🔒 Pay with Razorpay';
+        showErr(errEl, 'Payment was cancelled. Please try again.');
+      }
+    },
+    handler: function(response) {
+      // Payment successful
+      onPaymentSuccess(response);
+    }
+  };
+
+  try {
+    const rzp = new Razorpay(options);
+    rzp.on('payment.failed', function(resp) {
+      btn.disabled = false;
+      btn.textContent = '🔒 Pay with Razorpay';
+      showErr(errEl, 'Payment failed: ' + (resp.error?.description || 'Please try again.'));
+    });
+    rzp.open();
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '🔒 Pay with Razorpay';
+    showErr(errEl, 'Could not open payment. Please disable any ad blockers and try again.');
+  }
+}
+
+function onPaymentSuccess(response) {
+  // Show success step
+  const phone = document.getElementById('co-phone').value.trim();
+  document.getElementById('success-phone-display').textContent = phone;
+
+  // Hide step tabs when showing success
+  document.querySelectorAll('.co-step').forEach(s => s.style.display = 'none');
+
+  goStepDirect('success');
+
+  // Optional: Log payment ID (you'd normally also call your backend here)
+  console.log('Razorpay Payment ID:', response.razorpay_payment_id);
+  console.log('Plan:', checkoutPlan.name, '| Amount: ₹' + checkoutPlan.price);
+}
+
+// ── CONTACT FORM ───────────────────────
+function handleContactSubmit() {
+  const btn = document.getElementById('cf-btn');
+  const name = document.getElementById('cf-name').value.trim();
+  const phone = document.getElementById('cf-phone').value.trim();
+
+  if (!name || !phone) {
+    alert('Please enter your name and phone number.');
     return;
   }
-  btn.textContent='Processing...';
-  btn.disabled=true;
-  setTimeout(()=>{
-    btn.textContent='✓ Request received! We will contact you on WhatsApp to complete payment.';
-    btn.style.background='var(--accent3)';
-    btn.style.fontSize='13px';
-  },1000);
+
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = '✓ Message sent! We will contact you shortly.';
+    btn.style.background = 'var(--accent3)';
+  }, 1000);
 }
 
-// Contact form submit
-function handleSubmit(e){
-  const btn=e.target;
-  btn.textContent='Sending...';btn.disabled=true;
-  setTimeout(()=>{
-    btn.textContent='Message sent! We will contact you shortly ✓';
-    btn.style.background='var(--accent3)';
-  },1200);
+// ── FAQ ────────────────────────────────
+function toggleFaq(el) {
+  el.parentElement.classList.toggle('open');
 }
 
-// FAQ toggle
-function toggleFaq(el){
-  const item=el.parentElement;
-  item.classList.toggle('open');
-}
-
-// Smooth active nav on scroll
-const sections=document.querySelectorAll('section[id],div[id]');
-window.addEventListener('scroll',()=>{
-  const pos=window.scrollY+100;
-  sections.forEach(s=>{
-    const top=s.offsetTop,bot=top+s.offsetHeight;
-    const link=document.querySelector('.nav-links a[href="#'+s.id+'"]');
-    if(link){link.style.color=pos>=top&&pos<bot?'var(--text)':'';} 
+// ── NAV SCROLL HIGHLIGHT ───────────────
+window.addEventListener('scroll', () => {
+  const pos = window.scrollY + 100;
+  document.querySelectorAll('section[id]').forEach(s => {
+    const link = document.querySelector('.nav-links a[href="#' + s.id + '"]');
+    if (link) link.style.color = (pos >= s.offsetTop && pos < s.offsetTop + s.offsetHeight) ? 'var(--text)' : '';
   });
 });
 </script>
