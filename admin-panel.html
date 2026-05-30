@@ -4,147 +4,1017 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>NetAdmin — ISP Management</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
-:root{
-  --bg:#f0f2f7;
-  --surface:#ffffff;
-  --card:#ffffff;
-  --border:#e0e4ef;
-  --accent:#3b7ef8;
-  --accent2:#00a87a;
-  --danger:#e53e3e;
-  --warn:#d97706;
-  --text:#1a1f36;
-  --muted:#7a849e;
-  --font:'Syne',sans-serif;
-  --mono:'DM Mono',monospace;
-  --shadow:0 1px 4px rgba(30,40,80,.07),0 4px 16px rgba(30,40,80,.06);
-  --shadow-sm:0 1px 3px rgba(30,40,80,.08);
+:root {
+  /* Dark sidebar palette */
+  --sidebar-bg: #212a37;
+  --sidebar-border: rgba(255,255,255,0.07);
+  --sidebar-hover: rgba(255,255,255,0.05);
+  --sidebar-active-bg: rgba(99,179,237,0.12);
+  --sidebar-active-border: #63b3ed;
+
+  /* Main area */
+  --bg: #f7f8fc;
+  --surface: #ffffff;
+  --border: #e8ecf4;
+  --border-strong: #d0d7e8;
+
+  /* Brand accents */
+  --blue: #3d7eff;
+  --blue-light: rgba(61,126,255,0.1);
+  --blue-glow: rgba(61,126,255,0.25);
+  --green: #10c97a;
+  --green-light: rgba(16,201,122,0.1);
+  --red: #f04060;
+  --red-light: rgba(240,64,96,0.1);
+  --amber: #f59e0b;
+  --amber-light: rgba(245,158,11,0.1);
+  --purple: #a855f7;
+  --purple-light: rgba(168,85,247,0.1);
+
+  /* Text */
+  --text: #0f172a;
+  --text-2: #475569;
+  --text-3: #94a3b8;
+  --text-inv: #ffffff;
+
+  /* Fonts */
+  --font: 'Outfit', sans-serif;
+  --mono: 'Space Mono', monospace;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+  --shadow: 0 4px 12px rgba(15,23,42,0.08), 0 2px 4px rgba(15,23,42,0.04);
+  --shadow-md: 0 8px 24px rgba(15,23,42,0.1), 0 4px 8px rgba(15,23,42,0.06);
+  --shadow-lg: 0 20px 48px rgba(15,23,42,0.14), 0 8px 16px rgba(15,23,42,0.08);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;}
-.shell{display:flex;height:100vh;overflow:hidden;}
-.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;box-shadow:2px 0 12px rgba(30,40,80,.04);}
-.main{flex:1;overflow-y:auto;padding:28px;}
-.logo{padding:24px 20px 20px;border-bottom:1px solid var(--border);}
-.logo-name{font-size:18px;font-weight:700;color:var(--text);}
-.logo-sub{font-size:11px;color:var(--accent);font-family:var(--mono);margin-top:2px;}
-.nav{padding:12px 0;flex:1;}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border-left:2px solid transparent;}
-.nav-item:hover{color:var(--text);background:rgba(59,126,248,.06);}
-.nav-item.active{color:var(--accent);background:rgba(59,126,248,.08);border-left-color:var(--accent);}
-.nav-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
-.nav-section{font-size:10px;color:var(--muted);padding:16px 20px 6px;letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono);}
-.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);background:var(--bg);}
-.user-row{display:flex;align-items:center;gap:10px;}
-.avatar{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
-.user-name{font-size:13px;font-weight:600;color:var(--text);}
-.user-role{font-size:11px;color:var(--muted);font-family:var(--mono);}
-.logout-btn{margin-top:10px;width:100%;padding:7px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--font);transition:all .15s;}
-.logout-btn:hover{border-color:var(--danger);color:var(--danger);background:rgba(229,62,62,.05);}
-.login-wrap{display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#f0f4ff 0%,#e8f0fe 100%);}
-.login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:380px;box-shadow:0 8px 40px rgba(30,40,80,.12);}
-.login-logo{font-size:24px;font-weight:700;color:var(--text);margin-bottom:4px;}
-.login-sub{font-size:13px;color:var(--muted);margin-bottom:32px;font-family:var(--mono);}
-.field{margin-bottom:16px;}
-.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em;}
-.field input{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border .15s;}
-.field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,126,248,.12);}
-.btn-primary{width:100%;padding:11px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;}
-.btn-primary:hover{background:#2d6ef0;box-shadow:0 4px 12px rgba(59,126,248,.3);}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
-.login-err{background:rgba(229,62,62,.08);border:1px solid rgba(229,62,62,.25);border-radius:8px;padding:10px 14px;color:var(--danger);font-size:13px;margin-bottom:16px;display:none;}
-.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
-.page-title{font-size:22px;font-weight:700;color:var(--text);}
-.page-sub{font-size:13px;color:var(--muted);margin-top:2px;font-family:var(--mono);}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
-.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;transition:all .15s;box-shadow:var(--shadow-sm);}
-.stat-card:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(59,126,248,.12);transform:translateY(-1px);}
-.stat-label{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;}
-.stat-val{font-size:28px;font-weight:700;line-height:1;color:var(--text);}
-.stat-sub{font-size:12px;color:var(--muted);margin-top:6px;}
-.up{color:var(--accent2);}
-.down{color:var(--danger);}
-.warn{color:var(--warn);}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow-sm);}
-.card-title{font-size:14px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;color:var(--text);}
-.tbl-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th{text-align:left;font-size:11px;color:var(--muted);padding:0 12px 10px 0;border-bottom:1px solid var(--border);font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;background:transparent;}
-td{padding:12px 12px 12px 0;border-bottom:1px solid rgba(224,228,239,.7);vertical-align:middle;color:var(--text);}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:rgba(59,126,248,.03);}
-.badge{display:inline-block;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:500;font-family:var(--mono);white-space:nowrap;}
-.bok{background:rgba(0,168,122,.12);color:#007a57;}
-.bwarn{background:rgba(217,119,6,.12);color:#b45309;}
-.berr{background:rgba(229,62,62,.12);color:#c53030;}
-.binfo{background:rgba(59,126,248,.12);color:#2563eb;}
-.bgray{background:rgba(122,132,158,.12);color:var(--muted);}
-.bzoho{background:rgba(217,119,6,.12);color:#b45309;}
-.btn{padding:7px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap;}
-.btn:hover{background:var(--bg);border-color:var(--accent);color:var(--accent);}
-.bblu{background:var(--accent);border-color:var(--accent);color:#fff;}
-.bblu:hover{background:#2d6ef0;border-color:#2d6ef0;box-shadow:0 4px 12px rgba(59,126,248,.25);}
-.bsm{padding:4px 10px;font-size:11px;}
-.bedit{background:rgba(217,119,6,.08);border-color:var(--warn);color:var(--warn);}
-.bedit:hover{background:var(--warn);color:#fff;}
-.bview{background:rgba(59,126,248,.08);border-color:var(--accent);color:var(--accent);}
-.bview:hover{background:var(--accent);color:#fff;}
-.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
-.sbox{padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;width:240px;transition:all .15s;}
-.sbox:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,126,248,.1);}
-.fsel{padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;cursor:pointer;}
-.fsel:focus{border-color:var(--accent);}
-.modal-bg{position:fixed;inset:0;background:rgba(15,20,45,.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;backdrop-filter:blur(2px);}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(30,40,80,.18);}
-.modal-lg{max-width:760px;}
-.modal-title{font-size:18px;font-weight:700;margin-bottom:20px;color:var(--text);}
-.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.ff{display:flex;flex-direction:column;gap:5px;}
-.ff.full{grid-column:1/-1;}
-.ff label{font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em;}
-.ff input,.ff select,.ff textarea{padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:all .15s;}
-.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,126,248,.1);background:var(--surface);}
-.ff select option{background:var(--surface);color:var(--text);}
-.ff textarea{resize:vertical;min-height:70px;}
-.mactions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
-.errmsg{color:var(--danger);font-size:12px;margin-top:12px;display:none;background:rgba(229,62,62,.06);padding:8px 12px;border-radius:6px;border:1px solid rgba(229,62,62,.2);}
-.sec-title{font-size:11px;font-weight:600;color:var(--accent);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
-.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.ditem{background:var(--bg);border-radius:8px;padding:10px;border:1px solid var(--border);}
-.ditem.full{grid-column:1/-1;}
-.dlabel{font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
-.dval{font-size:13px;color:var(--text);word-break:break-all;}
-.loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:13px;gap:10px;}
-.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.empty{text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:13px;}
-.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;z-index:200;transform:translateY(80px);opacity:0;transition:all .25s;max-width:320px;box-shadow:0 8px 24px rgba(30,40,80,.15);}
-.toast.show{transform:translateY(0);opacity:1;}
-.toast.ok{border-color:var(--accent2);color:var(--accent2);}
-.toast.err{border-color:var(--danger);color:var(--danger);}
-.abtns{display:flex;gap:4px;}
-.tpl-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all .15s;}
-.tpl-item:hover{border-color:var(--accent);background:rgba(59,126,248,.03);}
-.tpl-title{font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text);}
-.tpl-msg{font-size:12px;color:var(--muted);}
-.tabs{display:flex;gap:2px;margin-bottom:14px;background:var(--bg);padding:4px;border-radius:8px;border:1px solid var(--border);}
-.tab{flex:1;padding:7px;text-align:center;cursor:pointer;border-radius:6px;font-size:12px;font-weight:500;color:var(--muted);transition:all .15s;}
-.tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(59,126,248,.2);}
-.chk-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(224,228,239,.5);}
-.chk-row:last-child{border-bottom:none;}
-.chk-row input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--accent);}
-.nprev{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:10px;display:none;}
-.alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
-.alert-row{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-bottom:1px solid rgba(224,228,239,.5);}
-.alert-row:last-child{border-bottom:none;}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── SHELL ── */
+.shell { display: flex; height: 100vh; overflow: hidden; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 232px;
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* subtle grid texture on sidebar */
+.sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--sidebar-border);
+  position: relative;
+}
+
+.logo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.logo-icon {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #3d7eff, #63b3ed);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+  box-shadow: 0 4px 12px rgba(61,126,255,0.4);
+}
+
+.logo-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.logo-sub {
+  font-size: 10px;
+  color: #4a6fa5;
+  font-family: var(--mono);
+  margin-top: 2px;
+  letter-spacing: 0.04em;
+}
+
+.nav { padding: 10px 0; flex: 1; overflow-y: auto; }
+.nav::-webkit-scrollbar { width: 0; }
+
+.nav-section {
+  font-size: 9px;
+  color: #2d4a70;
+  padding: 14px 20px 5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  font-weight: 700;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px 9px 20px;
+  cursor: pointer;
+  color: #6b8bb5;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+  margin: 1px 0;
+  border-radius: 0;
+  position: relative;
+}
+
+.nav-item:hover {
+  color: #c8d8f0;
+  background: var(--sidebar-hover);
+}
+
+.nav-item.active {
+  color: #fff;
+  background: var(--sidebar-active-bg);
+  border-left-color: var(--sidebar-active-border);
+}
+
+.nav-icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.nav-item.active .nav-icon { opacity: 1; }
+
+/* voice section in sidebar */
+.voice-block {
+  padding: 12px 16px;
+  border-top: 1px solid var(--sidebar-border);
+  border-bottom: 1px solid var(--sidebar-border);
+  display: none;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.voice-label {
+  font-size: 9px;
+  color: #2d4a70;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  font-weight: 700;
+}
+
+.voice-btn-activate {
+  display: none;
+  width: 100%;
+  text-align: left;
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(16,201,122,0.3);
+  background: rgba(16,201,122,0.1);
+  color: var(--green);
+  cursor: pointer;
+  font-family: var(--font);
+}
+
+.voice-toggle-btn {
+  width: 100%;
+  text-align: left;
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--sidebar-border);
+  background: rgba(255,255,255,0.04);
+  color: #6b8bb5;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all 0.15s;
+}
+
+.voice-lang-sel {
+  width: 100%;
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--sidebar-border);
+  background: rgba(255,255,255,0.04);
+  color: #6b8bb5;
+  font-family: var(--font);
+  cursor: pointer;
+  outline: none;
+}
+
+.voice-lang-sel option { background: #1a2535; color: #c8d8f0; }
+
+.sidebar-footer {
+  padding: 14px 16px;
+  border-top: 1px solid var(--sidebar-border);
+}
+
+.user-row { display: flex; align-items: center; gap: 10px; }
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #3d7eff, #63b3ed);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(61,126,255,0.3);
+}
+
+.user-name { font-size: 13px; font-weight: 600; color: #e2eaf6; }
+.user-role { font-size: 10px; color: #4a6fa5; font-family: var(--mono); margin-top: 1px; }
+
+.logout-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  border: 1px solid rgba(240,64,96,0.25);
+  border-radius: 8px;
+  color: #f04060;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font);
+  font-weight: 500;
+  transition: all 0.15s;
+  opacity: 0.7;
+}
+.logout-btn:hover { background: rgba(240,64,96,0.1); opacity: 1; }
+
+/* ── MAIN ── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 32px;
+  background: var(--bg);
+}
+
+.main::-webkit-scrollbar { width: 6px; }
+.main::-webkit-scrollbar-track { background: transparent; }
+.main::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.page-sub {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: 5px;
+  font-family: var(--mono);
+}
+
+/* ── STAT CARDS ── */
+.stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 24px; }
+.stats3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 24px; }
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--card-accent, var(--border));
+  border-radius: 14px 14px 0 0;
+  transition: opacity 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+
+.stat-card.blue { --card-accent: linear-gradient(90deg, #3d7eff, #63b3ed); }
+.stat-card.green { --card-accent: linear-gradient(90deg, #10c97a, #34d399); }
+.stat-card.red { --card-accent: linear-gradient(90deg, #f04060, #f87171); }
+.stat-card.amber { --card-accent: linear-gradient(90deg, #f59e0b, #fbbf24); }
+
+.stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  margin-bottom: 14px;
+}
+
+.stat-icon.blue { background: var(--blue-light); }
+.stat-icon.green { background: var(--green-light); }
+.stat-icon.red { background: var(--red-light); }
+.stat-icon.amber { background: var(--amber-light); }
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text-3);
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.stat-val {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -1px;
+  color: var(--text);
+}
+
+.stat-sub { font-size: 11.5px; color: var(--text-3); margin-top: 6px; }
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text);
+}
+
+/* ── TABLE ── */
+.tbl-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+th {
+  text-align: left;
+  font-size: 10.5px;
+  color: var(--text-3);
+  padding: 0 14px 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+td {
+  padding: 13px 14px 13px 0;
+  border-bottom: 1px solid rgba(232,236,244,0.8);
+  vertical-align: middle;
+  color: var(--text);
+}
+
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(61,126,255,0.025); }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+
+.badge::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.bok { background: var(--green-light); color: #059669; }
+.bwarn { background: var(--amber-light); color: #d97706; }
+.berr { background: var(--red-light); color: #e02040; }
+.binfo { background: var(--blue-light); color: #2563eb; }
+.bgray { background: rgba(148,163,184,0.12); color: #64748b; }
+.bzoho { background: var(--amber-light); color: #b45309; }
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 8px 16px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  font-family: var(--font);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background: var(--bg);
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.bblu {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 3px 10px var(--blue-glow);
+}
+
+.bblu:hover {
+  background: #2d6ef0;
+  border-color: #2d6ef0;
+  color: #fff;
+  box-shadow: 0 4px 14px var(--blue-glow);
+  transform: translateY(-1px);
+}
+
+.bsm { padding: 5px 11px; font-size: 11.5px; }
+
+.bedit {
+  background: var(--amber-light);
+  border-color: rgba(245,158,11,0.3);
+  color: #d97706;
+}
+.bedit:hover { background: var(--amber); border-color: var(--amber); color: #fff; }
+
+.bview {
+  background: var(--blue-light);
+  border-color: rgba(61,126,255,0.3);
+  color: var(--blue);
+}
+.bview:hover { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+.bdanger {
+  background: var(--red-light);
+  border-color: rgba(240,64,96,0.3);
+  color: var(--red);
+}
+.bdanger:hover { background: var(--red); border-color: var(--red); color: #fff; }
+
+/* ── TOOLBAR ── */
+.toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.sbox {
+  padding: 9px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  outline: none;
+  width: 260px;
+  transition: all 0.15s;
+  box-shadow: var(--shadow-sm);
+}
+
+.sbox:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+.sbox::placeholder { color: var(--text-3); }
+
+.fsel {
+  padding: 9px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.fsel:focus { border-color: var(--blue); }
+
+/* ── QUICK ACTIONS ── */
+.qa-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  transition: all 0.15s;
+  margin-bottom: 8px;
+  text-align: left;
+  width: 100%;
+}
+
+.qa-btn:hover {
+  background: var(--blue-light);
+  border-color: rgba(61,126,255,0.3);
+  color: var(--blue);
+  transform: translateX(3px);
+}
+
+.qa-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+
+/* ── STATUS DOTS ── */
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(232,236,244,0.7);
+}
+.status-row:last-child { border-bottom: none; }
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-dot.online { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.status-dot.offline { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+.status-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.status-label { font-size: 11px; color: var(--text-3); margin-top: 1px; font-family: var(--mono); }
+
+/* ── RECENT CUSTOMER ROW ── */
+.recent-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(232,236,244,0.7);
+  transition: background 0.1s;
+}
+.recent-row:last-child { border-bottom: none; }
+.recent-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.recent-meta { font-size: 11px; color: var(--text-3); font-family: var(--mono); margin-top: 2px; }
+
+/* ── MODAL ── */
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,15,30,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 30px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.modal-lg { max-width: 760px; }
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal::-webkit-scrollbar { width: 5px; }
+.modal::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+.modal-title {
+  font-size: 19px;
+  font-weight: 800;
+  margin-bottom: 22px;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ff { display: flex; flex-direction: column; gap: 6px; }
+.ff.full { grid-column: 1/-1; }
+
+.ff label {
+  font-size: 10.5px;
+  color: var(--text-3);
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.ff input, .ff select, .ff textarea {
+  padding: 10px 13px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  outline: none;
+  transition: all 0.15s;
+}
+
+.ff input:focus, .ff select:focus, .ff textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-light);
+  background: var(--surface);
+}
+
+.ff input::placeholder { color: var(--text-3); }
+.ff select option { background: var(--surface); color: var(--text); }
+.ff textarea { resize: vertical; min-height: 72px; }
+
+.mactions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 22px;
+}
+
+.errmsg {
+  color: var(--red);
+  font-size: 12px;
+  margin-top: 12px;
+  display: none;
+  background: var(--red-light);
+  padding: 9px 13px;
+  border-radius: 8px;
+  border: 1px solid rgba(240,64,96,0.2);
+}
+
+.sec-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--blue);
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 20px 0 12px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* view modal data grid */
+.dgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ditem {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+}
+.ditem.full { grid-column: 1/-1; }
+.dlabel { font-size: 9.5px; color: var(--text-3); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-weight: 700; }
+.dval { font-size: 13px; color: var(--text); word-break: break-all; font-weight: 500; }
+
+/* ── LOADING / EMPTY ── */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: var(--text-3);
+  font-family: var(--mono);
+  font-size: 12px;
+  gap: 10px;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty {
+  text-align: center;
+  padding: 48px;
+  color: var(--text-3);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 12px;
+  padding: 13px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 200;
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  max-width: 320px;
+  box-shadow: var(--shadow-lg);
+  color: #e2eaf6;
+}
+
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.ok { border-color: rgba(16,201,122,0.4); }
+.toast.err { border-color: rgba(240,64,96,0.4); color: #fca5a5; }
+
+/* ── LOGIN ── */
+.login-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #0d1117;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-wrap::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(61,126,255,0.12) 0%, transparent 65%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.login-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 44px;
+  width: 380px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+  position: relative;
+  backdrop-filter: blur(20px);
+}
+
+.login-logo {
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
+}
+
+.login-sub {
+  font-size: 12px;
+  color: #4a6fa5;
+  margin-bottom: 36px;
+  font-family: var(--mono);
+}
+
+.login-card .field label {
+  display: block;
+  font-size: 10.5px;
+  color: #4a6fa5;
+  margin-bottom: 7px;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.login-card .field input {
+  width: 100%;
+  padding: 11px 15px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: #e2eaf6;
+  font-family: var(--font);
+  font-size: 14px;
+  outline: none;
+  transition: all 0.15s;
+}
+
+.login-card .field input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(61,126,255,0.2);
+}
+
+.login-card .field input::placeholder { color: rgba(255,255,255,0.2); }
+
+.login-card .btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: var(--blue);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 4px 16px rgba(61,126,255,0.4);
+  letter-spacing: 0.01em;
+}
+
+.login-card .btn-primary:hover {
+  background: #2d6ef0;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(61,126,255,0.5);
+}
+
+.login-card .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.login-err {
+  background: rgba(240,64,96,0.12);
+  border: 1px solid rgba(240,64,96,0.3);
+  border-radius: 9px;
+  padding: 10px 14px;
+  color: #fca5a5;
+  font-size: 13px;
+  margin-bottom: 16px;
+  display: none;
+}
+
+.field { margin-bottom: 16px; }
+
+/* ── NOTIFICATIONS ── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 14px;
+  background: var(--bg);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.tab {
+  flex: 1;
+  padding: 7px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+  transition: all 0.15s;
+}
+
+.tab.active {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 2px 8px var(--blue-glow);
+}
+
+.tpl-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 13px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tpl-item:hover {
+  border-color: rgba(61,126,255,0.3);
+  background: var(--blue-light);
+  transform: translateX(3px);
+}
+
+.tpl-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
+.tpl-msg { font-size: 12px; color: var(--text-3); }
+
+.nprev {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 13px;
+  margin-top: 10px;
+  display: none;
+  border-left: 3px solid var(--blue);
+}
+
+.chk-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(232,236,244,0.5);
+}
+.chk-row:last-child { border-bottom: none; }
+.chk-row input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--blue); }
+
+.abtns { display: flex; gap: 5px; flex-wrap: nowrap; }
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
 
+<!-- LOGIN -->
 <div class="login-wrap" id="login-page">
   <div class="login-card">
     <div class="login-logo">NetAdmin</div>
@@ -152,75 +1022,146 @@ tr:hover td{background:rgba(59,126,248,.03);}
     <div class="login-err" id="login-err"></div>
     <div class="field"><label>Username</label><input type="text" id="login-phone" placeholder="admin"/></div>
     <div class="field"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••"/></div>
-    <button class="btn-primary" id="login-btn">Sign in</button>
+    <button class="btn-primary" id="login-btn">Sign in →</button>
   </div>
 </div>
 
+<!-- APP -->
 <div class="shell" id="app-shell" style="display:none">
   <div class="sidebar">
-    <div class="logo"><div class="logo-name">NetAdmin</div><div class="logo-sub">// ISP Management</div></div>
-    <nav class="nav">
-      <div style="padding:12px 20px">
-        <div id="voice-settings-btn" style="padding:12px 20px;display:none;flex-direction:column;gap:8px;border-bottom:1px solid var(--border)">
-          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em">Voice Alerts</div>
-          <button id="voice-banner" onclick="enableVoiceOnRefresh()" style="width:100%;text-align:left;font-size:12px;padding:7px 10px;border-radius:7px;border:1px solid var(--accent2);background:rgba(0,168,122,.08);color:var(--accent2);cursor:pointer;font-family:var(--font);display:none;">🔊 Click to activate voice</button>
-          <button class="btn" id="voice-toggle" onclick="toggleVoice()" style="width:100%;text-align:left;font-size:12px;color:var(--muted)">🔇 Voice OFF</button>
-          <select id="voice-lang-sel" class="fsel" style="width:100%;font-size:12px" onchange="changeLanguage(this.value)">
-            <option value="hi-IN">🇮🇳 हिंदी</option>
-            <option value="en-IN">🇬🇧 English</option>
-          </select>
-        </div>
+    <div class="logo">
+      <div class="logo-badge">
+        <div class="logo-icon">NA</div>
+        <div class="logo-name">NetAdmin</div>
       </div>
+      <div class="logo-sub">// ISP Management</div>
+    </div>
+
+    <nav class="nav">
+      <!-- voice -->
+      <div id="voice-settings-btn" style="display:none;flex-direction:column;gap:7px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.07);">
+        <div class="voice-label">Voice Alerts</div>
+        <button id="voice-banner" onclick="enableVoiceOnRefresh()" style="display:none;width:100%;text-align:left;font-size:11px;padding:6px 10px;border-radius:7px;border:1px solid rgba(16,201,122,0.3);background:rgba(16,201,122,0.1);color:#10c97a;cursor:pointer;font-family:var(--font);">🔊 Click to activate voice</button>
+        <button class="voice-toggle-btn" id="voice-toggle" onclick="toggleVoice()">🔇 Voice OFF</button>
+        <select class="voice-lang-sel" id="voice-lang-sel" onchange="changeLanguage(this.value)">
+          <option value="hi-IN">🇮🇳 हिंदी</option>
+          <option value="en-IN">🇬🇧 English</option>
+        </select>
+      </div>
+
       <div class="nav-section">Overview</div>
-      <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')"><div class="nav-dot"></div>Dashboard</div>
+      <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
+        <div class="nav-icon">⬡</div>Dashboard
+      </div>
       <div class="nav-section">Management</div>
-      <div class="nav-item" id="nav-customers" onclick="showPage('customers')"><div class="nav-dot"></div>Customers</div>
-      <div class="nav-item" id="nav-activations" onclick="showPage('activations')"><div class="nav-dot"></div>Activations</div>
-      <div class="nav-item" id="nav-payments" onclick="showPage('payments')"><div class="nav-dot"></div>Payments</div>
-      <div class="nav-item" id="nav-notifications" onclick="showPage('notifications')"><div class="nav-dot"></div>Notifications</div>
-      <div class="nav-item" id="nav-plans" onclick="showPage('plans')"><div class="nav-dot"></div>Plans</div>
+      <div class="nav-item" id="nav-customers" onclick="showPage('customers')">
+        <div class="nav-icon">👤</div>Customers
+      </div>
+      <div class="nav-item" id="nav-activations" onclick="showPage('activations')">
+        <div class="nav-icon">⚡</div>Activations
+      </div>
+      <div class="nav-item" id="nav-payments" onclick="showPage('payments')">
+        <div class="nav-icon">₹</div>Payments
+      </div>
+      <div class="nav-item" id="nav-notifications" onclick="showPage('notifications')">
+        <div class="nav-icon">🔔</div>Notifications
+      </div>
+      <div class="nav-item" id="nav-plans" onclick="showPage('plans')">
+        <div class="nav-icon">📦</div>Plans
+      </div>
     </nav>
+
     <div class="sidebar-footer">
       <div class="user-row">
         <div class="avatar" id="sb-avatar">A</div>
-        <div><div class="user-name" id="sb-name">Admin</div><div class="user-role" id="sb-role">admin</div></div>
+        <div>
+          <div class="user-name" id="sb-name">Admin</div>
+          <div class="user-role" id="sb-role">admin</div>
+        </div>
       </div>
       <button class="logout-btn" id="logout-btn">Sign out</button>
     </div>
   </div>
 
   <div class="main">
+
     <!-- DASHBOARD -->
     <div id="page-dashboard">
       <div class="page-header">
-        <div><div class="page-title">Dashboard</div><div class="page-sub">// <span id="dash-date"></span></div></div>
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-sub">//<span id="dash-date"></span></div>
+        </div>
         <button class="btn bblu" onclick="showPage('customers');openAdd()">+ Add customer</button>
       </div>
+
       <div class="stats">
-        <div class="stat-card" onclick="showPage('customers')"><div class="stat-label">Total</div><div class="stat-val" id="s-total">—</div><div class="stat-sub">customers</div></div>
-        <div class="stat-card" onclick="showPage('customers');filterSt('active')"><div class="stat-label">Active</div><div class="stat-val up" id="s-active">—</div><div class="stat-sub up">online</div></div>
-        <div class="stat-card" onclick="showPage('customers');filterSt('expired')"><div class="stat-label">Expired</div><div class="stat-val down" id="s-expired">—</div><div class="stat-sub down">renewal needed</div></div>
-        <div class="stat-card" onclick="showPage('activations')"><div class="stat-label">Pending</div><div class="stat-val warn" id="s-pending">—</div><div class="stat-sub warn">activations</div></div>
+        <div class="stat-card blue" onclick="showPage('customers')">
+          <div class="stat-icon blue">👥</div>
+          <div class="stat-label">Total</div>
+          <div class="stat-val" id="s-total">—</div>
+          <div class="stat-sub">customers</div>
+        </div>
+        <div class="stat-card green" onclick="showPage('customers');filterSt('active')">
+          <div class="stat-icon green">✓</div>
+          <div class="stat-label">Active</div>
+          <div class="stat-val" id="s-active" style="color:var(--green)">—</div>
+          <div class="stat-sub" style="color:var(--green)">online</div>
+        </div>
+        <div class="stat-card red" onclick="showPage('customers');filterSt('expired')">
+          <div class="stat-icon red">⚠</div>
+          <div class="stat-label">Expired</div>
+          <div class="stat-val" id="s-expired" style="color:var(--red)">—</div>
+          <div class="stat-sub" style="color:var(--red)">renewal needed</div>
+        </div>
+        <div class="stat-card amber" onclick="showPage('activations')">
+          <div class="stat-icon amber">⏳</div>
+          <div class="stat-label">Pending</div>
+          <div class="stat-val" id="s-pending" style="color:var(--amber)">—</div>
+          <div class="stat-sub" style="color:var(--amber)">activations</div>
+        </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
         <div class="card">
-          <div class="card-title">Recent customers <span id="dash-cnt" style="font-size:11px;color:var(--muted);font-family:var(--mono)"></span></div>
+          <div class="card-title">
+            Recent customers
+            <span id="dash-cnt" style="font-size:11px;color:var(--text-3);font-family:var(--mono);font-weight:400"></span>
+          </div>
           <div id="dash-recent"><div class="loading"><div class="spinner"></div>Loading...</div></div>
         </div>
+
         <div class="card">
           <div class="card-title">Quick actions</div>
-          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
-            <button class="btn" style="text-align:left" onclick="showPage('customers');openAdd()">+ Add customer</button>
-            <button class="btn" style="text-align:left" onclick="showPage('payments');openCash()">+ Cash payment</button>
-            <button class="btn" style="text-align:left" onclick="showPage('notifications')">📢 Send notification</button>
-            <button class="btn" style="text-align:left" onclick="showPage('customers');filterSt('expired')">Expired accounts</button>
+          <button class="qa-btn" onclick="showPage('customers');openAdd()">
+            <div class="qa-icon">+</div>Add new customer
+          </button>
+          <button class="qa-btn" onclick="showPage('payments');openCash()">
+            <div class="qa-icon">₹</div>Record cash payment
+          </button>
+          <button class="qa-btn" onclick="showPage('notifications')">
+            <div class="qa-icon">📢</div>Send notification
+          </button>
+          <button class="qa-btn" onclick="showPage('customers');filterSt('expired')">
+            <div class="qa-icon">⚠</div>View expired accounts
+          </button>
+
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin:18px 0 12px;">System status</div>
+          <div class="status-row">
+            <div class="status-dot online"></div>
+            <div><div class="status-name">Cloudflare</div><div class="status-label">online</div></div>
           </div>
-          <div class="card-title">System status</div>
-          <div>
-            <div class="alert-row"><div class="alert-dot" style="background:var(--accent2)"></div><div><div style="font-weight:500">Cloudflare Workers</div><div style="font-size:11px;color:var(--muted)">online</div></div></div>
-            <div class="alert-row"><div class="alert-dot" style="background:var(--accent2)"></div><div><div style="font-weight:500">Jaze ISP Server</div><div style="font-size:11px;color:var(--muted)">connected</div></div></div>
-            <div class="alert-row"><div class="alert-dot" style="background:var(--accent2)"></div><div><div style="font-weight:500">NetAdmin Server</div><div style="font-size:11px;color:var(--muted)">scheduler active</div></div></div>
-            <div class="alert-row"><div class="alert-dot" style="background:var(--accent2)"></div><div><div style="font-weight:500">Payment Gateway</div><div style="font-size:11px;color:var(--muted)">active</div></div></div>
+          <div class="status-row">
+            <div class="status-dot online"></div>
+            <div><div class="status-name">Jaze ISP Server</div><div class="status-label">connected</div></div>
+          </div>
+          <div class="status-row">
+            <div class="status-dot online"></div>
+            <div><div class="status-name">NetAdmin Server</div><div class="status-label">scheduler active</div></div>
+          </div>
+          <div class="status-row">
+            <div class="status-dot online"></div>
+            <div><div class="status-name">Payment Gateway</div><div class="status-label">active</div></div>
           </div>
         </div>
       </div>
@@ -241,15 +1182,15 @@ tr:hover td{background:rgba(59,126,248,.03);}
           <option value="suspended">Suspended</option>
           <option value="lead">Lead</option>
         </select>
-        <button class="btn" onclick="loadCustomers()">Refresh</button>
+        <button class="btn" onclick="loadCustomers()">↺ Refresh</button>
       </div>
       <div class="card" style="padding:0;overflow:hidden">
         <div class="tbl-wrap">
           <table>
             <thead><tr>
-              <th style="padding-left:16px">Name</th><th>Phone</th><th>ISP</th><th>Username</th>
+              <th style="padding-left:18px">Name</th><th>Phone</th><th>ISP</th><th>Username</th>
               <th>Plan</th><th>Expiry</th><th>Due</th><th>Status</th>
-              <th style="padding-right:16px">Actions</th>
+              <th style="padding-right:18px">Actions</th>
             </tr></thead>
             <tbody id="ctbody"><tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
           </table>
@@ -261,12 +1202,12 @@ tr:hover td{background:rgba(59,126,248,.03);}
     <div id="page-activations" style="display:none">
       <div class="page-header">
         <div><div class="page-title">Activations</div><div class="page-sub">// ISP activation log</div></div>
-        <button class="btn" onclick="loadActivations()">Refresh</button>
+        <button class="btn" onclick="loadActivations()">↺ Refresh</button>
       </div>
       <div class="stats3">
-        <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-val warn" id="ap">—</div><div class="stat-sub warn">NetAdmin queue</div></div>
-        <div class="stat-card"><div class="stat-label">Confirmed</div><div class="stat-val up" id="ac">—</div><div class="stat-sub up">activated</div></div>
-        <div class="stat-card"><div class="stat-label">Failed</div><div class="stat-val down" id="af">—</div><div class="stat-sub down">attention needed</div></div>
+        <div class="stat-card amber"><div class="stat-icon amber">⏳</div><div class="stat-label">Pending</div><div class="stat-val" id="ap" style="color:var(--amber)">—</div><div class="stat-sub" style="color:var(--amber)">NetAdmin queue</div></div>
+        <div class="stat-card green"><div class="stat-icon green">✓</div><div class="stat-label">Confirmed</div><div class="stat-val" id="ac" style="color:var(--green)">—</div><div class="stat-sub" style="color:var(--green)">activated</div></div>
+        <div class="stat-card red"><div class="stat-icon red">✕</div><div class="stat-label">Failed</div><div class="stat-val" id="af" style="color:var(--red)">—</div><div class="stat-sub" style="color:var(--red)">attention needed</div></div>
       </div>
       <div class="toolbar">
         <select class="fsel" id="af-status" onchange="loadActivations()"><option value="">All status</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="failed">Failed</option></select>
@@ -276,9 +1217,9 @@ tr:hover td{background:rgba(59,126,248,.03);}
         <div class="tbl-wrap">
           <table>
             <thead><tr>
-              <th style="padding-left:16px">#</th><th>Customer</th><th>Username</th>
+              <th style="padding-left:18px">#</th><th>Customer</th><th>Username</th>
               <th>Server</th><th>Profile</th><th>Expiry</th><th>Status</th><th>Created</th>
-              <th>Confirmed</th><th style="padding-right:16px">Del</th>
+              <th>Confirmed</th><th style="padding-right:18px">Del</th>
             </tr></thead>
             <tbody id="atbody"><tr><td colspan="10"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
           </table>
@@ -293,17 +1234,17 @@ tr:hover td{background:rgba(59,126,248,.03);}
         <button class="btn bblu" onclick="openCash()">+ Cash payment</button>
       </div>
       <div class="stats3">
-        <div class="stat-card"><div class="stat-label">Total Collected</div><div class="stat-val up" id="pt">—</div><div class="stat-sub up">all time</div></div>
-        <div class="stat-card"><div class="stat-label">Online / Zoho</div><div class="stat-val up" id="po">—</div><div class="stat-sub up">Razorpay + Zoho</div></div>
-        <div class="stat-card"><div class="stat-label">Cash</div><div class="stat-val up" id="pc">—</div><div class="stat-sub up">collected</div></div>
+        <div class="stat-card green"><div class="stat-icon green">₹</div><div class="stat-label">Total Collected</div><div class="stat-val" id="pt" style="font-size:22px;color:var(--green)">—</div><div class="stat-sub" style="color:var(--green)">all time</div></div>
+        <div class="stat-card blue"><div class="stat-icon blue">🌐</div><div class="stat-label">Online / Zoho</div><div class="stat-val" id="po" style="font-size:22px;color:var(--blue)">—</div><div class="stat-sub">Razorpay + Zoho</div></div>
+        <div class="stat-card amber"><div class="stat-icon amber">💵</div><div class="stat-label">Cash</div><div class="stat-val" id="pc" style="font-size:22px;color:var(--amber)">—</div><div class="stat-sub" style="color:var(--amber)">collected</div></div>
       </div>
       <div class="card" style="padding:0;overflow:hidden">
         <div class="tbl-wrap">
           <table>
             <thead><tr>
-              <th style="padding-left:16px">#</th><th>Customer</th><th>Amount</th>
+              <th style="padding-left:18px">#</th><th>Customer</th><th>Amount</th>
               <th>Method</th><th>Type</th><th>App Ref</th><th>Bank Txn</th>
-              <th>Status</th><th>Date</th><th style="padding-right:16px">Del</th>
+              <th>Status</th><th>Date</th><th style="padding-right:18px">Del</th>
             </tr></thead>
             <tbody id="ptbody"><tr><td colspan="10"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
           </table>
@@ -316,7 +1257,7 @@ tr:hover td{background:rgba(59,126,248,.03);}
       <div class="page-header">
         <div><div class="page-title">Notifications</div><div class="page-sub">// send push notifications</div></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
         <div class="card">
           <div class="card-title">Send Notification</div>
           <div class="sec-title">Step 1 — Audience</div>
@@ -331,18 +1272,18 @@ tr:hover td{background:rgba(59,126,248,.03);}
               <option value="expired">Expired only</option>
               <option value="expiring_7">Expiring in 7 days</option>
             </select>
-            <div style="font-size:12px;color:var(--muted);margin-top:8px" id="aud-count"></div>
+            <div style="font-size:12px;color:var(--text-3);margin-top:8px;font-family:var(--mono)" id="aud-count"></div>
           </div>
           <div id="aud-s" style="display:none">
-            <div style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;background:var(--bg)" id="chklist"><div class="loading"><div class="spinner"></div></div></div>
+            <div style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:8px;background:var(--bg)" id="chklist"><div class="loading"><div class="spinner"></div></div></div>
           </div>
           <div class="sec-title">Step 2 — Message</div>
           <div class="ff" style="margin-bottom:10px"><label>Title *</label><input id="ntitle" placeholder="Notification title" oninput="updatePrev()"/></div>
           <div class="ff" style="margin-bottom:10px"><label>Message *</label><textarea id="nmsg" rows="3" placeholder="Your message..." oninput="updatePrev()"></textarea></div>
           <div class="nprev" id="nprev">
-            <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:6px">PREVIEW</div>
+            <div style="font-size:9.5px;color:var(--text-3);font-family:var(--mono);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">PREVIEW</div>
             <div style="font-weight:600;font-size:13px;color:var(--text)" id="pv-title"></div>
-            <div style="font-size:12px;color:var(--muted);margin-top:4px" id="pv-msg"></div>
+            <div style="font-size:12px;color:var(--text-3);margin-top:4px" id="pv-msg"></div>
           </div>
           <div class="mactions" style="margin-top:14px">
             <button class="btn" onclick="clearNotif()">Clear</button>
@@ -354,8 +1295,8 @@ tr:hover td{background:rgba(59,126,248,.03);}
           <div id="tpl-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
         </div>
       </div>
-      <div class="card" style="margin-top:8px">
-        <div class="card-title">Notification History <button class="btn bsm" onclick="loadNHistory()" style="margin-left:8px">Refresh</button></div>
+      <div class="card" style="margin-top:0">
+        <div class="card-title">Notification History <button class="btn bsm" onclick="loadNHistory()" style="margin-left:8px">↺ Refresh</button></div>
         <div class="tbl-wrap">
           <table>
             <thead><tr>
@@ -377,9 +1318,9 @@ tr:hover td{background:rgba(59,126,248,.03);}
         <div class="tbl-wrap">
           <table>
             <thead><tr>
-              <th style="padding-left:16px">#</th><th>Plan Name</th><th>Speed ↓</th><th>Speed ↑</th>
+              <th style="padding-left:18px">#</th><th>Plan Name</th><th>Speed ↓</th><th>Speed ↑</th>
               <th>Price</th><th>Validity</th><th>ISP Server</th><th>NetAdmin Profile</th>
-              <th>Status</th><th style="padding-right:16px">Actions</th>
+              <th>Status</th><th style="padding-right:18px">Actions</th>
             </tr></thead>
             <tbody id="plan-tbody"><tr><td colspan="10"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
           </table>
@@ -435,7 +1376,7 @@ tr:hover td{background:rgba(59,126,248,.03);}
     <div class="sec-title">ISP Details</div>
     <div class="fgrid">
       <div class="ff"><label>ISP Server *</label><select id="a-isp"><option value="1">Jaze ISP Server</option><option value="2">NetAdmin Server</option></select></div>
-      <div class="ff"><label>ISP Customer ID *</label><input id="a-cid" placeholder="ID on Jaze/NetAdmin"/></div>
+      <<div class="ff"><label>ISP Customer ID</label><input id="a-cid" placeholder="Optional — Jaze/NetAdmin ID"/></div>
       <div class="ff full"><label>ISP Username (PPPoE)</label><input id="a-iuser" placeholder="ramesh.ncn"/></div>
       <div class="ff"><label>Expiry date</label><input id="a-expiry" type="date"/></div>
       <div class="ff"><label>Plan</label><select id="a-plan"><option value="">— Select Plan —</option></select></div>
@@ -456,7 +1397,6 @@ tr:hover td{background:rgba(59,126,248,.03);}
       <div class="ff"><label>WiFi Band</label>
         <select id="a-wifi-band"><option value="single">Single Band (2.4GHz)</option><option value="dual">Dual Band (2.4GHz + 5GHz)</option></select>
       </div>
-      <!-- ✅ BALANCE DUE in Add modal -->
       <div class="ff"><label>Balance Due (₹)</label>
         <input id="a-due" type="number" placeholder="0" min="0" value="0"/>
       </div>
@@ -472,7 +1412,7 @@ tr:hover td{background:rgba(59,126,248,.03);}
 <!-- VIEW CUSTOMER -->
 <div class="modal-bg" id="m-view" style="display:none">
   <div class="modal modal-lg">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px">
       <div class="modal-title" style="margin:0" id="v-title">Customer</div>
       <div style="display:flex;gap:8px">
         <button class="btn bsm bedit" id="v-edit-btn">✏ Edit</button>
@@ -493,7 +1433,7 @@ tr:hover td{background:rgba(59,126,248,.03);}
 <!-- EDIT CUSTOMER -->
 <div class="modal-bg" id="m-edit" style="display:none">
   <div class="modal modal-lg">
-    <div class="modal-title">Edit customer <span id="e-label" style="font-size:13px;color:var(--muted);font-family:var(--mono)"></span></div>
+    <div class="modal-title">Edit customer <span id="e-label" style="font-size:13px;color:var(--text-3);font-family:var(--mono)"></span></div>
     <div class="sec-title">Customer Details</div>
     <div class="fgrid">
       <input type="hidden" id="e-id"/>
@@ -509,7 +1449,7 @@ tr:hover td{background:rgba(59,126,248,.03);}
     <div class="sec-title">ISP Details</div>
     <div class="fgrid">
       <div class="ff"><label>ISP Server *</label><select id="e-isp"><option value="1">Jaze ISP Server</option><option value="2">NetAdmin Server</option></select></div>
-      <div class="ff"><label>ISP Customer ID *</label><input id="e-cid"/></div>
+      <div class="ff"><label>ISP Customer ID</label><input id="e-cid"/></div>
       <div class="ff full"><label>ISP Username (PPPoE)</label><input id="e-iuser"/></div>
       <div class="ff"><label>Expiry date</label><input id="e-expiry" type="date"/></div>
       <div class="ff"><label>Plan</label><select id="e-plan"><option value="">— Select Plan —</option></select></div>
@@ -531,7 +1471,6 @@ tr:hover td{background:rgba(59,126,248,.03);}
         <select id="e-wifi-band"><option value="single">Single Band (2.4GHz)</option><option value="dual">Dual Band (2.4GHz + 5GHz)</option></select>
       </div>
     </div>
-    <!-- ✅ BILLING SECTION in Edit modal -->
     <div class="sec-title">Billing</div>
     <div class="fgrid">
       <div class="ff"><label>Balance Due (₹)</label>
@@ -584,7 +1523,7 @@ const PAGES=['dashboard','customers','activations','payments','notifications','p
 let custCache=[];let plansCache=[];let audTab='f';
 
 function $(id){return document.getElementById(id);}
-function toast(msg,type='ok'){const t=$('toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(()=>t.className='toast',3000);}
+function toast(msg,type='ok'){const t=$('toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(()=>t.className='toast',3200);}
 function closeM(id){$(id).style.display='none';}
 function showErr(el,msg){el.textContent=msg;el.style.display='block';}
 function getToken(){return localStorage.getItem('ngn_token');}
@@ -625,7 +1564,7 @@ async function doLogin(){
       startApp();initVoiceAfterLogin();
     }else{err.textContent=r.error||'Login failed';err.style.display='block';}
   }catch(e){err.textContent='Network error';err.style.display='block';}
-  finally{btn.disabled=false;btn.textContent='Sign in';}
+  finally{btn.disabled=false;btn.textContent='Sign in →';}
 }
 
 function startApp(){
@@ -659,7 +1598,7 @@ async function loadDash(){
     $('s-pending').textContent=ar.data?.activations?.length||0;
     const rec=all.slice(0,5);
     $('dash-cnt').textContent='('+all.length+' total)';
-    $('dash-recent').innerHTML=rec.length?rec.map(c=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(224,228,239,.6)"><div><div style="font-size:13px;font-weight:600;color:var(--text)">'+c.name+'</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">'+c.phone+' · '+(c.isp_server||'—')+'</div></div>'+sbadge(realSt(c))+'</div>').join(''):'<div class="empty">No customers yet</div>';
+    $('dash-recent').innerHTML=rec.length?rec.map(c=>'<div class="recent-row"><div><div class="recent-name">'+c.name+'</div><div class="recent-meta">'+c.phone+' · '+(c.isp_server||'—')+'</div></div>'+sbadge(realSt(c))+'</div>').join(''):'<div class="empty">No customers yet</div>';
   }catch(e){console.error(e);}
 }
 
@@ -675,7 +1614,7 @@ async function loadCustomers(){
     if(!cs.length){$('ctbody').innerHTML='<tr><td colspan="9"><div class="empty">No customers found</div></td></tr>';return;}
     $('ctbody').innerHTML=cs.map(c=>{
       const safeName=c.name.replace(/'/g,"\\'");
-      return '<tr><td style="padding-left:16px;font-weight:600;color:var(--text)">'+c.name+'</td><td style="font-family:var(--mono);color:var(--muted)">'+c.phone+'</td><td><span class="badge binfo">'+(c.isp_server||'—')+'</span></td><td style="font-family:var(--mono);font-size:12px;color:var(--muted)">'+(c.isp_username||'—')+'</td><td style="color:var(--muted)">'+(c.plan_name||'—')+'</td><td style="font-family:var(--mono);font-size:12px;color:var(--text)">'+(c.expiry_date||'—')+'</td><td style="color:'+(c.balance_due>0?'var(--danger)':'var(--muted)')+';font-family:var(--mono);font-weight:'+(c.balance_due>0?'600':'400')+'">'+(c.balance_due>0?'₹'+c.balance_due:'—')+'</td><td>'+sbadge(realSt(c))+'</td><td style="padding-right:16px"><div class="abtns"><button class="btn bsm bview" onclick="openView('+c.id+')">👁 View</button><button class="btn bsm bedit" onclick="openEdit('+c.id+')">✏ Edit</button><button class="btn bsm" style="color:var(--danger);border-color:var(--danger);background:rgba(229,62,62,.06)" onclick="deleteCustomer('+c.id+',\''+safeName+'\')">🗑</button></div></td></tr>';
+      return '<tr><td style="padding-left:18px;font-weight:600;color:var(--text)">'+c.name+'</td><td style="font-family:var(--mono);color:var(--text-3);font-size:12px">'+c.phone+'</td><td><span class="badge binfo">'+(c.isp_server||'—')+'</span></td><td style="font-family:var(--mono);font-size:12px;color:var(--text-3)">'+(c.isp_username||'—')+'</td><td style="color:var(--text-2)">'+(c.plan_name||'—')+'</td><td style="font-family:var(--mono);font-size:12px;color:var(--text)">'+(c.expiry_date||'—')+'</td><td style="color:'+(c.balance_due>0?'var(--red)':'var(--text-3)')+';font-family:var(--mono);font-weight:'+(c.balance_due>0?'700':'400')+'">'+(c.balance_due>0?'₹'+c.balance_due:'—')+'</td><td>'+sbadge(realSt(c))+'</td><td style="padding-right:18px"><div class="abtns"><button class="btn bsm bview" onclick="openView('+c.id+')">👁 View</button><button class="btn bsm bedit" onclick="openEdit('+c.id+')">✏ Edit</button><button class="btn bsm bdanger" onclick="deleteCustomer('+c.id+',\''+safeName+'\')">🗑</button></div></td></tr>';
     }).join('');
   }catch(e){console.error(e);}
 }
@@ -689,24 +1628,15 @@ function openView(id){
   $('v-cust').innerHTML=di('Name',c.name)+di('Phone',c.phone)+di('Email',c.email)+di('Membership',c.membership)+di('Status',sbadge(realSt(c)),true)+di('Created',c.created_at)+di('Address',c.address,'full')+di('Comments',c.comments,'full');
   $('v-isp').innerHTML=di('ISP Server',c.isp_server)+di('ISP Customer ID',c.isp_customer_id,'','mono')+di('ISP Username',c.isp_username,'full','mono')+di('Plan',c.plan_name)+di('Plan ID',c.plan_id);
   $('v-hw').innerHTML=di('Router Brand',c.router_brand)+di('Router IP',c.router_ip,'','mono')+di('Router User',c.router_username,'','mono')+di('Router Pass',c.router_password,'','mono')+di('MAC Address',c.mac_address,'','mono')+di('IPTV',c.iptv);
-  $('v-bill').innerHTML=di('Expiry Date',c.expiry_date,'','mono')+di('Balance Due',c.balance_due>0?'<span style="color:var(--danger);font-weight:600">₹'+c.balance_due+'</span>':'<span style="color:var(--accent2)">₹0</span>',true);
+  $('v-bill').innerHTML=di('Expiry Date',c.expiry_date,'','mono')+di('Balance Due',c.balance_due>0?'<span style="color:var(--red);font-weight:700">₹'+c.balance_due+'</span>':'<span style="color:var(--green);font-weight:600">₹0</span>',true);
   $('m-view').style.display='flex';
 }
 function di(label,val,cls,mono){return '<div class="ditem'+(cls?' '+cls:'')+'""><div class="dlabel">'+label+'</div><div class="dval'+(mono?' '+mono:'')+'">'+(val||'—')+'</div></div>';}
 
 function openAdd(){
-  // Reset add form
   ['a-name','a-phone','a-email','a-pass','a-addr','a-mem','a-comments','a-cid','a-iuser','a-rip','a-ruser','a-rpass','a-mac','a-iptv','a-wifi-ssid'].forEach(i=>{const el=$(i);if(el)el.value='';});
-  $('a-due').value='0';
-  $('a-expiry').value='';
-  $('a-isp').value='1';
-  $('a-brand').value='';
-  $('a-plan').value='';
-  $('a-pon-port').value='';
-  $('a-onu-id').value='';
-  $('a-wifi-band').value='single';
-  $('a-err').style.display='none';
-  $('m-add').style.display='flex';
+  $('a-due').value='0';$('a-expiry').value='';$('a-isp').value='1';$('a-brand').value='';$('a-plan').value='';$('a-pon-port').value='';$('a-onu-id').value='';$('a-wifi-band').value='single';
+  $('a-err').style.display='none';$('m-add').style.display='flex';
 }
 
 function openEdit(id){
@@ -717,50 +1647,21 @@ function openEdit(id){
   $('e-cid').value=c.isp_customer_id||'';$('e-iuser').value=c.isp_username||'';
   $('e-brand').value=c.router_brand_id||'';$('e-rip').value=c.router_ip||'192.168.1.1';
   $('e-ruser').value=c.router_username||'admin';$('e-rpass').value=c.router_password||'';
-  $('e-expiry').value=c.expiry_date||'';
-  $('e-status').value=c.status||'active';$('e-mem').value=c.membership||'';
-  $('e-comments').value=c.comments||'';$('e-mac').value=c.mac_address||'';
-  $('e-iptv').value=c.iptv||'';$('e-err').style.display='none';
-  $('e-plan').value=c.plan_id?String(c.plan_id):'';
-  // ✅ Populate PON, ONU, WiFi fields
+  $('e-expiry').value=c.expiry_date||'';$('e-status').value=c.status||'active';$('e-mem').value=c.membership||'';
+  $('e-comments').value=c.comments||'';$('e-mac').value=c.mac_address||'';$('e-iptv').value=c.iptv||'';
+  $('e-err').style.display='none';$('e-plan').value=c.plan_id?String(c.plan_id):'';
   if($('e-pon-port'))$('e-pon-port').value=c.pon_port||'';
   if($('e-onu-id'))$('e-onu-id').value=c.onu_id||'';
   if($('e-wifi-ssid'))$('e-wifi-ssid').value=c.wifi_ssid||'';
   if($('e-wifi-band'))$('e-wifi-band').value=c.wifi_band||'single';
-  // ✅ Balance Due
   $('e-due').value=c.balance_due||0;
   $('m-edit').style.display='flex';
 }
 
 async function submitAdd(){
   const btn=$('a-btn'),err=$('a-err');err.style.display='none';
-  const d={
-    name:$('a-name').value.trim(),
-    phone:$('a-phone').value.trim(),
-    email:$('a-email').value.trim(),
-    password:$('a-pass').value.trim(),
-    address:$('a-addr').value.trim(),
-    isp_server_id:parseInt($('a-isp').value),
-    isp_customer_id:$('a-cid').value.trim(),
-    isp_username:$('a-iuser').value.trim(),
-    router_brand_id:$('a-brand').value||null,
-    router_ip:$('a-rip').value.trim()||'192.168.1.1',
-    router_username:$('a-ruser').value.trim()||'admin',
-    router_password:$('a-rpass').value.trim(),
-    expiry_date:$('a-expiry').value||null,
-    plan_id:$('a-plan').value?parseInt($('a-plan').value):null,
-    membership:$('a-mem').value.trim(),
-    comments:$('a-comments').value.trim(),
-    mac_address:$('a-mac').value.trim(),
-    iptv:$('a-iptv').value.trim(),
-    pon_port:$('a-pon-port').value||null,
-    onu_id:$('a-onu-id').value?parseInt($('a-onu-id').value):null,
-    wifi_ssid:$('a-wifi-ssid').value.trim()||null,
-    wifi_band:$('a-wifi-band').value||'single',
-    // ✅ balance_due from a-due (own field, not e-due)
-    balance_due:parseFloat($('a-due').value)||0
-  };
-  if(!d.name||!d.phone||!d.isp_customer_id){showErr(err,'Name, phone and ISP ID required');return;}
+  const d={name:$('a-name').value.trim(),phone:$('a-phone').value.trim(),email:$('a-email').value.trim(),password:$('a-pass').value.trim(),address:$('a-addr').value.trim(),isp_server_id:parseInt($('a-isp').value),isp_customer_id:$('a-cid').value.trim(),isp_username:$('a-iuser').value.trim(),router_brand_id:$('a-brand').value||null,router_ip:$('a-rip').value.trim()||'192.168.1.1',router_username:$('a-ruser').value.trim()||'admin',router_password:$('a-rpass').value.trim(),expiry_date:$('a-expiry').value||null,plan_id:$('a-plan').value?parseInt($('a-plan').value):null,membership:$('a-mem').value.trim(),comments:$('a-comments').value.trim(),mac_address:$('a-mac').value.trim(),iptv:$('a-iptv').value.trim(),pon_port:$('a-pon-port').value||null,onu_id:$('a-onu-id').value?parseInt($('a-onu-id').value):null,wifi_ssid:$('a-wifi-ssid').value.trim()||null,wifi_band:$('a-wifi-band').value||'single',balance_due:parseFloat($('a-due').value)||0};
+  if(!d.name||!d.phone){showErr(err,'Name and phone required');return;}
   btn.disabled=true;btn.textContent='Adding...';
   try{
     const r=await apiFetch('POST','/api/admin/customers',d);
@@ -773,32 +1674,7 @@ async function submitAdd(){
 async function submitEdit(){
   const btn=$('e-btn'),err=$('e-err');err.style.display='none';
   const id=$('e-id').value;
-  const d={
-    name:$('e-name').value.trim(),
-    phone:$('e-phone').value.trim(),
-    email:$('e-email').value.trim(),
-    address:$('e-addr').value.trim(),
-    isp_server_id:parseInt($('e-isp').value),
-    isp_customer_id:$('e-cid').value.trim(),
-    isp_username:$('e-iuser').value.trim(),
-    router_brand_id:$('e-brand').value||null,
-    router_ip:$('e-rip').value.trim(),
-    router_username:$('e-ruser').value.trim(),
-    router_password:$('e-rpass').value.trim(),
-    expiry_date:$('e-expiry').value||null,
-    plan_id:$('e-plan').value?parseInt($('e-plan').value):null,
-    status:$('e-status').value,
-    membership:$('e-mem').value.trim(),
-    comments:$('e-comments').value.trim(),
-    mac_address:$('e-mac').value.trim(),
-    iptv:$('e-iptv').value.trim(),
-    pon_port:$('e-pon-port')?($('e-pon-port').value||null):null,
-    onu_id:$('e-onu-id')&&$('e-onu-id').value?parseInt($('e-onu-id').value):null,
-    wifi_ssid:$('e-wifi-ssid')?($('e-wifi-ssid').value.trim()||null):null,
-    wifi_band:$('e-wifi-band')?($('e-wifi-band').value||'single'):'single',
-    // ✅ balance_due
-    balance_due:parseFloat($('e-due').value)||0
-  };
+  const d={name:$('e-name').value.trim(),phone:$('e-phone').value.trim(),email:$('e-email').value.trim(),address:$('e-addr').value.trim(),isp_server_id:parseInt($('e-isp').value),isp_customer_id:$('e-cid').value.trim(),isp_username:$('e-iuser').value.trim(),router_brand_id:$('e-brand').value||null,router_ip:$('e-rip').value.trim(),router_username:$('e-ruser').value.trim(),router_password:$('e-rpass').value.trim(),expiry_date:$('e-expiry').value||null,plan_id:$('e-plan').value?parseInt($('e-plan').value):null,status:$('e-status').value,membership:$('e-mem').value.trim(),comments:$('e-comments').value.trim(),mac_address:$('e-mac').value.trim(),iptv:$('e-iptv').value.trim(),pon_port:$('e-pon-port')?($('e-pon-port').value||null):null,onu_id:$('e-onu-id')&&$('e-onu-id').value?parseInt($('e-onu-id').value):null,wifi_ssid:$('e-wifi-ssid')?($('e-wifi-ssid').value.trim()||null):null,wifi_band:$('e-wifi-band')?($('e-wifi-band').value||'single'):'single',balance_due:parseFloat($('e-due').value)||0};
   const np=$('e-pass').value.trim();if(np)d.password=np;
   if(!d.name||!d.phone){showErr(err,'Name and phone required');return;}
   btn.disabled=true;btn.textContent='Saving...';
@@ -823,21 +1699,7 @@ async function loadActivations(){
     $('s-pending').textContent=all.filter(a=>a.status==='pending'&&a.action==='update').length;
     const acts=fr.data?.activations||[];
     if(!acts.length){$('atbody').innerHTML='<tr><td colspan="10"><div class="empty">No activations found</div></td></tr>';return;}
-    // ✅ Added delete button column
-    $('atbody').innerHTML=acts.map(a=>
-      '<tr>'+
-      '<td style="padding-left:16px;font-family:var(--mono);color:var(--muted)">#'+a.id+'</td>'+
-      '<td><div style="font-weight:600;color:var(--text)">'+(a.customer_name||'—')+'</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">'+(a.customer_phone||'')+'</div></td>'+
-      '<td style="font-family:var(--mono);font-size:12px;color:var(--text)">'+(a.isp_username||'—')+'</td>'+
-      '<td>'+abadge(a.action)+'</td>'+
-      '<td style="color:var(--muted);font-size:12px">'+(a.mikrotik_profile&&a.mikrotik_profile!=='jaze'?a.mikrotik_profile:'—')+'</td>'+
-      '<td style="font-family:var(--mono);font-size:12px;color:var(--text)">'+(a.expiry_date||'—')+'</td>'+
-      '<td>'+sbadge(a.status)+'</td>'+
-      '<td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(a.created_at||'').slice(0,16).replace('T',' ')+'</td>'+
-      '<td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(a.confirmed_at?(a.confirmed_at||'').slice(0,16).replace('T',' '):'—')+'</td>'+
-      '<td style="padding-right:16px"><button class="btn bsm" style="color:var(--danger);border-color:var(--danger);background:rgba(229,62,62,.06)" onclick="deleteActivation('+a.id+')">🗑</button></td>'+
-      '</tr>'
-    ).join('');
+    $('atbody').innerHTML=acts.map(a=>'<tr><td style="padding-left:18px;font-family:var(--mono);color:var(--text-3);font-size:12px">#'+a.id+'</td><td><div style="font-weight:600;color:var(--text)">'+(a.customer_name||'—')+'</div><div style="font-size:11px;color:var(--text-3);font-family:var(--mono)">'+(a.customer_phone||'')+'</div></td><td style="font-family:var(--mono);font-size:12px;color:var(--text)">'+(a.isp_username||'—')+'</td><td>'+abadge(a.action)+'</td><td style="color:var(--text-2);font-size:12px">'+(a.mikrotik_profile&&a.mikrotik_profile!=='jaze'?a.mikrotik_profile:'—')+'</td><td style="font-family:var(--mono);font-size:12px;color:var(--text)">'+(a.expiry_date||'—')+'</td><td>'+sbadge(a.status)+'</td><td style="font-family:var(--mono);font-size:11px;color:var(--text-3)">'+(a.created_at||'').slice(0,16).replace('T',' ')+'</td><td style="font-family:var(--mono);font-size:11px;color:var(--text-3)">'+(a.confirmed_at?(a.confirmed_at||'').slice(0,16).replace('T',' '):'—')+'</td><td style="padding-right:18px"><button class="btn bsm bdanger" onclick="deleteActivation('+a.id+')">🗑</button></td></tr>').join('');
   }catch(e){console.error(e);}
 }
 
@@ -854,43 +1716,12 @@ async function loadPayments(){
     $('po').textContent='₹'+onl.toLocaleString('en-IN');
     $('pc').textContent='₹'+csh.toLocaleString('en-IN');
     if(!pays.length){$('ptbody').innerHTML='<tr><td colspan="10"><div class="empty">No payments yet</div></td></tr>';return;}
-    // ✅ Added delete button column
-    $('ptbody').innerHTML=pays.map(p=>
-      '<tr>'+
-      '<td style="padding-left:16px;font-family:var(--mono);color:var(--muted)">#'+p.id+'</td>'+
-      '<td><div style="font-weight:600;color:var(--text)">'+(p.customer_name||'—')+'</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono)">'+(p.customer_phone||'')+'</div></td>'+
-      '<td style="font-family:var(--mono);font-weight:700;color:var(--accent2)">₹'+(p.amount_total||0).toLocaleString('en-IN')+'</td>'+
-      '<td>'+mbadge(p.payment_method)+'</td>'+
-      '<td style="color:var(--muted)">'+(p.recharge_type||'').replace(/_/g,' ')+'</td>'+
-      '<td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(p.payu_order_id||'—')+'</td>'+
-      '<td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(p.payu_txn_id||'—')+'</td>'+
-      '<td>'+sbadge(p.status)+'</td>'+
-      '<td style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+(p.created_at||'').slice(0,16).replace('T',' ')+'</td>'+
-      '<td style="padding-right:16px"><button class="btn bsm" style="color:var(--danger);border-color:var(--danger);background:rgba(229,62,62,.06)" onclick="deletePayment('+p.id+')">🗑</button></td>'+
-      '</tr>'
-    ).join('');
+    $('ptbody').innerHTML=pays.map(p=>'<tr><td style="padding-left:18px;font-family:var(--mono);color:var(--text-3);font-size:12px">#'+p.id+'</td><td><div style="font-weight:600;color:var(--text)">'+(p.customer_name||'—')+'</div><div style="font-size:11px;color:var(--text-3);font-family:var(--mono)">'+(p.customer_phone||'')+'</div></td><td style="font-family:var(--mono);font-weight:700;color:var(--green)">₹'+(p.amount_total||0).toLocaleString('en-IN')+'</td><td>'+mbadge(p.payment_method)+'</td><td style="color:var(--text-2)">'+(p.recharge_type||'').replace(/_/g,' ')+'</td><td style="font-family:var(--mono);font-size:11px;color:var(--text-3)">'+(p.payu_order_id||'—')+'</td><td style="font-family:var(--mono);font-size:11px;color:var(--text-3)">'+(p.payu_txn_id||'—')+'</td><td>'+sbadge(p.status)+'</td><td style="font-family:var(--mono);font-size:11px;color:var(--text-3)">'+(p.created_at||'').slice(0,16).replace('T',' ')+'</td><td style="padding-right:18px"><button class="btn bsm bdanger" onclick="deletePayment('+p.id+')">🗑</button></td></tr>').join('');
   }catch(e){console.error(e);}
 }
 
-// ✅ Delete payment
-async function deletePayment(id){
-  if(!confirm('Delete this payment record permanently?'))return;
-  try{
-    const r=await apiFetch('DELETE','/api/admin/payments/'+id);
-    if(r.success){toast('Payment deleted');loadPayments();}
-    else toast(r.error||'Failed','err');
-  }catch(e){toast('Network error','err');}
-}
-
-// ✅ Delete activation
-async function deleteActivation(id){
-  if(!confirm('Delete this activation record permanently?'))return;
-  try{
-    const r=await apiFetch('DELETE','/api/admin/activations/'+id);
-    if(r.success){toast('Activation deleted');loadActivations();}
-    else toast(r.error||'Failed','err');
-  }catch(e){toast('Network error','err');}
-}
+async function deletePayment(id){if(!confirm('Delete this payment record permanently?'))return;try{const r=await apiFetch('DELETE','/api/admin/payments/'+id);if(r.success){toast('Payment deleted');loadPayments();}else toast(r.error||'Failed','err');}catch(e){toast('Network error','err');}}
+async function deleteActivation(id){if(!confirm('Delete this activation record permanently?'))return;try{const r=await apiFetch('DELETE','/api/admin/activations/'+id);if(r.success){toast('Activation deleted');loadActivations();}else toast(r.error||'Failed','err');}catch(e){toast('Network error','err');}}
 
 function openCash(){$('m-cash').style.display='flex';}
 async function submitCash(){
@@ -917,7 +1748,7 @@ async function loadChklist(){
   try{
     const r=await apiFetch('GET','/api/admin/customers?page=1&limit=200');
     const cs=r.data?.customers||[];
-    el.innerHTML=cs.map(c=>'<div class="chk-row"><input type="checkbox" id="chk'+c.id+'" value="'+c.id+'"/><label for="chk'+c.id+'" style="cursor:pointer;flex:1"><span style="font-weight:600;color:var(--text)">'+c.name+'</span><span style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-left:8px">'+c.phone+' · '+(c.isp_username||'—')+'</span></label>'+sbadge(realSt(c))+'</div>').join('');
+    el.innerHTML=cs.map(c=>'<div class="chk-row"><input type="checkbox" id="chk'+c.id+'" value="'+c.id+'"/><label for="chk'+c.id+'" style="cursor:pointer;flex:1"><span style="font-weight:600;color:var(--text)">'+c.name+'</span><span style="font-size:11px;color:var(--text-3);font-family:var(--mono);margin-left:8px">'+c.phone+' · '+(c.isp_username||'—')+'</span></label>'+sbadge(realSt(c))+'</div>').join('');
   }catch(e){el.innerHTML='<div class="empty">Failed</div>';}
 }
 
@@ -963,7 +1794,7 @@ async function loadTpls(){
     const r=await apiFetch('GET','/api/admin/notification-templates');
     const ts=r.data?.templates||[];
     if(!ts.length){el.innerHTML='<div class="empty" style="padding:20px">No templates yet</div>';return;}
-    el.innerHTML=ts.map(t=>'<div class="tpl-item" onclick="useTpl(\''+esc(t.title)+'\',\''+esc(t.message)+'\')"><div style="display:flex;align-items:center;justify-content:space-between"><div class="tpl-title">'+t.title+'</div><button class="btn bsm" style="color:var(--danger);border-color:var(--danger);background:rgba(229,62,62,.06)" onclick="event.stopPropagation();delTpl('+t.id+')">✕</button></div><div class="tpl-msg">'+t.message+'</div></div>').join('');
+    el.innerHTML=ts.map(t=>'<div class="tpl-item" onclick="useTpl(\''+esc(t.title)+'\',\''+esc(t.message)+'\')"><div style="display:flex;align-items:center;justify-content:space-between"><div class="tpl-title">'+t.title+'</div><button class="btn bsm bdanger" onclick="event.stopPropagation();delTpl('+t.id+')">✕</button></div><div class="tpl-msg">'+t.message+'</div></div>').join('');
   }catch(e){el.innerHTML='<div class="empty">Failed</div>';}
 }
 
@@ -990,7 +1821,7 @@ async function loadNHistory(){
     const r=await apiFetch('GET','/api/admin/notifications-history');
     const rows=r.data?.notifications||[];
     if(!rows.length){el.innerHTML='<tr><td colspan="5"><div class="empty">No notifications sent yet</div></td></tr>';return;}
-    el.innerHTML=rows.map(n=>'<tr><td style="padding-left:12px;font-weight:600;color:var(--text)">'+(n.customer_name||'—')+'</td><td><span class="badge binfo">'+(n.type||'—')+'</span></td><td style="font-size:12px;color:var(--muted);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(n.message||'—')+'</td><td>'+sbadge(n.status)+'</td><td style="padding-right:12px;font-family:var(--mono);font-size:11px;color:var(--muted)">'+(n.sent_at||'').slice(0,16).replace('T',' ')+'</td></tr>').join('');
+    el.innerHTML=rows.map(n=>'<tr><td style="padding-left:12px;font-weight:600;color:var(--text)">'+(n.customer_name||'—')+'</td><td><span class="badge binfo">'+(n.type||'—')+'</span></td><td style="font-size:12px;color:var(--text-3);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(n.message||'—')+'</td><td>'+sbadge(n.status)+'</td><td style="padding-right:12px;font-family:var(--mono);font-size:11px;color:var(--text-3)">'+(n.sent_at||'').slice(0,16).replace('T',' ')+'</td></tr>').join('');
   }catch(e){el.innerHTML='<tr><td colspan="5"><div class="empty">Failed</div></td></tr>';}
 }
 
@@ -1008,24 +1839,20 @@ async function loadPlans(){
   try{
     const r=await apiFetch('GET','/api/admin/plans');
     const ps=r.data?.plans||[];plansCache=ps;
-
     ['a-plan','e-plan','cc-plan'].forEach(function(selId){
       const sel=document.getElementById(selId);if(!sel)return;
       const cur=sel.value;
       sel.innerHTML='<option value="">— Select Plan —</option>';
       ps.filter(p=>p.is_active).forEach(function(p){
-        const o=document.createElement('option');
-        o.value=p.id;
+        const o=document.createElement('option');o.value=p.id;
         o.textContent=p.name+' — ₹'+p.price+' / '+p.validity_days+'d';
         sel.appendChild(o);
       });
       if(cur)sel.value=cur;
     });
-
-    const tbody=$('plan-tbody');
-    if(!tbody)return;
+    const tbody=$('plan-tbody');if(!tbody)return;
     if(!ps.length){tbody.innerHTML='<tr><td colspan="10"><div class="empty">No plans yet</div></td></tr>';return;}
-    tbody.innerHTML=ps.map(p=>'<tr><td style="padding-left:16px;font-family:var(--mono);color:var(--muted)">#'+p.id+'</td><td style="font-weight:600;color:var(--text)">'+p.name+'</td><td style="font-family:var(--mono);color:var(--text)">'+(p.speed_down_mbps||0)+' Mbps</td><td style="font-family:var(--mono);color:var(--text)">'+(p.speed_up_mbps||0)+' Mbps</td><td style="font-family:var(--mono);font-weight:700;color:var(--accent2)">₹'+p.price+'</td><td style="font-family:var(--mono);color:var(--text)">'+(p.validity_days||30)+' days</td><td><span class="badge binfo">'+(p.isp_server_name||'—')+'</span></td><td style="font-size:12px;color:var(--muted)">'+(p.mikrotik_profile||'—')+'</td><td>'+sbadge(p.is_active?'active':'inactive')+'</td><td style="padding-right:16px"><div class="abtns"><button class="btn bsm bedit" onclick="openEditPlan('+p.id+')">✏ Edit</button><button class="btn bsm" style="color:var(--danger);border-color:var(--danger);background:rgba(229,62,62,.06)" onclick="deactivatePlan('+p.id+')">✕</button></div></td></tr>').join('');
+    tbody.innerHTML=ps.map(p=>'<tr><td style="padding-left:18px;font-family:var(--mono);color:var(--text-3);font-size:12px">#'+p.id+'</td><td style="font-weight:600;color:var(--text)">'+p.name+'</td><td style="font-family:var(--mono);color:var(--text)">'+(p.speed_down_mbps||0)+' Mbps</td><td style="font-family:var(--mono);color:var(--text)">'+(p.speed_up_mbps||0)+' Mbps</td><td style="font-family:var(--mono);font-weight:700;color:var(--green)">₹'+p.price+'</td><td style="font-family:var(--mono);color:var(--text)">'+(p.validity_days||30)+' days</td><td><span class="badge binfo">'+(p.isp_server_name||'—')+'</span></td><td style="font-size:12px;color:var(--text-2)">'+(p.mikrotik_profile||'—')+'</td><td>'+sbadge(p.is_active?'active':'inactive')+'</td><td style="padding-right:18px"><div class="abtns"><button class="btn bsm bedit" onclick="openEditPlan('+p.id+')">✏ Edit</button><button class="btn bsm bdanger" onclick="deactivatePlan('+p.id+')">✕</button></div></td></tr>').join('');
   }catch(e){console.error(e);}
 }
 
@@ -1039,9 +1866,8 @@ function openAddPlan(){
 function openEditPlan(id){
   const p=plansCache.find(x=>x.id===id);if(!p){toast('Not found','err');return;}
   $('plan-modal-title').textContent='Edit Plan — '+p.name;$('pl-id').value=p.id;
-  $('pl-name').value=p.name||'';$('pl-down').value=p.speed_down_mbps||'';
-  $('pl-up').value=p.speed_up_mbps||'';$('pl-price').value=p.price||'';
-  $('pl-days').value=p.validity_days||30;$('pl-isp').value=p.isp_server_id||1;
+  $('pl-name').value=p.name||'';$('pl-down').value=p.speed_down_mbps||'';$('pl-up').value=p.speed_up_mbps||'';
+  $('pl-price').value=p.price||'';$('pl-days').value=p.validity_days||30;$('pl-isp').value=p.isp_server_id||1;
   $('pl-isp-id').value=p.isp_plan_id||'';$('pl-mk-profile').value=p.mikrotik_profile||'';
   $('pl-mk-service').value=p.mikrotik_service||'pppoe';$('pl-active').value=p.is_active?'1':'0';
   $('pl-err').style.display='none';$('m-plan').style.display='flex';
@@ -1068,26 +1894,6 @@ async function deactivatePlan(id){
   else toast(r.error||'Failed','err');
 }
 
-window.addEventListener('load',function(){
-  $('login-btn').addEventListener('click',doLogin);
-  $('login-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
-  $('logout-btn').addEventListener('click',doLogout);
-  ['m-add','m-view','m-edit','m-cash','m-tpl','m-plan'].forEach(function(id){$(id).addEventListener('click',function(e){if(e.target===this)closeM(id);});});
-  if(getToken()){
-    startApp();
-    apiFetch('GET','/api/admin/voice-prefs').then(r=>{
-      if(r.success){
-        voiceEnabled=r.data.voice_enabled===1;
-        voiceLang=r.data.voice_language||'hi-IN';
-        updateVoiceUI();
-        $('voice-settings-btn').style.display='flex';
-        const banner=$('voice-banner');
-        if(banner)banner.style.display='block';
-      }
-    });
-  }else{$('login-page').style.display='flex';$('app-shell').style.display='none';}
-});
-
 // ── Voice ──────────────────────────────────────────────────
 let lastPaymentId=0;let voiceInterval=null;let voiceReady=false;let voiceEnabled=true;let voiceLang='hi-IN';
 const VOICE_MESSAGES={
@@ -1113,8 +1919,7 @@ async function checkNewPayments(){
   if(!voiceReady||!voiceEnabled)return;
   try{
     const r=await apiFetch('GET','/api/admin/payments');
-    const pays=r.data?.payments||[];
-    const successPays=pays.filter(p=>p.status==='success');
+    const pays=r.data?.payments||[];const successPays=pays.filter(p=>p.status==='success');
     if(!successPays.length)return;
     const newPays=successPays.filter(p=>p.id>lastPaymentId);
     if(newPays.length>0){
@@ -1132,11 +1937,28 @@ async function checkNewPayments(){
 }
 
 function speak(text){if(!voiceReady||!voiceEnabled)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=voiceLang;u.rate=0.9;u.pitch=1.0;u.volume=1.0;speechSynthesis.speak(u);}
-function updateVoiceUI(){const btn=$('voice-toggle');const ls=$('voice-lang-sel');if(!btn)return;btn.textContent=voiceEnabled?'🔊 Voice ON':'🔇 Voice OFF';btn.style.color=voiceEnabled?'var(--accent2)':'var(--muted)';btn.style.borderColor=voiceEnabled?'var(--accent2)':'var(--border)';if(ls)ls.value=voiceLang;}
+function updateVoiceUI(){const btn=$('voice-toggle');const ls=$('voice-lang-sel');if(!btn)return;btn.textContent=voiceEnabled?'🔊 Voice ON':'🔇 Voice OFF';btn.style.color=voiceEnabled?'var(--green)':'#6b8bb5';btn.style.borderColor=voiceEnabled?'rgba(16,201,122,0.4)':'rgba(255,255,255,0.07)';if(ls)ls.value=voiceLang;}
 async function toggleVoice(){voiceEnabled=!voiceEnabled;if(voiceEnabled){startPaymentPolling();speak(voiceLang==='hi-IN'?'आवाज़ सूचनाएं चालू हैं!':'Voice notifications enabled!');}else{clearInterval(voiceInterval);speechSynthesis.cancel();}updateVoiceUI();await saveVoicePrefs();toast(voiceEnabled?'🔊 Voice enabled!':'🔇 Voice disabled!');}
 async function changeLanguage(lang){voiceLang=lang;updateVoiceUI();await saveVoicePrefs();speak(lang==='hi-IN'?'भाषा हिंदी में बदल दी गई!':'Language changed to English!');toast('Language saved!');}
 async function saveVoicePrefs(){try{await apiFetch('POST','/api/admin/voice-prefs',{voice_enabled:voiceEnabled,voice_language:voiceLang});}catch(e){}}
 function enableVoiceOnRefresh(){voiceReady=true;if(voiceEnabled)startPaymentPolling();const banner=document.getElementById('voice-banner');if(banner)banner.style.display='none';speak(voiceLang==='hi-IN'?'आवाज़ सूचनाएं चालू हैं!':'Voice notifications enabled!');toast('🔊 Voice active!');}
+
+window.addEventListener('load',function(){
+  $('login-btn').addEventListener('click',doLogin);
+  $('login-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+  $('logout-btn').addEventListener('click',doLogout);
+  ['m-add','m-view','m-edit','m-cash','m-tpl','m-plan'].forEach(function(id){$(id).addEventListener('click',function(e){if(e.target===this)closeM(id);});});
+  if(getToken()){
+    startApp();
+    apiFetch('GET','/api/admin/voice-prefs').then(r=>{
+      if(r.success){
+        voiceEnabled=r.data.voice_enabled===1;voiceLang=r.data.voice_language||'hi-IN';updateVoiceUI();
+        $('voice-settings-btn').style.display='flex';
+        const banner=$('voice-banner');if(banner)banner.style.display='block';
+      }
+    });
+  }else{$('login-page').style.display='flex';$('app-shell').style.display='none';}
+});
 </script>
 </body>
 </html>
