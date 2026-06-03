@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NetFlow Customer Portal</title>
+<title>Customer Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
@@ -41,7 +41,6 @@
     overflow-x: hidden;
   }
 
-  /* ── Noise overlay ── */
   body::before {
     content: '';
     position: fixed; inset: 0;
@@ -49,9 +48,7 @@
     pointer-events: none; z-index: 0; opacity: 0.4;
   }
 
-  /* ════════════════════════════════════
-     LOGIN SCREEN
-  ════════════════════════════════════ */
+  /* ════ LOGIN ════ */
   #login-screen {
     display: flex; align-items: center; justify-content: center;
     min-height: 100vh; padding: 24px;
@@ -59,6 +56,7 @@
                 radial-gradient(ellipse at 10% 80%, rgba(96,165,250,0.07) 0%, transparent 50%),
                 var(--bg);
     position: relative; z-index: 1;
+    flex-direction: column; gap: 0;
   }
 
   .login-box {
@@ -77,7 +75,7 @@
   }
 
   .login-logo {
-    display: flex; align-items: center; gap: 12px; margin-bottom: 32px;
+    display: flex; align-items: center; gap: 12px; margin-bottom: 6px;
   }
   .login-logo-icon {
     width: 44px; height: 44px;
@@ -92,6 +90,14 @@
     letter-spacing: -0.5px;
   }
   .login-logo-text span { color: var(--accent2); }
+
+  .login-merchant-name {
+    font-size: 12px; color: var(--text3); margin-bottom: 24px;
+    padding: 4px 10px; background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 20px; display: inline-block;
+    font-style: italic; letter-spacing: 0.3px;
+  }
+  .login-merchant-name.loaded { color: var(--accent2); border-color: rgba(59,130,246,0.3); }
 
   .login-title {
     font-family: 'Syne', sans-serif;
@@ -138,27 +144,37 @@
     display: none;
   }
 
-  /* ════════════════════════════════════
-     APP SHELL
-  ════════════════════════════════════ */
+  .login-footer-links {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px;
+    margin-top: 20px; padding: 0 8px;
+  }
+  .login-footer-links a {
+    font-size: 11px; color: var(--text3); text-decoration: none;
+    transition: color 0.2s;
+  }
+  .login-footer-links a:hover { color: var(--accent2); }
+  .login-footer-sep { color: var(--border); font-size: 11px; }
+
+  /* ════ APP SHELL ════ */
   #app { display: none; min-height: 100vh; position: relative; z-index: 1; }
 
-  /* ── Top Nav ── */
   .topnav {
     position: sticky; top: 0; z-index: 100;
     background: rgba(10,14,26,0.9); backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border);
-    padding: 0 24px; height: 60px;
+    padding: 0 20px; height: 60px;
     display: flex; align-items: center; justify-content: space-between;
   }
   .nav-brand {
-    font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800;
-    display: flex; align-items: center; gap: 8px;
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 0;
   }
-  .nav-brand-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+  .nav-brand-main { display: flex; align-items: center; gap: 6px; }
+  .nav-brand-dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
+  .nav-merchant-sub { font-size: 10px; color: var(--text3); font-family: 'DM Sans', sans-serif; font-weight: 400; font-style: italic; line-height: 1.2; }
 
-  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .nav-right { display: flex; align-items: center; gap: 8px; }
   .nav-username { font-size: 13px; color: var(--text2); }
   .btn-logout {
     padding: 7px 14px; background: transparent;
@@ -168,7 +184,6 @@
   }
   .btn-logout:hover { border-color: var(--red); color: var(--red); }
 
-  /* ── Bottom Tab Bar ── */
   .tab-bar {
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
     background: rgba(17,24,39,0.96); backdrop-filter: blur(16px);
@@ -183,7 +198,7 @@
     position: relative;
   }
   .tab-item.active { color: var(--accent2); }
-  .tab-item .tab-icon { font-size: 20px; line-height: 1; }
+  .tab-item .tab-icon { font-size: 18px; line-height: 1; }
   .tab-item.active::before {
     content: '';
     position: absolute; top: 0; left: 50%; transform: translateX(-50%);
@@ -199,20 +214,16 @@
     color: white;
   }
 
-  /* ── Page Content ── */
   .page-content {
     padding: 20px 20px 84px;
     max-width: 600px; margin: 0 auto;
   }
 
-  /* ── Pages ── */
   .page { display: none; animation: fadeIn 0.3s ease; }
   .page.active { display: block; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
-  /* ════════════════════════════════════
-     DASHBOARD
-  ════════════════════════════════════ */
+  /* ════ DASHBOARD ════ */
   .hero-card {
     background: linear-gradient(135deg, #1a2a4a 0%, #0f1e38 50%, #0a1628 100%);
     border: 1px solid rgba(59,130,246,0.25);
@@ -224,13 +235,6 @@
     position: absolute; top: -40px; right: -40px;
     width: 160px; height: 160px;
     background: radial-gradient(circle, rgba(59,130,246,0.2) 0%, transparent 70%);
-    border-radius: 50%;
-  }
-  .hero-card::after {
-    content: '';
-    position: absolute; bottom: -30px; left: 30px;
-    width: 100px; height: 100px;
-    background: radial-gradient(circle, rgba(96,165,250,0.1) 0%, transparent 70%);
     border-radius: 50%;
   }
   .hero-name { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
@@ -282,9 +286,7 @@
   }
   .quick-recharge-btn:hover { box-shadow: 0 8px 28px rgba(59,130,246,0.5); transform: translateY(-1px); }
 
-  /* ════════════════════════════════════
-     PLANS / RECHARGE
-  ════════════════════════════════════ */
+  /* ════ PLANS ════ */
   .section-title {
     font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700;
     margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
@@ -317,9 +319,7 @@
   .plan-detail { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text2); }
   .plan-detail-icon { font-size: 15px; }
 
-  .recharge-type-selector {
-    display: flex; gap: 10px; margin-bottom: 20px;
-  }
+  .recharge-type-selector { display: flex; gap: 10px; margin-bottom: 20px; }
   .type-btn {
     flex: 1; padding: 10px;
     background: var(--card2); border: 1.5px solid var(--border);
@@ -341,9 +341,7 @@
   .pay-btn:hover { box-shadow: 0 8px 28px rgba(34,197,94,0.45); transform: translateY(-1px); }
   .pay-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-  /* ════════════════════════════════════
-     HISTORY
-  ════════════════════════════════════ */
+  /* ════ HISTORY ════ */
   .history-list { display: grid; gap: 10px; }
 
   .history-item {
@@ -358,24 +356,18 @@
   .history-date { font-size: 11px; color: var(--text3); text-align: right; margin-top: 2px; }
   .history-txn { font-size: 10px; color: var(--text3); margin-top: 4px; font-family: monospace; }
 
-  /* ════════════════════════════════════
-     NOTIFICATIONS
-  ════════════════════════════════════ */
+  /* ════ NOTIFICATIONS ════ */
   .notif-list { display: grid; gap: 10px; }
-
   .notif-item {
     background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 16px;
-    transition: border-color 0.2s;
+    border-radius: var(--radius); padding: 16px; transition: border-color 0.2s;
   }
   .notif-item.unread { border-color: rgba(59,130,246,0.35); background: linear-gradient(135deg, rgba(59,130,246,0.05), var(--card)); }
   .notif-msg { font-size: 14px; line-height: 1.5; margin-bottom: 8px; }
   .notif-time { font-size: 11px; color: var(--text3); }
   .notif-dot { display: inline-block; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; margin-right: 6px; }
 
-  /* ════════════════════════════════════
-     WIFI CHANGE
-  ════════════════════════════════════ */
+  /* ════ WIFI ════ */
   .wifi-card {
     background: var(--card); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 24px; margin-bottom: 16px;
@@ -384,9 +376,7 @@
   .wifi-icon-big { font-size: 36px; }
   .wifi-current-label { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
   .wifi-current-ssid { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; }
-
   .wifi-form .form-group { margin-bottom: 16px; }
-
   .btn-wifi {
     width: 100%; padding: 15px;
     background: linear-gradient(135deg, #7c3aed, #6d28d9);
@@ -398,9 +388,127 @@
   .btn-wifi:hover { box-shadow: 0 8px 28px rgba(124,58,237,0.5); transform: translateY(-1px); }
   .btn-wifi:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-  /* ════════════════════════════════════
-     SHARED UI
-  ════════════════════════════════════ */
+  /* ════ POLICY MODAL ════ */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(5, 8, 18, 0.88); backdrop-filter: blur(8px);
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal-sheet {
+    width: 100%; max-width: 600px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 24px 24px 0 0;
+    max-height: 90vh; display: flex; flex-direction: column;
+    animation: sheetUp 0.35s cubic-bezier(0.16,1,0.3,1);
+  }
+  @keyframes sheetUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-handle {
+    width: 40px; height: 4px; background: var(--border);
+    border-radius: 2px; margin: 14px auto 0;
+    flex-shrink: 0;
+  }
+
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .modal-title {
+    font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .modal-close {
+    width: 32px; height: 32px; background: var(--card2);
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text2); cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .modal-close:hover { background: var(--red-dim); color: var(--red); border-color: rgba(239,68,68,0.3); }
+
+  .modal-body {
+    overflow-y: auto; padding: 20px;
+    flex: 1;
+  }
+
+  /* Policy content styles */
+  .policy-merchant-banner {
+    background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(96,165,250,0.06));
+    border: 1px solid rgba(59,130,246,0.2); border-radius: 14px;
+    padding: 16px 18px; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .policy-merchant-logo {
+    width: 44px; height: 44px; background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .policy-merchant-info-name { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+  .policy-merchant-info-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  .policy-section { margin-bottom: 24px; }
+  .policy-section-title {
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+    color: var(--accent2); margin-bottom: 10px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .policy-text {
+    font-size: 13px; line-height: 1.75; color: var(--text2);
+  }
+  .policy-text p { margin-bottom: 10px; }
+  .policy-list {
+    list-style: none; padding: 0;
+  }
+  .policy-list li {
+    font-size: 13px; line-height: 1.7; color: var(--text2);
+    padding: 6px 0 6px 18px; position: relative; border-bottom: 1px solid rgba(42,58,85,0.5);
+  }
+  .policy-list li:last-child { border-bottom: none; }
+  .policy-list li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-size: 12px; top: 7px; }
+
+  .contact-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .contact-icon { font-size: 22px; flex-shrink: 0; }
+  .contact-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .contact-value { font-size: 14px; font-weight: 500; color: var(--text); word-break: break-all; }
+  .contact-value a { color: var(--accent2); text-decoration: none; }
+  .contact-value a:hover { text-decoration: underline; }
+
+  .about-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .about-stat {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px;
+    text-align: center;
+  }
+  .about-stat-val { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--accent2); margin-bottom: 4px; }
+  .about-stat-lbl { font-size: 11px; color: var(--text3); }
+
+  .policy-footer {
+    padding: 12px 0 4px;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .policy-footer-title { font-size: 11px; color: var(--text3); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .policy-footer-links {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .policy-link-chip {
+    padding: 6px 12px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; font-size: 12px; color: var(--text2);
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .policy-link-chip:hover { border-color: var(--accent); color: var(--accent2); background: var(--accent-glow); }
+
+  /* ════ SHARED ════ */
   .empty-state {
     text-align: center; padding: 48px 24px; color: var(--text3);
   }
@@ -432,12 +540,8 @@
   .toast.info    { border-color: rgba(59,130,246,0.4); color: var(--accent2); }
   @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(12px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
 
-  .divider {
-    border: none; border-top: 1px solid var(--border);
-    margin: 20px 0;
-  }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
 
-  /* Scrollbar */
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -445,15 +549,15 @@
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     LOGIN SCREEN
-══════════════════════════════════════ -->
+<!-- ══ LOGIN ══ -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">
       <div class="login-logo-icon">📡</div>
-      <div class="login-logo-text">Net<span>Flow</span></div>
+      <div class="login-logo-text" id="login-brand-text">Net<span>Flow</span></div>
     </div>
+    <div class="login-merchant-name" id="login-merchant-name">Loading provider info…</div>
+
     <div class="login-title">Welcome back</div>
     <div class="login-sub">Sign in to your customer portal</div>
 
@@ -468,17 +572,31 @@
     <button class="btn-primary" id="login-btn" onclick="doLogin()">Sign In</button>
     <div class="error-msg" id="login-error"></div>
   </div>
+
+  <div class="login-footer-links">
+    <a href="#" onclick="openPolicy('about');return false;">About Us</a>
+    <span class="login-footer-sep">·</span>
+    <a href="#" onclick="openPolicy('contact');return false;">Contact Us</a>
+    <span class="login-footer-sep">·</span>
+    <a href="#" onclick="openPolicy('refund');return false;">Refund Policy</a>
+    <span class="login-footer-sep">·</span>
+    <a href="#" onclick="openPolicy('privacy');return false;">Privacy Policy</a>
+    <span class="login-footer-sep">·</span>
+    <a href="#" onclick="openPolicy('terms');return false;">Terms & Conditions</a>
+    <span class="login-footer-sep">·</span>
+    <a href="#" onclick="openPolicy('mandate');return false;">Mandate Policy</a>
+  </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     APP
-══════════════════════════════════════ -->
+<!-- ══ APP ══ -->
 <div id="app">
-  <!-- Top Nav -->
   <nav class="topnav">
     <div class="nav-brand">
-      <div class="nav-brand-dot"></div>
-      NetFlow
+      <div class="nav-brand-main">
+        <div class="nav-brand-dot"></div>
+        <span id="nav-brand-name">NetFlow</span>
+      </div>
+      <div class="nav-merchant-sub" id="nav-merchant-sub"></div>
     </div>
     <div class="nav-right">
       <span class="nav-username" id="nav-username"></span>
@@ -486,47 +604,54 @@
     </div>
   </nav>
 
-  <!-- Pages -->
   <div class="page-content">
 
-    <!-- ── Dashboard ── -->
+    <!-- Home -->
     <div class="page active" id="page-home">
       <div id="dashboard-loading" class="loading-spinner"><div class="spinner"></div><span>Loading your profile…</span></div>
       <div id="dashboard-content" style="display:none"></div>
+      <div class="policy-footer" id="home-policy-footer" style="display:none">
+        <div class="policy-footer-title">Quick Links</div>
+        <div class="policy-footer-links">
+          <div class="policy-link-chip" onclick="openPolicy('about')">ℹ️ About Us</div>
+          <div class="policy-link-chip" onclick="openPolicy('contact')">📞 Contact Us</div>
+          <div class="policy-link-chip" onclick="openPolicy('refund')">↩️ Refund Policy</div>
+          <div class="policy-link-chip" onclick="openPolicy('privacy')">🔒 Privacy Policy</div>
+          <div class="policy-link-chip" onclick="openPolicy('terms')">📄 Terms & Conditions</div>
+          <div class="policy-link-chip" onclick="openPolicy('mandate')">📋 Mandate Policy</div>
+        </div>
+      </div>
     </div>
 
-    <!-- ── Recharge ── -->
+    <!-- Recharge -->
     <div class="page" id="page-recharge">
       <div class="section-title">📶 Recharge <span>Plans</span></div>
-
       <div class="recharge-type-selector">
         <div class="type-btn active" id="type-renewal" onclick="setRechargeType('renewal')">🔄 Renewal</div>
         <div class="type-btn" id="type-advance" onclick="setRechargeType('advance')">⏩ Advance</div>
       </div>
-
       <div id="plans-loading" class="loading-spinner"><div class="spinner"></div><span>Fetching plans…</span></div>
       <div id="plans-list" class="plans-grid"></div>
-
       <button class="pay-btn" id="pay-btn" onclick="initiatePayment()">
         💳 Pay ₹<span id="pay-amount">0</span>
       </button>
     </div>
 
-    <!-- ── History ── -->
+    <!-- History -->
     <div class="page" id="page-history">
       <div class="section-title">🧾 Recharge <span>History</span></div>
       <div id="history-loading" class="loading-spinner"><div class="spinner"></div><span>Loading history…</span></div>
       <div id="history-list" class="history-list"></div>
     </div>
 
-    <!-- ── Notifications ── -->
+    <!-- Notifications -->
     <div class="page" id="page-notif">
       <div class="section-title">🔔 <span>Notifications</span></div>
       <div id="notif-loading" class="loading-spinner"><div class="spinner"></div><span>Loading notifications…</span></div>
       <div id="notif-list" class="notif-list"></div>
     </div>
 
-    <!-- ── WiFi ── -->
+    <!-- WiFi -->
     <div class="page" id="page-wifi">
       <div class="section-title">📡 WiFi <span>Settings</span></div>
       <div id="wifi-content"></div>
@@ -560,6 +685,20 @@
   </div>
 </div>
 
+<!-- ══ POLICY MODAL ══ -->
+<div class="modal-overlay" id="policy-modal" onclick="handleModalClick(event)">
+  <div class="modal-sheet" id="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Policy</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <div class="loading-spinner"><div class="spinner"></div><span>Loading…</span></div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════
 //  CONFIG
@@ -574,19 +713,15 @@ let profile = null;
 let plans = [];
 let selectedPlanId = null;
 let rechargeType = 'renewal';
+let merchantInfo = null;
 
 // ══════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════
 window.onload = () => {
   if (token) showApp();
-  // Enter key on login
-  document.getElementById('login-password').addEventListener('keydown', e => {
-    if (e.key === 'Enter') doLogin();
-  });
-  document.getElementById('login-phone').addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('login-password').focus();
-  });
+  document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('login-phone').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-password').focus(); });
 };
 
 // ══════════════════════════════════════
@@ -597,6 +732,78 @@ async function api(path, opts = {}) {
   if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(BASE + path, { ...opts, headers });
   return res.json();
+}
+
+// ══════════════════════════════════════
+//  FRANCHISE INFO LOADER
+//  Reads franchise_* fields directly from the customer profile response.
+//  getProfile() now JOINs the franchises table and returns these fields.
+// ══════════════════════════════════════
+function loadFranchiseInfoFromProfile(p) {
+  // These fields are now returned directly by /api/customer/profile
+  // after the getProfile fix (LEFT JOIN franchises f ON f.id = c.franchise_id)
+  merchantInfo = {
+    name:    p.franchise_name  || '',
+    owner:   p.franchise_owner || '',
+    phone:   p.franchise_phone || '',
+    email:   p.franchise_email || '',
+    city:    p.franchise_city  || '',
+    state:   p.franchise_state || '',
+  };
+  applyMerchantBranding();
+}
+
+// ══════════════════════════════════════
+//  BRANDING
+// ══════════════════════════════════════
+function applyMerchantBranding() {
+  if (!merchantInfo) return;
+
+  const name  = merchantInfo.name  || '';
+  const phone = merchantInfo.phone || '';
+  const city  = merchantInfo.city  || '';
+  const state = merchantInfo.state || '';
+  const email = merchantInfo.email || '';
+
+  // Login badge
+  const badge = document.getElementById('login-merchant-name');
+  if (badge) {
+    if (name) {
+      badge.textContent = name + (city ? ` · ${city}` : '');
+      badge.classList.add('loaded');
+    } else {
+      badge.textContent = 'Powered by NetFlow';
+    }
+  }
+
+  // Login brand name — split last word into accent span
+  if (name) {
+    const brandEl = document.getElementById('login-brand-text');
+    if (brandEl) {
+      const words = name.trim().split(/\s+/);
+      if (words.length >= 2) {
+        brandEl.innerHTML = esc(words.slice(0, -1).join(' ')) + '<span> ' + esc(words[words.length - 1]) + '</span>';
+      } else {
+        brandEl.innerHTML = '<span>' + esc(name) + '</span>';
+      }
+    }
+  }
+
+  // Nav bar
+  const navName = document.getElementById('nav-brand-name');
+  const navSub  = document.getElementById('nav-merchant-sub');
+  if (navName && name) navName.textContent = name;
+  if (navSub) {
+    const parts = [city, state].filter(Boolean);
+    if (phone) parts.push(phone);
+    navSub.textContent = parts.join(' · ');
+  }
+}
+
+// Build merchantInfo from customer profile response fields
+// (profile now returns franchise_* fields directly via JOIN)
+function applyMerchantFromProfile(p) {
+  loadFranchiseInfoFromProfile(p);
 }
 
 // ══════════════════════════════════════
@@ -619,9 +826,9 @@ async function doLogin() {
       body: JSON.stringify({ phone, password })
     });
 
-    if (!data.success) { showLoginError(data.message || data.error || 'Login failed. Check your credentials.'); }
-    else {
-      // Handle single or multiple accounts
+    if (!data.success) {
+      showLoginError(data.message || data.error || 'Login failed. Check your credentials.');
+    } else {
       const d = data.data;
       const t = d.token || (d.accounts && d.accounts[0]?.token);
       if (!t) { showLoginError('No token received. Please try again.'); return; }
@@ -629,8 +836,11 @@ async function doLogin() {
       localStorage.setItem('nf_token', token);
       showApp();
     }
-  } catch (e) { showLoginError('Network error. Please check your connection.'); }
-  finally { btn.disabled = false; btn.textContent = 'Sign In'; }
+  } catch (e) {
+    showLoginError('Network error. Please check your connection.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
 }
 
 function showLoginError(msg) {
@@ -650,12 +860,16 @@ function showApp() {
 function logout() {
   token = null;
   localStorage.removeItem('nf_token');
-  profile = null; plans = []; selectedPlanId = null;
+  profile = null; plans = []; selectedPlanId = null; merchantInfo = null;
   document.getElementById('app').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('login-phone').value = '';
   document.getElementById('login-password').value = '';
   document.getElementById('login-error').style.display = 'none';
+  document.getElementById('home-policy-footer').style.display = 'none';
+  // Reset branding to default
+  document.getElementById('login-merchant-name').textContent = 'Loading provider info…';
+  document.getElementById('login-merchant-name').classList.remove('loaded');
   switchTab('home');
 }
 
@@ -680,44 +894,48 @@ function switchTab(tab) {
 async function loadDashboard() {
   try {
     const data = await api('/api/customer/profile');
-    if (!data.success) { if (data.error === 'Unauthorized') { logout(); return; } }
+    if (!data.success) {
+      if (data.error === 'Unauthorized') { logout(); return; }
+    }
     profile = data.data;
     document.getElementById('nav-username').textContent = profile.name?.split(' ')[0] || '';
+
+    // Franchise fields are now returned directly by /api/customer/profile (via JOIN)
+    loadFranchiseInfoFromProfile(profile);
+
     renderDashboard();
     checkUnread();
   } catch (e) {
-    document.getElementById('dashboard-loading').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load profile. Please refresh.</div></div>';
+    document.getElementById('dashboard-loading').innerHTML =
+      '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Failed to load profile. Please refresh.</div></div>';
   }
 }
 
 function renderDashboard() {
   const p = profile;
-  const loading = document.getElementById('dashboard-loading');
+  document.getElementById('dashboard-loading').style.display = 'none';
   const content = document.getElementById('dashboard-content');
-  loading.style.display = 'none';
   content.style.display = 'block';
+  document.getElementById('home-policy-footer').style.display = 'block';
 
-  const today = new Date();
+  const today  = new Date();
   const expiry = p.expiry_date ? new Date(p.expiry_date) : null;
   const daysLeft = expiry ? Math.ceil((expiry - today) / 86400000) : null;
   const isActive = p.status === 'active';
 
   let expiryClass = '';
   if (daysLeft !== null) {
-    if (daysLeft < 0)  expiryClass = 'expired-val';
+    if (daysLeft < 0) expiryClass = 'expired-val';
     else if (daysLeft <= 7) expiryClass = 'expiring';
   }
-
-  const statusCls = isActive ? 'active' : 'expired';
-  const statusLabel = isActive ? '● Active' : '● Expired';
 
   content.innerHTML = `
     <div class="hero-card">
       <div class="hero-name">${esc(p.name)}</div>
       <div class="hero-phone">📱 ${esc(p.phone)}</div>
-      <div class="status-badge ${statusCls}">
+      <div class="status-badge ${isActive ? 'active' : 'expired'}">
         <div class="status-badge-dot"></div>
-        ${statusLabel}
+        ${isActive ? '● Active' : '● Expired'}
       </div>
       <div class="hero-stats">
         <div class="hero-stat">
@@ -749,12 +967,12 @@ function renderDashboard() {
     </div>` : ''}
 
     <div class="info-grid">
-      ${p.plan_price ? `<div class="info-card"><div class="info-icon">💰</div><div class="info-label">Plan Price</div><div class="info-value">₹${p.plan_price}</div></div>` : ''}
-      ${p.wifi_ssid ? `<div class="info-card"><div class="info-icon">📶</div><div class="info-label">WiFi Name</div><div class="info-value">${esc(p.wifi_ssid)}</div></div>` : ''}
-      ${p.email ? `<div class="info-card"><div class="info-icon">📧</div><div class="info-label">Email</div><div class="info-value" style="font-size:12px">${esc(p.email)}</div></div>` : ''}
-      ${p.address ? `<div class="info-card"><div class="info-icon">📍</div><div class="info-label">Address</div><div class="info-value" style="font-size:12px">${esc(p.address)}</div></div>` : ''}
+      ${p.plan_price   ? `<div class="info-card"><div class="info-icon">💰</div><div class="info-label">Plan Price</div><div class="info-value">₹${p.plan_price}</div></div>` : ''}
+      ${p.wifi_ssid    ? `<div class="info-card"><div class="info-icon">📶</div><div class="info-label">WiFi Name</div><div class="info-value">${esc(p.wifi_ssid)}</div></div>` : ''}
+      ${p.email        ? `<div class="info-card"><div class="info-icon">📧</div><div class="info-label">Email</div><div class="info-value" style="font-size:12px">${esc(p.email)}</div></div>` : ''}
+      ${p.address      ? `<div class="info-card"><div class="info-icon">📍</div><div class="info-label">Address</div><div class="info-value" style="font-size:12px">${esc(p.address)}</div></div>` : ''}
       ${p.router_brand ? `<div class="info-card"><div class="info-icon">📦</div><div class="info-label">Router</div><div class="info-value">${esc(p.router_brand)}</div></div>` : ''}
-      ${p.mac_address ? `<div class="info-card"><div class="info-icon">🔗</div><div class="info-label">MAC Address</div><div class="info-value" style="font-size:12px">${esc(p.mac_address)}</div></div>` : ''}
+      ${p.mac_address  ? `<div class="info-card"><div class="info-icon">🔗</div><div class="info-label">MAC Address</div><div class="info-value" style="font-size:12px">${esc(p.mac_address)}</div></div>` : ''}
     </div>
 
     <button class="quick-recharge-btn" onclick="switchTab('recharge')">
@@ -770,11 +988,9 @@ async function loadPlans() {
   const listEl = document.getElementById('plans-list');
   document.getElementById('plans-loading').style.display = 'flex';
   listEl.innerHTML = '';
-
   try {
     const data = await api('/api/customer/plans');
     document.getElementById('plans-loading').style.display = 'none';
-
     if (!data.success || !data.data?.length) {
       listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No plans available</div></div>';
       return;
@@ -790,7 +1006,6 @@ async function loadPlans() {
 function renderPlans() {
   const listEl = document.getElementById('plans-list');
   if (!plans.length) return;
-
   const midIdx = Math.floor(plans.length / 2);
   listEl.innerHTML = plans.map((plan, i) => `
     <div class="plan-card ${i === midIdx ? 'popular' : ''} ${selectedPlanId === plan.id ? 'selected' : ''}"
@@ -804,7 +1019,7 @@ function renderPlans() {
       </div>
       <div class="plan-details">
         ${plan.speed_down_mbps ? `<div class="plan-detail"><span class="plan-detail-icon">⬇️</span>${plan.speed_down_mbps} Mbps</div>` : ''}
-        ${plan.speed_up_mbps ? `<div class="plan-detail"><span class="plan-detail-icon">⬆️</span>${plan.speed_up_mbps} Mbps</div>` : ''}
+        ${plan.speed_up_mbps   ? `<div class="plan-detail"><span class="plan-detail-icon">⬆️</span>${plan.speed_up_mbps} Mbps</div>` : ''}
         <div class="plan-detail"><span class="plan-detail-icon">📅</span>${plan.validity_days} Days</div>
       </div>
     </div>
@@ -813,11 +1028,8 @@ function renderPlans() {
 
 function selectPlan(id, price) {
   selectedPlanId = id;
-  // Update card styles
   document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
   document.getElementById('plan-' + id)?.classList.add('selected');
-
-  // Calc total with balance
   const due = profile?.balance_due || 0;
   const total = price + due;
   document.getElementById('pay-amount').textContent = total;
@@ -835,57 +1047,42 @@ function setRechargeType(type) {
 // ══════════════════════════════════════
 async function initiatePayment() {
   if (!selectedPlanId) { showToast('Please select a plan first', 'error'); return; }
-
   const btn = document.getElementById('pay-btn');
   btn.disabled = true; btn.textContent = '⏳ Creating order…';
-
   try {
     const data = await api('/api/payments/create-order', {
       method: 'POST',
       body: JSON.stringify({ plan_id: selectedPlanId, recharge_type: rechargeType })
     });
-
     if (!data.success) { showToast(data.error || 'Failed to create order', 'error'); return; }
-
     const order = data.data;
-
-    if (order.payment_gateway === 'razorpay') {
-      openRazorpay(order);
-    } else {
-      showToast('Gateway ' + order.payment_gateway + ' not supported on web yet', 'error');
-    }
+    if (order.payment_gateway === 'razorpay') openRazorpay(order);
+    else showToast('Gateway not supported on web yet', 'error');
   } catch (e) {
     showToast('Network error. Please try again.', 'error');
   } finally {
-    btn.disabled = false; btn.textContent = `💳 Pay ₹${document.getElementById('pay-amount').textContent}`;
+    btn.disabled = false;
+    btn.textContent = `💳 Pay ₹${document.getElementById('pay-amount').textContent}`;
   }
 }
 
 function openRazorpay(order) {
-  const amountPaise = Math.round(parseFloat(order.amount) * 100);
-
+  const m = merchantInfo || {};
+  const bizName = m.name || m.business_name || m.franchise_name || 'NetFlow';
   const options = {
-    key:          order.key,
-    amount:       amountPaise,
-    currency:     'INR',
-    name:         'NetFlow',
-    description:  order.productinfo,
-    prefill: {
-      name:    order.firstname,
-      email:   order.email || 'customer@netflow.in',
-      contact: order.phone,
-    },
+    key: order.key,
+    amount: Math.round(parseFloat(order.amount) * 100),
+    currency: 'INR',
+    name: bizName,
+    description: order.productinfo,
+    prefill: { name: order.firstname, email: order.email || 'customer@netflow.in', contact: order.phone },
     theme: { color: '#3b82f6' },
-    modal: {
-      ondismiss: () => showToast('Payment cancelled', 'info')
-    },
+    modal: { ondismiss: () => showToast('Payment cancelled', 'info') },
     handler: async (response) => {
-      // Payment successful — confirm with backend
       showToast('Verifying payment…', 'info');
       await confirmPayment(order.txnid, response.razorpay_payment_id);
     }
   };
-
   const rzp = new Razorpay(options);
   rzp.on('payment.failed', (resp) => {
     showToast('Payment failed: ' + (resp.error?.description || 'Unknown error'), 'error');
@@ -899,13 +1096,11 @@ async function confirmPayment(txnid, razorpayId) {
       method: 'POST',
       body: JSON.stringify({ txnid, status: 'success', razorpay_id: razorpayId })
     });
-
     if (data.success) {
       showToast('🎉 Recharge successful! Expiry: ' + (data.data?.new_expiry || ''), 'success');
       selectedPlanId = null;
       document.getElementById('pay-btn').style.display = 'none';
       document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
-      // Refresh dashboard
       await loadDashboard();
       switchTab('home');
     } else {
@@ -923,17 +1118,14 @@ async function loadHistory() {
   const listEl = document.getElementById('history-list');
   document.getElementById('history-loading').style.display = 'flex';
   listEl.innerHTML = '';
-
   try {
     const data = await api('/api/customer/recharge-history');
     document.getElementById('history-loading').style.display = 'none';
-
     const items = data.data?.data || [];
     if (!items.length) {
       listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No recharge history yet</div></div>';
       return;
     }
-
     listEl.innerHTML = items.map(item => `
       <div class="history-item">
         <div>
@@ -942,7 +1134,7 @@ async function loadHistory() {
             ${item.recharge_type === 'advance' ? '⏩ Advance' : '🔄 Renewal'} •
             Expiry: ${item.new_expiry ? fmtDate(item.new_expiry) : 'N/A'}
           </div>
-          ${item.txn_id ? `<div class="history-txn">TXN: ${esc(item.txn_id)}</div>` : ''}
+          ${item.txn_id      ? `<div class="history-txn">TXN: ${esc(item.txn_id)}</div>` : ''}
           ${item.razorpay_id ? `<div class="history-txn">RZP: ${esc(item.razorpay_id)}</div>` : ''}
         </div>
         <div>
@@ -964,25 +1156,20 @@ async function loadNotifications() {
   const listEl = document.getElementById('notif-list');
   document.getElementById('notif-loading').style.display = 'flex';
   listEl.innerHTML = '';
-
   try {
     const data = await api('/api/customer/notifications');
     document.getElementById('notif-loading').style.display = 'none';
-
     const notifs = data.data?.notifications || [];
     if (!notifs.length) {
       listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🔕</div><div class="empty-text">No notifications</div></div>';
       return;
     }
-
     listEl.innerHTML = notifs.map(n => `
       <div class="notif-item ${n.status === 'sent' ? 'unread' : ''}">
         <div class="notif-msg">${n.status === 'sent' ? '<span class="notif-dot"></span>' : ''}${esc(n.message)}</div>
         <div class="notif-time">${fmtDateTime(n.sent_at)}</div>
       </div>
     `).join('');
-
-    // Mark as read
     if (data.data?.unread_count > 0) {
       api('/api/customer/notifications/read', { method: 'POST', body: '{}' });
       document.getElementById('notif-badge').style.display = 'none';
@@ -1004,10 +1191,10 @@ async function checkUnread() {
 }
 
 // ══════════════════════════════════════
-//  WIFI CHANGE
+//  WIFI
 // ══════════════════════════════════════
 function renderWifi() {
-  const el = document.getElementById('wifi-content');
+  const el   = document.getElementById('wifi-content');
   const ssid = profile?.wifi_ssid || 'Not set';
   const mac  = profile?.mac_address;
 
@@ -1022,27 +1209,22 @@ function renderWifi() {
       </div>
       ${!mac ? `<div style="background:var(--yellow-dim);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:12px;font-size:13px;color:var(--yellow);">⚠️ No device MAC address registered. WiFi change may not work. Contact your ISP.</div>` : ''}
     </div>
-
     <div class="wifi-card wifi-form">
       <div class="section-title" style="font-size:16px;margin-bottom:16px">🔧 Change WiFi</div>
       <div class="form-group">
         <label class="form-label">New WiFi Name (SSID)</label>
         <input type="text" id="new-ssid" class="form-input" placeholder="Enter new WiFi name">
-        <div style="font-size:11px;color:var(--text3);margin-top:6px">Your full SSID will be prefixed by your ISP (e.g. "NetFlow YourName 4G")</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:6px">Your full SSID will be prefixed by your ISP</div>
       </div>
       <div class="form-group">
         <label class="form-label">New WiFi Password</label>
         <input type="password" id="new-wifi-pass" class="form-input" placeholder="Min 8 characters">
       </div>
-      <button class="btn-wifi" id="wifi-change-btn" onclick="submitWifiChange()">
-        📡 Apply WiFi Change
-      </button>
+      <button class="btn-wifi" id="wifi-change-btn" onclick="submitWifiChange()">📡 Apply WiFi Change</button>
       <div class="error-msg" id="wifi-error" style="margin-top:12px"></div>
     </div>
-
     <div id="wifi-status-card" style="margin-top:12px"></div>
   `;
-
   loadWifiStatus();
 }
 
@@ -1069,25 +1251,19 @@ async function submitWifiChange() {
   const newPass = document.getElementById('new-wifi-pass').value;
   const errEl   = document.getElementById('wifi-error');
   const btn     = document.getElementById('wifi-change-btn');
-
   errEl.style.display = 'none';
-
   if (!newSsid) { errEl.textContent = 'Please enter a new WiFi name.'; errEl.style.display = 'block'; return; }
   if (newPass.length < 8) { errEl.textContent = 'Password must be at least 8 characters.'; errEl.style.display = 'block'; return; }
-
   btn.disabled = true; btn.textContent = '⏳ Applying…';
-
   try {
     const data = await api('/api/customer/wifi-change', {
       method: 'POST',
       body: JSON.stringify({ new_ssid: newSsid, new_wifi_password: newPass })
     });
-
     if (data.success) {
       showToast('✅ WiFi change applied!', 'success');
       document.getElementById('new-ssid').value = '';
       document.getElementById('new-wifi-pass').value = '';
-      // Refresh profile to update displayed SSID
       await loadDashboard();
       renderWifi();
     } else {
@@ -1103,11 +1279,343 @@ async function submitWifiChange() {
 }
 
 // ══════════════════════════════════════
+//  POLICY MODAL
+// ══════════════════════════════════════
+const POLICY_TITLES = {
+  about:   'ℹ️ About Us',
+  contact: '📞 Contact Us',
+  refund:  '↩️ Refund & Cancellation Policy',
+  privacy: '🔒 Privacy Policy',
+  terms:   '📄 Terms & Conditions',
+  mandate: '📋 Mandate Policy',
+};
+
+function openPolicy(type) {
+  document.getElementById('modal-title').textContent = POLICY_TITLES[type] || 'Policy';
+  document.getElementById('modal-body').innerHTML = '<div class="loading-spinner"><div class="spinner"></div><span>Loading…</span></div>';
+  document.getElementById('policy-modal').classList.add('open');
+  renderPolicyContent(type);
+}
+
+function closeModal() {
+  document.getElementById('policy-modal').classList.remove('open');
+}
+
+function handleModalClick(e) {
+  if (e.target === document.getElementById('policy-modal')) closeModal();
+}
+
+function merchantBannerHTML() {
+  const name     = merchantInfo?.name  || 'Your Internet Provider';
+  const city     = merchantInfo?.city  || '';
+  const state    = merchantInfo?.state || '';
+  const fullAddr = [city, state].filter(Boolean).join(', ');
+
+  return `
+    <div class="policy-merchant-banner">
+      <div class="policy-merchant-logo">📡</div>
+      <div>
+        <div class="policy-merchant-info-name">${esc(name)}</div>
+        ${fullAddr ? `<div class="policy-merchant-info-sub">📍 ${esc(fullAddr)}</div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function mField(keys, fallback = '') {
+  const m = merchantInfo || {};
+  for (const k of keys) { if (m[k]) return m[k]; }
+  return fallback;
+}
+
+function renderPolicyContent(type) {
+  const name    = (merchantInfo?.name)  || 'Your Internet Provider';
+  const phone   = (merchantInfo?.phone) || '';
+  const email   = (merchantInfo?.email) || '';
+  const city    = (merchantInfo?.city)  || '';
+  const state   = (merchantInfo?.state) || '';
+  const owner   = (merchantInfo?.owner) || '';
+  const fullAddr = [city, state].filter(Boolean).join(', ');
+  const website  = '';
+  const since    = '';
+  const about_text = '';
+  const grievance_name = owner || name || 'Grievance Officer';
+  const working_hours  = 'Monday – Saturday (9:00 – 18:00)';
+
+  let html = '';
+
+  if (type === 'about') {
+    html = `
+      ${merchantBannerHTML()}
+      ${about_text ? `
+      <div class="policy-section">
+        <div class="policy-section-title">Who We Are</div>
+        <div class="policy-text"><p>${esc(about_text)}</p></div>
+      </div>` : `
+      <div class="policy-section">
+        <div class="policy-section-title">Who We Are</div>
+        <div class="policy-text"><p>${esc(name)} is a local broadband Internet Service Provider committed to delivering fast, reliable, and affordable internet connectivity to homes and businesses in our service area.</p></div>
+      </div>`}
+      <div class="about-stat-grid">
+        ${since ? `<div class="about-stat"><div class="about-stat-val">${esc(since)}</div><div class="about-stat-lbl">Established</div></div>` : ''}
+        ${city  ? `<div class="about-stat"><div class="about-stat-val">${esc(city)}</div><div class="about-stat-lbl">Service Area</div></div>` : ''}
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Our Mission</div>
+        <div class="policy-text"><p>To bridge the digital divide by providing high-speed internet access that empowers individuals and communities.</p></div>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Our Services</div>
+        <ul class="policy-list">
+          <li>High-Speed Broadband Internet for homes and offices</li>
+          <li>Flexible monthly and annual recharge plans</li>
+          <li>24×7 customer support for connectivity issues</li>
+          <li>WiFi router setup and configuration assistance</li>
+        </ul>
+      </div>
+    `;
+  }
+
+  else if (type === 'contact') {
+    html = `
+      ${merchantBannerHTML()}
+      <div class="policy-section">
+        <div class="policy-section-title">Get In Touch</div>
+      </div>
+      ${phone   ? `<div class="contact-card"><div class="contact-icon">📞</div><div><div class="contact-label">Phone / WhatsApp</div><div class="contact-value"><a href="tel:${esc(phone)}">${esc(phone)}</a></div></div></div>` : ''}
+      ${email   ? `<div class="contact-card"><div class="contact-icon">📧</div><div><div class="contact-label">Email</div><div class="contact-value"><a href="mailto:${esc(email)}">${esc(email)}</a></div></div></div>` : ''}
+      ${fullAddr ? `<div class="contact-card"><div class="contact-icon">📍</div><div><div class="contact-label">Address</div><div class="contact-value">${esc(fullAddr)}</div></div></div>` : ''}
+      ${website  ? `<div class="contact-card"><div class="contact-icon">🌐</div><div><div class="contact-label">Website</div><div class="contact-value"><a href="${esc(website)}" target="_blank">${esc(website)}</a></div></div></div>` : ''}
+      <div class="contact-card"><div class="contact-icon">🕐</div><div><div class="contact-label">Support Hours</div><div class="contact-value">${esc(working_hours)}</div></div></div>
+      <div class="policy-section" style="margin-top:16px">
+        <div class="policy-section-title">For Complaints / Escalations</div>
+        <div class="policy-text">
+          <p>If your issue is not resolved within 48 hours, please escalate by emailing us at ${email ? `<strong style="color:var(--accent2)">${esc(email)}</strong>` : 'our support email'} with subject line <strong>"Escalation – [Your Name]"</strong>.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  else if (type === 'refund') {
+    html = `
+      ${merchantBannerHTML()}
+      <div class="policy-section">
+        <div class="policy-section-title">Refund & Cancellation Policy</div>
+        <div class="policy-text"><p>This policy outlines how you can cancel or seek a refund for a service purchased through our portal.</p></div>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Cancellation Terms</div>
+        <ul class="policy-list">
+          <li>Cancellations will only be considered if the request is made within <strong>7 days</strong> of placing the order.</li>
+          <li>Cancellation requests will not be entertained if the service has already been activated and data consumption has begun.</li>
+          <li>${esc(name)} does not accept cancellation requests for plans that have been partially consumed.</li>
+          <li>In case of receipt of a defective or incorrectly configured service, please report to our customer service team within <strong>7 days</strong> of activation.</li>
+          <li>If you feel that the service received is not as described, bring it to the notice of our customer service within 7 days of activation.</li>
+        </ul>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Return / Refund Process</div>
+        <div class="policy-text">
+          <p>We offer refunds within the first <strong>7 days</strong> from the date of your purchase if the service was not activated. If 7 days have passed since your purchase, you will not be offered a return, exchange, or refund of any kind.</p>
+          <p>For refunds approved by ${esc(name)}, it will take up to <strong>15 business days</strong> for the refund to be processed back to the original payment method.</p>
+        </div>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Contact for Refunds</div>
+        <div class="policy-text">
+          <p>To initiate a refund, contact us at: ${phone ? `<strong style="color:var(--accent2)">${esc(phone)}</strong>` : ''} ${email ? `or <strong style="color:var(--accent2)">${esc(email)}</strong>` : ''}.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  else if (type === 'privacy') {
+    html = `
+      ${merchantBannerHTML()}
+      <div class="policy-section">
+        <div class="policy-section-title">Introduction</div>
+        <div class="policy-text">
+          <p>This Privacy Policy describes how <strong>${esc(name)}</strong> and its affiliates (collectively "${esc(name)}, we, our, us") collect, use, share, protect or otherwise process your personal data through our customer portal${website ? ` (${esc(website)})` : ''} (hereinafter referred to as Platform).</p>
+          <p>By visiting this Platform or availing any service offered, you expressly agree to be bound by the terms of this Privacy Policy and the applicable laws of India.</p>
+        </div>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Information We Collect</div>
+        <ul class="policy-list">
+          <li>Personal data provided during registration: name, date of birth, address, telephone/mobile number, email ID</li>
+          <li>Payment instrument information (bank account, credit/debit card details) with your consent</li>
+          <li>Device information including MAC address for service configuration</li>
+          <li>Usage data: transaction history, connection logs, and service usage patterns</li>
+          <li>Identity/address proof documents as required for KYC compliance</li>
+        </ul>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">How We Use Your Information</div>
+        <ul class="policy-list">
+          <li>To provide and manage the internet services you have subscribed to</li>
+          <li>To process payments and maintain billing records</li>
+          <li>To send service alerts, renewal reminders, and important notifications</li>
+          <li>To resolve disputes, troubleshoot problems, and enforce our terms</li>
+          <li>To comply with legal and regulatory requirements</li>
+        </ul>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Information Sharing</div>
+        <ul class="policy-list">
+          <li>We may share data with payment gateways (Razorpay) solely for processing payments</li>
+          <li>We may disclose information to government agencies if required by law</li>
+          <li>We do not sell your personal data to third-party advertisers</li>
+          <li>Technical partners may access data only as needed to provide contracted services</li>
+        </ul>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Security Precautions</div>
+        <div class="policy-text">
+          <p>We adopt reasonable security practices to protect your personal data from unauthorized access, loss, or misuse. All data transmission is encrypted over HTTPS. Users are responsible for maintaining the confidentiality of their login credentials.</p>
+        </div>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Data Deletion & Retention</div>
+        <div class="policy-text">
+          <p>You may request account deletion by contacting us. We retain data for the period required by law or as necessary for dispute resolution and fraud prevention. Anonymized data may be retained for analytics.</p>
+        </div>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Grievance Officer</div>
+        <div class="policy-text">
+          <p><strong>${esc(grievance_name)}</strong><br>
+          ${fullAddr ? `${esc(fullAddr)}<br>` : ''}
+          ${email ? `Email: <strong style="color:var(--accent2)">${esc(email)}</strong><br>` : ''}
+          ${phone ? `Phone: <strong style="color:var(--accent2)">${esc(phone)}</strong><br>` : ''}
+          Hours: ${esc(working_hours)}</p>
+        </div>
+      </div>
+    `;
+  }
+
+  else if (type === 'terms') {
+    html = `
+      ${merchantBannerHTML()}
+      <div class="policy-section">
+        <div class="policy-section-title">Agreement to Terms</div>
+        <div class="policy-text">
+          <p>By accessing or using the services provided by <strong>${esc(name)}</strong>, you agree to be bound by these Terms and Conditions. If you do not agree, please do not use our services.</p>
+        </div>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Service Usage</div>
+        <ul class="policy-list">
+          <li>Services are provided for lawful personal and commercial use only</li>
+          <li>You must not use our network for illegal activities, hacking, or distributing malicious software</li>
+          <li>Sharing your connection credentials with unauthorized persons is prohibited</li>
+          <li>We reserve the right to suspend service for violation of these terms without prior notice</li>
+          <li>Bandwidth intensive activities that affect other users may be subject to fair usage policy</li>
+        </ul>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Payment & Billing</div>
+        <ul class="policy-list">
+          <li>All plan prices are inclusive of applicable taxes unless stated otherwise</li>
+          <li>Payments are non-refundable once a plan has been activated and service commenced</li>
+          <li>Outstanding dues must be cleared before renewing or upgrading your plan</li>
+          <li>We reserve the right to revise plan pricing with reasonable prior notice</li>
+        </ul>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Service Availability</div>
+        <ul class="policy-list">
+          <li>We strive to provide 99% uptime but do not guarantee uninterrupted service</li>
+          <li>Scheduled maintenance will be communicated in advance via SMS or notifications</li>
+          <li>Force majeure events (natural disasters, government restrictions) are excluded from SLA</li>
+          <li>Service credits for extended outages will be evaluated on a case-by-case basis</li>
+        </ul>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Limitation of Liability</div>
+        <div class="policy-text">
+          <p>${esc(name)} shall not be liable for any indirect, incidental, or consequential damages arising from the use or inability to use our services. Our maximum liability shall not exceed the amount paid for the current billing cycle.</p>
+        </div>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Governing Law</div>
+        <div class="policy-text">
+          <p>These Terms are governed by the laws of India. Any disputes shall be subject to the jurisdiction of courts in ${esc(city || 'the service area')}.</p>
+        </div>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Contact</div>
+        <div class="policy-text">
+          <p>For any queries regarding these terms, contact us at: ${email ? `<strong style="color:var(--accent2)">${esc(email)}</strong>` : ''} ${phone ? `or <strong style="color:var(--accent2)">${esc(phone)}</strong>` : ''}.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  else if (type === 'mandate') {
+    html = `
+      ${merchantBannerHTML()}
+      <div class="policy-section">
+        <div class="policy-section-title">Auto-Pay Mandate Policy</div>
+        <div class="policy-text">
+          <p>This policy governs the setup and management of recurring payment mandates (auto-pay) for services provided by <strong>${esc(name)}</strong>.</p>
+        </div>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Mandate Setup</div>
+        <ul class="policy-list">
+          <li>Auto-pay mandates can be set up via UPI AutoPay or bank standing instructions through our portal</li>
+          <li>By setting up a mandate, you authorize ${esc(name)} to debit your account on the plan renewal date</li>
+          <li>The amount debited will correspond to your active plan price at the time of renewal</li>
+          <li>You will receive a notification at least 24 hours before each auto-debit</li>
+        </ul>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Mandate Limits & Frequency</div>
+        <ul class="policy-list">
+          <li>Mandate amount is capped at the maximum plan value available on our platform</li>
+          <li>Frequency is set to monthly by default, matching your plan validity cycle</li>
+          <li>You may set a custom maximum debit limit during mandate setup for added security</li>
+          <li>Mandates are processed through RBI-regulated payment networks (UPI, NACH)</li>
+        </ul>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Cancellation of Mandate</div>
+        <ul class="policy-list">
+          <li>You may cancel your auto-pay mandate at any time through your bank app or UPI app</li>
+          <li>Cancellation of mandate will not affect your current active plan validity</li>
+          <li>You will need to make manual payments for future renewals after cancellation</li>
+          <li>Cancellation requests through our portal take up to 2 business days to process</li>
+        </ul>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Failed Mandate Execution</div>
+        <ul class="policy-list">
+          <li>If an auto-debit fails due to insufficient funds, your service may be suspended after a grace period of 3 days</li>
+          <li>Failed mandate attempts will be notified via SMS and app notification</li>
+          <li>You can make a manual payment to restore service during the grace period</li>
+          <li>${esc(name)} is not liable for service interruption caused by failed mandate execution</li>
+        </ul>
+      </div>
+      <div class="policy-section">
+        <div class="policy-section-title">Dispute Resolution</div>
+        <div class="policy-text">
+          <p>For any disputes related to auto-pay mandates, contact us within <strong>7 days</strong> of the disputed transaction at ${email ? `<strong style="color:var(--accent2)">${esc(email)}</strong>` : 'our support email'} ${phone ? `or <strong style="color:var(--accent2)">${esc(phone)}</strong>` : ''}.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById('modal-body').innerHTML = html;
+}
+
+// ══════════════════════════════════════
 //  HELPERS
 // ══════════════════════════════════════
 function esc(str) {
   if (!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function fmtDate(d) {
@@ -1129,7 +1637,6 @@ function showToast(msg, type = 'info') {
   let existing = document.querySelector('.toast');
   if (existing) existing.remove();
   if (toastTimer) clearTimeout(toastTimer);
-
   const el = document.createElement('div');
   el.className = `toast ${type}`;
   el.textContent = msg;
