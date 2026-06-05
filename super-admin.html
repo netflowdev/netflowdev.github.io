@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SuperAdmin — ISP SaaS Platform</title>
+<title>SuperAdmin ISP SaaS Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
 :root{--bg:#0a0c10;--surface:#111318;--card:#181c26;--border:#252a3a;--accent:#7c6dfa;--accent2:#00d4aa;--danger:#ff4f6d;--warn:#ffb930;--text:#e8eaf0;--muted:#6b7291;--font:'Syne',sans-serif;--mono:'DM Mono',monospace;}
@@ -438,6 +438,22 @@ tr:hover td{background:rgba(124,109,250,.03);}
           <div class="ff"><label>Notes (optional)</label><input id="f-mk-note" placeholder="Router location, IP etc"/></div>
         </div>
       </div>
+
+      <div class="isp-box" style="border-color:#6366f1">
+        <div class="isp-box-title" style="color:#6366f1">📡 TR-069 / GenieACS Configuration</div>
+        <div class="fgrid">
+          <div class="ff full"><label>ACS URL</label><input id="f-tr069-url" placeholder="http://your-acs-server:7557"/></div>
+          <div class="ff"><label>ACS Username</label><input id="f-tr069-user" placeholder="ACS username"/></div>
+          <div class="ff"><label>ACS Password</label><input id="f-tr069-pass" type="password" placeholder="ACS password"/></div>
+          <div class="ff"><label>SSID Prefix</label><input id="f-ssid-prefix" placeholder="e.g. NetFlow"/></div>
+          <div class="ff"><label>WiFi Method</label>
+            <select id="f-wifi-method">
+              <option value="NetFlow Tr-069">NetFlow Tr-069</option>
+              <option value="none">None</option>
+            </select>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="errmsg" id="f-err"></div>
@@ -591,13 +607,13 @@ function updateGWFields(){
 function openAddFranchise(){
   $('f-modal-title').textContent='Add New Franchise';$('f-id').value='';
   ['f-name','f-owner','f-phone','f-email','f-city','f-state',
-   'f-rzp-key','f-rzp-secret','f-ptm-key','f-ptm-secret',
-   'f-jaze-url','f-jaze-user','f-jaze-key','f-mk-key','f-mk-note',
-   'f-zoho-account','f-zoho-apikey','f-zoho-clientid','f-zoho-clientsecret',
-   'f-zoho-token'
-  ].forEach(i=>$(i).value='');
+ 'f-rzp-key','f-rzp-secret','f-ptm-key','f-ptm-secret',
+ 'f-jaze-url','f-jaze-user','f-jaze-key','f-mk-key','f-mk-note',
+ 'f-zoho-account','f-zoho-apikey','f-zoho-clientid','f-zoho-clientsecret',
+ 'f-zoho-token','f-tr069-url','f-tr069-user','f-tr069-pass','f-ssid-prefix'
+].forEach(i=>$(i).value='');
   $('f-gateway').value='razorpay';$('f-active').value='1';$('f-err').style.display='none';
-  updateGWFields();$('m-franchise').style.display='flex';
+  updateGWFields();$('m-franchise').style.display='flex';$('f-wifi-method').value='none';
 }
 
 async function openEditFranchise(id){
@@ -630,6 +646,11 @@ async function openEditFranchise(id){
   $('f-jaze-url').value=f.jaze_api_url||'';$('f-jaze-user').value=f.jaze_api_username||'';
   $('f-jaze-key').value=f.jaze_api_key||'';
   $('f-mk-key').value=f.mikrotik_api_key||'';$('f-mk-note').value=f.mikrotik_scheduler_note||'';
+  $('f-tr069-url').value=f.tr069_acs_url||'';
+  $('f-tr069-user').value=f.tr069_username||'';
+  $('f-tr069-pass').value=f.tr069_password||'';
+  $('f-ssid-prefix').value=f.ssid_prefix||'';
+  $('f-wifi-method').value=f.wifi_method||'none';
   $('f-active').value=f.is_active?'1':'0';$('f-err').style.display='none';
   updateGWFields();$('m-franchise').style.display='flex';
 }
@@ -655,6 +676,11 @@ async function submitFranchise(){
     jaze_api_url:$('f-jaze-url').value.trim(),jaze_api_username:$('f-jaze-user').value.trim(),
     jaze_api_key:$('f-jaze-key').value.trim(),
     mikrotik_api_key:$('f-mk-key').value.trim(),mikrotik_scheduler_note:$('f-mk-note').value.trim(),
+    tr069_acs_url:$('f-tr069-url').value.trim(),
+    tr069_username:$('f-tr069-user').value.trim(),
+    tr069_password:$('f-tr069-pass').value.trim(),
+    ssid_prefix:$('f-ssid-prefix').value.trim(),
+    wifi_method:$('f-wifi-method').value,
     is_active:parseInt($('f-active').value),
   };
   if(!d.name||!d.owner_name||!d.phone){showErr(err,'Name, owner and phone required');return;}
