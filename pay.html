@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>NetFlow — Pay Now</title>
+<title>Pay Now</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
@@ -12,6 +12,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
 .logo-icon{width:56px;height:56px;background:linear-gradient(135deg,#7C6DFA,#9B8FFB);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:10px}
 .logo-name{font-size:22px;font-weight:800;color:#1A1640}
 .logo-sub{font-size:12px;color:#9B94C9;margin-top:2px}
+.logo-phone{font-size:12px;color:#7C6DFA;margin-top:8px;display:none;align-items:center;justify-content:center;gap:4px}
+.logo-phone a{color:#7C6DFA;text-decoration:none;font-weight:600}
 
 /* loading */
 .state-loading{text-align:center;padding:20px 0}
@@ -46,6 +48,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
 .plan-meta-label{font-size:10px;color:#9B94C9;text-transform:uppercase;letter-spacing:0.06em}
 .plan-meta-val{font-size:14px;font-weight:600;color:#1A1640}
 
+/* due-only card */
+.due-only-card{background:#FFF7F0;border:1.5px solid #FFE0C2;border-radius:16px;padding:16px 18px;margin-bottom:20px;display:none}
+.due-only-label{font-size:10px;font-weight:700;color:#D97706;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+.due-only-title{font-size:17px;font-weight:700;color:#1A1640}
+.due-only-sub{font-size:12px;color:#9B94C9;margin-top:4px;line-height:1.5}
+
 .divider{height:1px;background:#EDE9FF;margin:20px 0}
 
 .amount-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
@@ -68,8 +76,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
 <div class="card">
   <div class="logo">
     <div class="logo-icon">⚡</div>
-    <div class="logo-name">NetFlow</div>
+    <div class="logo-name" id="franchise-name">NetFlow</div>
     <div class="logo-sub">Secure Payment Portal</div>
+    <div class="logo-phone" id="franchise-phone">📞 <a href="#" id="franchise-phone-link"></a></div>
   </div>
 
   <!-- Loading -->
@@ -89,7 +98,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
   <div class="state-success" id="state-success" style="display:none">
     <div class="success-icon">✅</div>
     <div class="success-title">Payment Successful!</div>
-    <div class="success-msg">Your plan has been renewed successfully.<br>You will receive a confirmation shortly.</div>
+    <div class="success-msg" id="success-msg">Thank you for your payment.<br>You will receive a confirmation shortly.</div>
   </div>
 
   <!-- Payment UI -->
@@ -102,7 +111,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
       </div>
     </div>
 
-    <div class="plan-card">
+    <div class="plan-card" id="plan-card">
       <div class="plan-label">Your Plan</div>
       <div class="plan-name" id="plan-name">—</div>
       <div class="plan-meta">
@@ -117,12 +126,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
       </div>
     </div>
 
+    <div class="due-only-card" id="due-only-card">
+      <div class="due-only-label">Payment For</div>
+      <div class="due-only-title">Outstanding Due Clearance</div>
+      <div class="due-only-sub">This payment will clear your pending balance. Your current plan will not change.</div>
+    </div>
+
     <div class="due-note" id="due-note">
       <strong>⚠️ Outstanding Due:</strong> <span id="due-amount"></span> included in total
     </div>
 
     <div class="amount-row">
-      <div class="amount-label">Total Amount</div>
+      <div class="amount-label" id="amount-label">Total Amount</div>
       <div class="amount-val" id="pay-amount">₹—</div>
     </div>
 
@@ -131,7 +146,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
   </div>
 </div>
 
-<div class="footer">NetFlow ISP Management · Powered by Cloudflare</div>
+<div class="footer">ISP Billing Portal · Powered by Cloudflare</div>
 
 <script>
 const BASE = 'https://isp-billing-api.netflowcloud.workers.dev';
@@ -146,7 +161,7 @@ function getToken() {
 function show(state) {
   ['loading','error','success','payment'].forEach(s => {
     const el = document.getElementById('state-' + s);
-    if (el) el.style.display = s === state ? (s === 'payment' ? 'block' : 'block') : 'none';
+    if (el) el.style.display = s === state ? 'block' : 'none';
   });
 }
 
@@ -154,6 +169,36 @@ function showError(title, msg) {
   document.getElementById('err-title').textContent = title;
   document.getElementById('err-msg').textContent = msg;
   show('error');
+}
+
+function applyBranding(data) {
+  document.getElementById('franchise-name').textContent = data.franchise_name || 'NetFlow';
+  const phoneWrap = document.getElementById('franchise-phone');
+  const phoneLink = document.getElementById('franchise-phone-link');
+  if (data.franchise_phone) {
+    phoneLink.href = 'tel:' + data.franchise_phone;
+    phoneLink.textContent = data.franchise_phone;
+    phoneWrap.style.display = 'flex';
+  }
+}
+
+function isDueOnly() {
+  return linkData && linkData.recharge_type === 'due_only';
+}
+
+// Returns true if we've already shown the success screen (caller should stop)
+function checkReturnFromPayment() {
+  const params = new URLSearchParams(window.location.search);
+  const status = params.get('status');
+  const txnid = params.get('txnid');
+  if (status === 'success' && txnid) {
+    document.getElementById('success-msg').innerHTML = isDueOnly()
+      ? 'Your outstanding due has been cleared successfully.<br>You will receive a confirmation shortly.'
+      : 'Your plan has been renewed successfully.<br>You will receive a confirmation shortly.';
+    show('success');
+    return true;
+  }
+  return false; // failure or no params — fall through to normal payment UI
 }
 
 async function loadLink() {
@@ -170,20 +215,35 @@ async function loadLink() {
     }
 
     linkData = data.data;
+    applyBranding(linkData);
+
+    // If we're returning from Easebuzz, show success/payment accordingly
+    if (checkReturnFromPayment()) return;
 
     // Fill UI
     const name = linkData.customer_name || 'Customer';
     document.getElementById('cust-avatar').textContent = name.charAt(0).toUpperCase();
     document.getElementById('cust-name').textContent = name;
     document.getElementById('cust-phone').textContent = linkData.customer_phone || '';
-    document.getElementById('plan-name').textContent = linkData.plan_name || 'N/A';
-    document.getElementById('plan-speed').textContent = linkData.plan_speed || 'N/A';
-    document.getElementById('plan-validity').textContent = (linkData.plan_validity || '—') + ' days';
     document.getElementById('pay-amount').textContent = '₹' + (linkData.amount || 0);
 
-    if (linkData.balance_due > 0) {
-      document.getElementById('due-note').style.display = 'block';
-      document.getElementById('due-amount').textContent = '₹' + linkData.balance_due;
+    if (isDueOnly()) {
+      document.getElementById('plan-card').style.display = 'none';
+      document.getElementById('due-only-card').style.display = 'block';
+      document.getElementById('due-note').style.display = 'none';
+      document.getElementById('amount-label').textContent = 'Amount Due';
+    } else {
+      document.getElementById('plan-card').style.display = 'block';
+      document.getElementById('due-only-card').style.display = 'none';
+      document.getElementById('amount-label').textContent = 'Total Amount';
+      document.getElementById('plan-name').textContent = linkData.plan_name || 'N/A';
+      document.getElementById('plan-speed').textContent = linkData.plan_speed || 'N/A';
+      document.getElementById('plan-validity').textContent = (linkData.plan_validity || '—') + ' days';
+
+      if (linkData.balance_due > 0) {
+        document.getElementById('due-note').style.display = 'block';
+        document.getElementById('due-amount').textContent = '₹' + linkData.balance_due;
+      }
     }
 
     show('payment');
@@ -215,8 +275,6 @@ async function startPayment() {
 
     currentTxnId = data.data.txnid;
 
-    // Open Easebuzz in same window via redirect
-    // Since this is a web portal (not Android SDK), use Easebuzz hosted checkout
     const ebzEnv = data.data.env || 'test';
     const accessKey = data.data.access_key;
     const ebzUrl = ebzEnv === 'production'
@@ -232,26 +290,8 @@ async function startPayment() {
   }
 }
 
-// Check if returning from Easebuzz with success param
-function checkReturnFromPayment() {
-  const params = new URLSearchParams(window.location.search);
-  const status = params.get('status');
-  const txnid = params.get('txnid');
-  if (status === 'success' && txnid) {
-    show('success');
-    return true;
-  }
-  if (status === 'failure' && txnid) {
-    // reload normally to show payment UI again
-    return false;
-  }
-  return false;
-}
-
 window.addEventListener('load', () => {
-  if (!checkReturnFromPayment()) {
-    loadLink();
-  }
+  loadLink();
 });
 </script>
 </body>
