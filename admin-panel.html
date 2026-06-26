@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NetAdmin — ISP Management</title>
+    <title>NetAdmin ISP Management</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
@@ -2601,12 +2601,23 @@
       function getUser() {
         return JSON.parse(localStorage.getItem("ngn_user") || "{}");
       }
+
       async function apiFetch(m, p, b) {
         const h = { "Content-Type": "application/json" };
         const t = getToken();
         if (t) h["Authorization"] = "Bearer " + t;
-        return (await fetch(BASE + p, { method: m, headers: h, body: b ? JSON.stringify(b) : undefined })).json();
+        
+        const res = await fetch(BASE + p, { method: m, headers: h, body: b ? JSON.stringify(b) : undefined });
+        
+        if (res.status === 401) {
+          toast("Session expired. Please login again.", "err");
+          setTimeout(() => doLogout(), 2000);
+          return { success: false, error: "Session expired" };
+        }
+        
+        return res.json();
       }
+
       function today() {
         return new Date().toISOString().split("T")[0];
       }
