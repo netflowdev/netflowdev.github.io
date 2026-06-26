@@ -3919,7 +3919,7 @@
               <div style="background:#F0EEFF;border-radius:10px;padding:12px 14px;font-size:12px;font-family:var(--mono);color:#3D3470;word-break:break-all;margin-bottom:16px">${url}</div>
               <div style="display:flex;gap:8px">
                 <button onclick="navigator.clipboard.writeText('${url}').then(()=>toast('Link copied!'))" class="btn bpri" style="flex:1">📋 Copy Link</button>
-                <button onclick="window.open('https://wa.me/?text=${encodeURIComponent('Hi ' + customerName + ', please use this link to renew your NetFlow plan: ' + url)}')" class="btn" style="flex:1;background:#25D366;border-color:#25D366;color:#fff">📲 WhatsApp</button>
+                <button onclick="window.open('https://wa.me/${r.data.customer_phone}?text=${encodeURIComponent('प्रिय ' + customerName + ',\nकृपया अपने ब्रॉडबैंड रिचार्ज का भुगतान नीचे दिए गए लिंक से करें।\n\n💳 Pay Now: ' + url + '\n\nधन्यवाद!')}')" class="btn" style="flex:1;background:#25D366;border-color:#25D366;color:#fff">📲 WhatsApp</button>
                 <button onclick="this.closest('.modal-bg').remove()" class="btn">Close</button>
               </div>
             </div>`;
@@ -3942,13 +3942,14 @@
           }
           tbody.innerHTML = links.map(l => {
             const url = PAY_BASE + '/pay.html?token=' + l.link_token;
-            const waMsg = encodeURIComponent('Please use this link to renew your NetFlow plan: ' + url);
+            const waMsg = encodeURIComponent('प्रिय ' + (l.customer_name||'') + ',\nकृपया अपने ब्रॉडबैंड रिचार्ज का भुगतान नीचे दिए गए लिंक से करें।\n\nPay Now: ' + url + '\n\nधन्यवाद!');
+            const waPhone = (l.customer_phone||'').replace(/\D/g,'');
             return '<tr>' +
               '<td style="font-family:var(--mono);color:var(--txt3);font-size:12px;padding-left:20px">#' + l.id + '</td>' +
               '<td><div style="font-weight:600;color:var(--txt)">' + (l.customer_name||'—') + '</div><div style="font-size:11px;color:var(--txt3);font-family:var(--mono)">' + (l.customer_phone||'') + '</div></td>' +
               '<td style="color:var(--txt2)">' + (l.plan_name||'—') + '</td>' +
               '<td style="font-family:var(--mono);font-weight:700;color:var(--green)">₹' + (l.amount||0) + '</td>' +
-              '<td><button class="btn bsm bpurple-btn" onclick="navigator.clipboard.writeText(\'' + url + '\').then(()=>toast(\'Copied!\'))">📋 Copy</button> <button class="btn bsm" onclick="window.open(\'https://wa.me/?text=' + waMsg + '\')" style="background:#25D366;border-color:#25D366;color:#fff">📲</button></td>' +
+              '<td><button class="btn bsm bpurple-btn" onclick="navigator.clipboard.writeText(\'' + url + '\').then(()=>toast(\'Copied!\'))">📋 Copy</button> <button class="btn bsm" onclick="window.open(\'https://wa.me/91' + waPhone + '?text=' + waMsg + '\')" style="background:#25D366;border-color:#25D366;color:#fff">📲</button></td>' +
               '<td>' + sbadge(l.is_active ? 'active' : 'inactive') + '</td>' +
               '<td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' + (l.created_at||'').slice(0,16) + '</td>' +
               '<td style="padding-right:20px"><button class="btn bsm bdanger" onclick="deactivateLink(' + l.id + ')">Deactivate</button></td>' +
