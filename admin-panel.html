@@ -1186,6 +1186,11 @@
       }
       .tbl-card .tbl-wrap {
         padding: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .tbl-card table {
+        min-width: 750px;
       }
       .tbl-card th {
         padding-left: 20px;
@@ -1320,10 +1325,136 @@
         background: #0f1520;
         color: #e2e8f0;
       }
+      /* ── MOBILE HAMBURGER BUTTON ── */
+      .mob-menu-btn {
+        display: none;
+        position: fixed;
+        top: 14px;
+        left: 14px;
+        z-index: 300;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: var(--sb-bg);
+        border: 1px solid var(--sb-border);
+        color: #fff;
+        font-size: 18px;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--sh-md);
+      }
+      .mob-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 149;
+        backdrop-filter: blur(2px);
+      }
+      .mob-overlay.show { display: block; }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 768px) {
+        .mob-menu-btn { display: flex; }
+
+        /* Sidebar slides in/out */
+        .sidebar {
+          position: fixed;
+          top: 0; left: 0; bottom: 0;
+          z-index: 150;
+          transform: translateX(-100%);
+          transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+          width: 260px;
+        }
+        .sidebar.open { transform: translateX(0); }
+
+        /* Shell & main */
+        .shell { display: block; height: 100vh; overflow-y: auto; }
+        .main { overflow-y: unset; }
+
+        /* Topbar */
+        .topbar {
+          padding: 14px 16px 14px 62px;
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+        .pg-title { font-size: 18px; }
+
+        /* Content */
+        .content { padding: 16px 14px 48px; }
+
+        /* Stats — 2 columns */
+        .stats { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+        .stats3 { grid-template-columns: 1fr 1fr; gap: 10px; }
+        .sc { padding: 16px 14px 12px; }
+        .sc-val { font-size: 24px; letter-spacing: -1px; }
+        .sc-icon { width: 32px; height: 32px; font-size: 14px; margin-bottom: 10px; }
+
+        /* Dashboard grids — stack */
+        div[style*="grid-template-columns: 1.2fr"],
+        div[style*="grid-template-columns: 1.1fr"] {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 14px !important;
+        }
+
+        /* Toolbar */
+        .toolbar { gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+        .sbox { width: 100%; min-width: 0; }
+        .fsel { flex: 1; min-width: 0; }
+
+        /* Table scroll */
+        .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { font-size: 12px; }
+        th { font-size: 9px; padding-bottom: 10px; }
+        td { padding: 10px 10px 10px 0; font-size: 12px; }
+        .tbl-card td:first-child { padding-left: 12px; }
+
+        /* Action buttons */
+        .abtns { gap: 3px; }
+        .bsm { padding: 4px 7px; font-size: 10px; }
+
+        /* Pagination */
+        #cpagination {
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          gap: 8px !important;
+          padding: 10px 14px !important;
+        }
+
+        /* Modals — bottom sheet */
+        .modal-bg { padding: 0; align-items: flex-end; }
+        .modal {
+          border-radius: var(--r-xl) var(--r-xl) 0 0;
+          max-width: 100% !important;
+          max-height: 92vh;
+          padding: 24px 18px;
+        }
+        .fgrid { grid-template-columns: 1fr; gap: 10px; }
+        .ff.full { grid-column: 1; }
+        .dgrid { grid-template-columns: 1fr; }
+
+        /* Cards */
+        .card { padding: 16px; }
+        .modal-title { font-size: 16px; margin-bottom: 16px; }
+
+        /* Login */
+        .login-card { width: 92%; padding: 32px 20px; }
+      }
+
+      @media (max-width: 420px) {
+        .stats { grid-template-columns: 1fr 1fr; }
+        .sc-val { font-size: 20px; }
+        .topbar { padding: 12px 12px 12px 56px; }
+        .pg-title { font-size: 16px; }
+      }
     </style>
   </head>
   <body>
     <div class="toast" id="toast"></div>
+    <button class="mob-menu-btn" id="mob-menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="mob-overlay" id="mob-overlay" onclick="closeSidebar()"></div>
 
     <!-- LOGIN -->
     <div class="login-wrap" id="login-page">
@@ -1618,6 +1749,14 @@
                 <option value="expired">Expired</option>
                 <option value="suspended">Suspended</option>
                 <option value="lead">Lead</option>
+              </select>
+              <select class="fsel" id="cpagesize" onchange="_custChangeSize()" title="Rows per page">
+                <option value="25">25 / page</option>
+                <option value="50">50 / page</option>
+                <option value="100">100 / page</option>
+                <option value="200">200 / page</option>
+                <option value="500">500 / page</option>
+                <option value="1000">1000 / page</option>
               </select>
               <button class="btn" onclick="loadCustomers()">↺ Refresh</button>
             </div>
@@ -2827,7 +2966,7 @@
             '<td style="padding-right:20px"><div class="abtns">' +
             '<button class="btn bsm bview" onclick="openView(' + c.id + ')">👁</button>' +
             '<button class="btn bsm bedit" onclick="openEdit(' + c.id + ')">✏</button>' +
-            '<button class="btn bsm bpurple-btn" onclick="generateLink(' + c.id + ',' + "'" + n + "')" + ' title="Payment Link">🔗</button>' +
+            '<button class="btn bsm bpurple-btn" onclick="generateLink(' + c.id + ",'" + n + "')" + '" title="Payment Link">🔗</button>' +
             '<button class="btn bsm bdanger" onclick="deleteCustomer(' + c.id + ',' + "'" + n + "'" + ')">🗑</button>' +
             '</div></td></tr>';
         }).join("");
@@ -2866,6 +3005,7 @@
 
       function searchC() { loadCustomers(); }
       function filterSt(s) { $("cstatus").value = s; loadCustomers(); }
+      function _custChangeSize() { _custSize = parseInt($("cpagesize").value); _custPage = 1; _renderCustPage(); }
 
       function openView(id) {
         const c = custCache.find((x) => x.id === id);
@@ -4001,6 +4141,21 @@
         if (r.success) { toast('Link deactivated'); loadPaymentLinks(); }
         else toast(r.error || 'Failed', 'err');
       }
+
+      /* ── MOBILE SIDEBAR ── */
+      function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('open');
+        $('mob-overlay').classList.toggle('show');
+      }
+      function closeSidebar() {
+        document.querySelector('.sidebar').classList.remove('open');
+        $('mob-overlay').classList.remove('show');
+      }
+      document.querySelectorAll('.nav-item').forEach(function(el) {
+        el.addEventListener('click', function() {
+          if (window.innerWidth <= 768) closeSidebar();
+        });
+      });
 
       window.addEventListener("load", function () {
         $("login-btn").addEventListener("click", doLogin);
