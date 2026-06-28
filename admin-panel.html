@@ -4081,12 +4081,54 @@
       // ── PAYMENT LINKS ─────────────────────────────────────────────
       const PAY_BASE = 'https://netflowdev.github.io'; // update to your hosted pay.html URL
 
+      function buildReminderMessage(data, url, lang = 'hi') {
+        const name      = data.customer_name;
+        const today     = new Date().toISOString().split('T')[0];
+        const expiry    = data.expiry_date;
+        const isExpired = expiry && expiry < today;
+        const daysLeft  = (expiry && !isExpired)
+          ? Math.ceil((new Date(expiry) - new Date(today)) / 86400000)
+          : null;
+
+        const formatDate = (d) => d ? d.split('-').reverse().join('-') : '';
+
+        const APP_LINK = 'https://pub-34318815f8fc477d8f35e094f9e2a42d.r2.dev/app-release.apk';
+
+        if (lang === 'en') {
+          const appLineEn = `\n\n📱 *NetFlow MyWiFi App* — Recharge • Change WiFi Password • OTT Add-ons • View Plan\n⬇️ Download: ${APP_LINK}\nLogin: Use your WhatsApp number as both Username & Password`;
+          if (data.recharge_type === 'due_only') {
+            return `Dear ${name},\nYour broadband recharge payment of ₹${data.balance_due} till ${formatDate(expiry)} is still pending. Please make the payment using the link below at the earliest.\n\n💳 Pay Now: ${url}${appLineEn}\n\nThank you!`;
+          }
+          if (isExpired) {
+            return `Dear ${name},\nYour broadband plan has expired. Please recharge immediately to continue your service.\nTotal Amount Due: ₹${data.amount}\n\n💳 Pay Now: ${url}${appLineEn}\n\nThank you!`;
+          }
+          if (daysLeft !== null && daysLeft <= 5) {
+            return `Dear ${name},\nYour broadband plan is expiring in ${daysLeft} day(s) on ${formatDate(expiry)}. Please recharge using the link below.\n\n💳 Pay Now: ${url}${appLineEn}\n\nThank you!`;
+          }
+          return `Dear ${name},\nPlease make your broadband recharge payment using the link below.\n\n💳 Pay Now: ${url}${appLineEn}\n\nThank you!`;
+        }
+
+        const appLineHi = `\n\n📱 *NetFlow MyWiFi App* से करें — रिचार्ज • WiFi पासवर्ड बदलें • OTT Add-ons • Plan देखें\n⬇️ Download: ${APP_LINK}\nLogin: Username & Password दोनों अपना WhatsApp नंबर डालें`;
+        if (data.recharge_type === 'due_only') {
+          return `प्रिय ${name},\nआपका दि. ${formatDate(expiry)} तक का ब्रॉडबैंड रिचार्ज का ₹${data.balance_due} भुगतान अभी तक बाकी है। कृपया नीचे दिए गए लिंक से जल्द भुगतान करें।\n\n💳 Pay Now: ${url}${appLineHi}\n\nधन्यवाद!`;
+        }
+        if (isExpired) {
+          return `प्रिय ${name},\nआपका ब्रॉडबैंड प्लान समाप्त हो गया है। सेवा जारी रखने हेतु कृपया तुरंत रिचार्ज करें।\nकुल देय राशि: ₹${data.amount}\n\n💳 Pay Now: ${url}${appLineHi}\n\nधन्यवाद!`;
+        }
+        if (daysLeft !== null && daysLeft <= 5) {
+          return `प्रिय ${name},\nआपका प्लान ${daysLeft} दिन में (${formatDate(expiry)}) को समाप्त हो रहा है। रिचार्ज करने हेतु कृपया नीचे दिए गए लिंक का उपयोग करें।\n\n💳 Pay Now: ${url}${appLineHi}\n\nधन्यवाद!`;
+        }
+        return `प्रिय ${name},\nकृपया अपने ब्रॉडबैंड रिचार्ज का भुगतान नीचे दिए गए लिंक से करें।\n\n💳 Pay Now: ${url}${appLineHi}\n\nधन्यवाद!`;
+      }
+
       async function generateLink(customerId, customerName) {
         if (!confirm('Generate payment link for ' + customerName + '?\n\nAny existing active link for this customer will be replaced.')) return;
         try {
           const r = await apiFetch('POST', '/api/admin/payment-links/generate', { customer_id: customerId });
           if (!r.success) { toast(r.error || 'Failed to generate link', 'err'); return; }
           const url = r.data.url;
+          const waMessageHi = buildReminderMessage(r.data, url, 'hi');
+          const waMessageEn = buildReminderMessage(r.data, url, 'en');
           const modal = document.createElement('div');
           modal.className = 'modal-bg';
           modal.innerHTML = `
@@ -4094,9 +4136,10 @@
               <div class="modal-title">🔗 Payment Link Generated!</div>
               <div style="font-size:13px;color:var(--txt3);margin-bottom:16px">Share this link with <strong>${customerName}</strong> via WhatsApp or SMS. No login needed.</div>
               <div style="background:#F0EEFF;border-radius:10px;padding:12px 14px;font-size:12px;font-family:var(--mono);color:#3D3470;word-break:break-all;margin-bottom:16px">${url}</div>
-              <div style="display:flex;gap:8px">
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
                 <button onclick="navigator.clipboard.writeText('${url}').then(()=>toast('Link copied!'))" class="btn bpri" style="flex:1">📋 Copy Link</button>
-                <button onclick="window.open('https://wa.me/${r.data.customer_phone}?text=${encodeURIComponent('प्रिय ' + customerName + ',\nकृपया अपने ब्रॉडबैंड रिचार्ज का भुगतान नीचे दिए गए लिंक से करें।\n\n💳 Pay Now: ' + url + '\n\nधन्यवाद!')}')" class="btn" style="flex:1;background:#25D366;border-color:#25D366;color:#fff">📲 WhatsApp</button>
+                <button onclick="window.open('https://wa.me/${r.data.customer_phone}?text=${encodeURIComponent(waMessageHi)}')" class="btn" style="flex:1;background:#25D366;border-color:#25D366;color:#fff">📲 Hindi</button>
+                <button onclick="window.open('https://wa.me/${r.data.customer_phone}?text=${encodeURIComponent(waMessageEn)}')" class="btn" style="flex:1;background:#128C7E;border-color:#128C7E;color:#fff">📲 English</button>
                 <button onclick="this.closest('.modal-bg').remove()" class="btn">Close</button>
               </div>
             </div>`;
