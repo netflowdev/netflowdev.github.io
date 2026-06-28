@@ -14,7 +14,7 @@
         --sb-surface: rgba(255, 255, 255, 0.03);
         --sb-border: rgba(255, 255, 255, 0.06);
         --sb-hover: rgba(255, 255, 255, 0.05);
-        --sb-active-bg: rgba(56, 189, 248, 0.08);
+        --sb-active-bg: rgba(249, 250, 250, 0.15);
         --sb-active-border: #38bdf8;
         --bg: #f0f2f7;
         --surface: #ffffff;
@@ -169,7 +169,7 @@
         gap: 11px;
         padding: 10px 18px 10px 22px;
         cursor: pointer;
-        color: rgba(255, 255, 255, 0.4);
+        color: rgba(255, 255, 255, 0.95);
         font-size: 13.5px;
         font-weight: 500;
         transition: all 0.18s;
@@ -267,7 +267,7 @@
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border-bottom: 1px solid var(--border);
-        padding: 18px 36px;
+        padding: 12px 36px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -287,7 +287,7 @@
         letter-spacing: 0.02em;
       }
       .content {
-        padding: 28px 36px 48px;
+        padding: 16px 36px 48px;
       }
       .stats {
         display: grid;
@@ -594,7 +594,7 @@
         display: flex;
         gap: 10px;
         align-items: center;
-        margin-bottom: 18px;
+        margin-bottom: 12px;
         flex-wrap: wrap;
       }
       .sbox {
@@ -1185,12 +1185,21 @@
         box-shadow: var(--sh-sm);
       }
       .tbl-card .tbl-wrap {
-        padding: 0;
         overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+        overflow-y: auto;
+        max-height: calc(100vh - 190px);
       }
       .tbl-card table {
         min-width: 750px;
+      }
+      .tbl-card thead th {
+        position: sticky;
+        top: 0;
+        background: var(--surface);
+        z-index: 5;
+        box-shadow: 0 1px 0 var(--border);
+        padding-top: 14px;
+        padding-bottom: 14px;
       }
       .tbl-card th {
         padding-left: 20px;
