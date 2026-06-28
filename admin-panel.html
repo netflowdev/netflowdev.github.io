@@ -1629,7 +1629,7 @@
             <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px">
               <div class="card fade-up fade-up-d2">
                 <div class="card-hd">
-                  Recent customers
+                  Recent Payments
                   <span class="card-hd-sub" id="dash-cnt"></span>
                 </div>
                 <div id="dash-recent">
@@ -2654,36 +2654,39 @@
     </div>
 
     <!-- CASH PAYMENT -->
-    <div class="modal-bg" id="m-cash" style="display: none">
-      <div class="modal" style="max-width: 460px">
-        <div class="modal-title">Record cash payment</div>
-        <div class="fgrid">
-          <div class="ff full">
-            <label>Customer ID *</label>
-            <input id="cc-id" placeholder="Customer ID" />
+      <div class="modal-bg" id="m-cash" style="display: none">
+        <div class="modal" style="max-width: 460px">
+          <div class="modal-title">Record cash payment</div>
+          <div class="fgrid">
+            <div class="ff full">
+              <label>Search Customer *</label>
+              <input id="cc-search" placeholder="Type name or mobile..." oninput="searchCashCustomer()" autocomplete="off" />
+              <div id="cc-results" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);margin-top:4px;max-height:180px;overflow-y:auto;box-shadow:var(--sh-sm)"></div>
+              <input type="hidden" id="cc-id" />
+              <div id="cc-selected" style="display:none;margin-top:6px;padding:8px 12px;background:var(--green-l);border:1px solid rgba(5,150,105,0.2);border-radius:var(--r-sm);font-size:12px;color:var(--green);font-weight:600"></div>
+            </div>
+            <div class="ff full">
+              <label>Plan *</label>
+              <select id="cc-plan">
+                <option value="">— Select Plan —</option>
+              </select>
+            </div>
+            <div class="ff">
+              <label>Amount (₹) *</label>
+              <input id="cc-amt" type="number" placeholder="600" />
+            </div>
+            <div class="ff">
+              <label>Notes</label>
+              <input id="cc-notes" placeholder="Collected by agent..." />
+            </div>
           </div>
-          <div class="ff full">
-            <label>Plan *</label>
-            <select id="cc-plan">
-              <option value="">— Select Plan —</option>
-            </select>
+          <div class="errmsg" id="cc-err"></div>
+          <div class="mactions">
+            <button class="btn" onclick="closeM('m-cash')">Cancel</button>
+            <button class="btn bpri" id="cc-btn" onclick="submitCash()">Record</button>
           </div>
-          <div class="ff">
-            <label>Amount (₹) *</label>
-            <input id="cc-amt" type="number" placeholder="600" />
-          </div>
-          <div class="ff">
-            <label>Notes</label>
-            <input id="cc-notes" placeholder="Collected by agent..." />
-          </div>
-        </div>
-        <div class="errmsg" id="cc-err"></div>
-        <div class="mactions">
-          <button class="btn" onclick="closeM('m-cash')">Cancel</button>
-          <button class="btn bpri" id="cc-btn" onclick="submitCash()">Record</button>
         </div>
       </div>
-    </div>
 
     <!-- SAVE TEMPLATE -->
     <div class="modal-bg" id="m-tpl" style="display: none">
@@ -2719,6 +2722,13 @@
         const [y, m, day] = d.split('-');
         return day + '-' + m + '-' + y;
       }
+
+      function fmtDateTime(d) {
+      if (!d) return '—';
+      const [date, time] = d.replace('T', ' ').split(' ');
+      const [y, m, day] = date.split('-');
+      return (time ? time.slice(0,5) + ' ' : '') + day + '-' + m + '-' + y;
+    }
 
       function $(id) {
         return document.getElementById(id);
@@ -2881,42 +2891,34 @@
 
       async function loadDash() {
         try {
-          const [cr, ar] = await Promise.all([
+          const [cr, ar, pr] = await Promise.all([
             apiFetch("GET", "/api/admin/customers?page=1&limit=9999"),
             apiFetch("GET", "/api/admin/activations?status=pending&action=update"),
+            apiFetch("GET", "/api/admin/payments"),
           ]);
           const all = cr.data?.customers || [];
           custCache = all;
           const td = today();
           $("s-total").textContent = all.length;
-          $("s-active").textContent = all.filter(
-            (c) => c.status === "active" && (!c.expiry_date || c.expiry_date >= td),
-          ).length;
-          $("s-expired").textContent = all.filter(
-            (c) => c.status === "expired" || (c.status === "active" && c.expiry_date && c.expiry_date < td),
-          ).length;
+          $("s-active").textContent = all.filter(c => c.status === "active" && (!c.expiry_date || c.expiry_date >= td)).length;
+          $("s-expired").textContent = all.filter(c => c.status === "expired" || (c.status === "active" && c.expiry_date && c.expiry_date < td)).length;
           $("s-pending").textContent = ar.data?.activations?.length || 0;
-          const rec = all.slice(0, 5);
-          $("dash-cnt").textContent = "(" + all.length + " total)";
-          $("dash-recent").innerHTML = rec.length
-            ? rec
-                .map(
-                  (c) =>
-                    '<div class="rc-row"><div><div class="rc-name">' +
-                    c.name +
-                    '</div><div class="rc-meta">' +
-                    c.phone +
-                    " · " +
-                    (c.isp_server || "—") +
-                    "</div></div>" +
-                    sbadge(realSt(c)) +
-                    "</div>",
-                )
-                .join("")
-            : '<div class="empty">No customers yet</div>';
-        } catch (e) {
-          console.error(e);
-        }
+
+          // Recent Payments
+          const pays = (pr.data?.payments || []).filter(p => p.status === "success").slice(0, 10);
+          $("dash-cnt").textContent = "(" + (pr.data?.payments || []).filter(p => p.status === "success").length + " total)";
+          $("dash-recent").innerHTML = pays.length
+            ? pays.map(p =>
+                '<div class="rc-row">' +
+                '<div>' +
+                  '<div class="rc-name">' + (p.customer_name || "—") + '</div>' +
+                  '<div class="rc-meta">' + fmtDateTime(p.created_at) + ' · ' + (p.payment_method || "—") + '</div>' +
+                '</div>' +
+                '<div style="font-family:var(--mono);font-weight:700;color:var(--green)">₹' + (p.amount_total || 0) + '</div>' +
+                '</div>'
+              ).join("")
+            : '<div class="empty">No payments yet</div>';
+        } catch(e) { console.error(e); }
       }
 
       let _custAll = [], _custPage = 1, _custSize = 100;
@@ -3279,13 +3281,13 @@
                 '</td><td style="color:var(--txt2);font-size:12px">' +
                 (a.mikrotik_profile && a.mikrotik_profile !== "jaze" ? a.mikrotik_profile : "—") +
                 '</td><td style="font-family:var(--mono);font-size:12px;color:var(--txt)">' +
-                (a.expiry_date || "—") +
+                fmtDate(a.expiry_date) +
                 "</td><td>" +
                 sbadge(a.status) +
                 '</td><td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' +
-                (a.created_at || "").slice(0, 16) +
+                fmtDateTime(a.created_at) +
                 '</td><td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' +
-                (a.confirmed_at ? (a.confirmed_at || "").slice(0, 16) : "—") +
+                (a.confirmed_at ? fmtDateTime(a.confirmed_at) : '—') +
                 '</td><td style="padding-right:20px"><button class="btn bsm bdanger" onclick="deleteActivation(' +
                 a.id +
                 ')">🗑</button></td></tr>',
@@ -3332,12 +3334,11 @@
                 (p.recharge_type || "").replace(/_/g, " ") +
                 '</td><td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' +
                 (p.payu_order_id || "—") +
-                '</td><td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' +
-                (p.payu_txn_id || "—") +
+                '</td><td style="font-family:var(--mono);font-size:11px;color:var(--txt3);max-width:160px;word-break:break-all;white-space:normal">' + (p.payu_txn_id || "—") +
                 "</td><td>" +
                 sbadge(p.status) +
                 '</td><td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' +
-                (p.created_at || "").slice(0, 16) +
+                fmtDateTime(p.created_at) +
                 '</td><td style="padding-right:20px"><button class="btn bsm bdanger" onclick="deletePayment(' +
                 p.id +
                 ')">🗑</button></td></tr>',
@@ -3374,8 +3375,13 @@
       }
 
       function openCash() {
+        $("cc-search").value = "";
+        $("cc-id").value = "";
+        $("cc-results").style.display = "none";
+        $("cc-selected").style.display = "none";
         $("m-cash").style.display = "flex";
       }
+
       async function submitCash() {
         const btn = $("cc-btn"),
           err = $("cc-err");
@@ -3492,7 +3498,7 @@
                 "</td><td>" +
                 sbadge(s.status) +
                 '</td><td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' +
-                (s.created_at || "").slice(0, 16) +
+                fmtDateTime(s.created_at) +
                 "</td></tr>",
             )
             .join("");
@@ -3805,9 +3811,11 @@
     const r=await apiFetch('GET','/api/admin/notifications-history');
     const rows=r.data?.notifications||[];
     if(!rows.length){el.innerHTML='<tr><td colspan="5"><div class="empty">No notifications sent yet</div></td></tr>';return;}
-    el.innerHTML=rows.map(n=>'<tr><td style="padding-left:12px;font-weight:600;color:var(--text)">'+(n.customer_name||'—')+'</td><td><span class="badge binfo">'+(n.type||'—')+'</span></td><td style="font-size:12px;color:var(--text-3);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(n.message||'—')+'</td><td>'+sbadge(n.status)+'</td><td style="padding-right:12px;font-family:var(--mono);font-size:11px;color:var(--text-3)">'+(n.sent_at||'').slice(0,16).replace('T',' ')+'</td></tr>').join('');
+    el.innerHTML=rows.map(n=>'<tr><td style="padding-left:12px;font-weight:600;color:var(--text)">'+(n.customer_name||'—')+'</td><td><span class="badge binfo">'+(n.type||'—')+'</span></td><td style="font-size:12px;color:var(--text-3);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(n.message||'—')+'</td><td>'+sbadge(n.status)+'</td><td style="padding-right:12px;font-family:var(--mono);font-size:11px;color:var(--text-3)">'+fmtDateTime(n.sent_at)+'</td></tr>').join('');
   }catch(e){el.innerHTML='<tr><td colspan="5"><div class="empty">Failed</div></td></tr>';}
 }
+
+
 
       async function deleteCustomer(id, name) {
         if (
@@ -3967,6 +3975,46 @@
         } else toast(r.error || "Failed", "err");
       }
 
+      function searchCashCustomer() {
+        const q = $("cc-search").value.trim().toLowerCase();
+        const res = $("cc-results");
+        const sel = $("cc-selected");
+        $("cc-id").value = "";
+        sel.style.display = "none";
+
+        if (q.length < 2) { res.style.display = "none"; return; }
+
+        const matches = custCache.filter(c =>
+          c.name.toLowerCase().includes(q) || (c.phone || "").includes(q)
+        ).slice(0, 8);
+
+        if (!matches.length) {
+          res.style.display = "block";
+          res.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--txt3);font-family:var(--mono)">No customers found</div>';
+          return;
+        }
+
+        res.style.display = "block";
+        res.innerHTML = matches.map(c =>
+          '<div onclick="selectCashCustomer(' + c.id + ',\'' + c.name.replace(/'/g, "\\'") + '\',' + (c.balance_due || 0) + ')" ' +
+          'style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.12s" ' +
+          'onmouseover="this.style.background=\'var(--blue-l)\'" onmouseout="this.style.background=\'\'">' +
+          '<div style="font-weight:600;color:var(--txt);font-size:13px">' + c.name + '</div>' +
+          '<div style="font-size:11px;color:var(--txt3);font-family:var(--mono)">' + c.phone + ' · ' + (c.plan_name || "No plan") + (c.balance_due > 0 ? ' · <span style="color:var(--red)">Due ₹' + c.balance_due + '</span>' : '') + '</div>' +
+          '</div>'
+        ).join("");
+      }
+
+      function selectCashCustomer(id, name, due) {
+        $("cc-id").value = id;
+        $("cc-search").value = "";
+        $("cc-results").style.display = "none";
+        const sel = $("cc-selected");
+        sel.style.display = "block";
+        sel.innerHTML = "✓ Selected: <strong>" + name + "</strong>" + (due > 0 ? ' · <span style="color:var(--red)">Due ₹' + due + '</span>' : "");
+      }
+
+
       /* ── Voice ── */
       let lastPaymentId = 0,
         voiceInterval = null,
@@ -4078,6 +4126,8 @@
         toast("🔊 Voice active!");
       }
 
+
+
       // ── PAYMENT LINKS ─────────────────────────────────────────────
       const PAY_BASE = 'https://netflowdev.github.io'; // update to your hosted pay.html URL
 
@@ -4171,7 +4221,7 @@
               '<td style="font-family:var(--mono);font-weight:700;color:var(--green)">₹' + (l.amount||0) + '</td>' +
               '<td><button class="btn bsm bpurple-btn" onclick="navigator.clipboard.writeText(\'' + url + '\').then(()=>toast(\'Copied!\'))">📋 Copy</button> <button class="btn bsm" onclick="window.open(\'https://wa.me/91' + waPhone + '?text=' + waMsg + '\')" style="background:#25D366;border-color:#25D366;color:#fff">📲</button></td>' +
               '<td>' + sbadge(l.is_active ? 'active' : 'inactive') + '</td>' +
-              '<td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' + (l.created_at||'').slice(0,16) + '</td>' +
+              '<td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' + fmtDateTime(l.created_at) + '</td>' +
               '<td style="padding-right:20px"><button class="btn bsm bdanger" onclick="deactivateLink(' + l.id + ')">Deactivate</button></td>' +
               '</tr>';
           }).join('');
@@ -4228,6 +4278,9 @@
           $("app-shell").style.display = "none";
         }
       });
+
+
+
     </script>
   </body>
 </html>
