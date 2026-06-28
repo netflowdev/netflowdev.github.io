@@ -2806,7 +2806,9 @@
         return '<span class="badge bgray">' + (m || "—") + "</span>";
       }
       function abadge(a) {
-        return a === "jaze_renew" ? '<span class="badge bok">Jaze</span>' : '<span class="badge bwarn">NetAdmin</span>';
+        return a === "jaze_renew"
+          ? '<span class="badge binfo">Jaze</span>'
+          : '<span class="badge bwarn">NetAdmin</span>';
       }
       function esc(s) {
         return (s || "").replace(/'/g, "&#39;").replace(/\\/g, "\\\\");
@@ -2965,7 +2967,7 @@
             '<td style="font-family:var(--mono);color:var(--txt3);font-size:12px;font-weight:600">' + sr + '</td>' +
             '<td style="font-weight:600;color:var(--txt)">' + c.name + '</td>' +
             '<td style="font-family:var(--mono);color:var(--txt3);font-size:12px">' + c.phone + '</td>' +
-            '<td><span class="badge binfo">' + (c.isp_server || "—") + '</span></td>' +
+            '<td>' + abadge(c.isp_server_id == 1 ? 'jaze_renew' : 'update') + '</td>' +
             '<td style="font-family:var(--mono);font-size:12px;color:var(--txt3)">' + (c.isp_username || "—") + '</td>' +
             '<td style="color:var(--txt2)">' + (c.plan_name || "—") + '</td>' +
             '<td style="font-family:var(--mono);font-size:12px;color:var(--txt)">' + fmtDate(c.expiry_date) + '</td>' +
