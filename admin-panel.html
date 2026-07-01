@@ -1562,6 +1562,9 @@
           </div>
           <div class="nav-item" id="nav-paylinks" onclick="showPage('paylinks')">
             <div class="nav-icon">🔗</div>Payment Links</div>
+
+          <div class="nav-item" id="nav-brands" onclick="showPage('brands')">
+          <div class="nav-icon">📡</div>Router Brands</div>
         </nav>
         <div class="sidebar-ft">
           <div class="user-row">
@@ -2234,6 +2237,51 @@
             </div>
           </div>
         </div>
+
+        <!-- ROUTER BRANDS -->
+        <div id="page-brands" style="display:none">
+          <div class="topbar">
+            <div>
+              <div class="pg-title">Router Brands</div>
+              <div class="pg-sub">// manage ONT/router brands and WiFi band settings</div>
+            </div>
+            <button class="btn bpri" onclick="openAddBrand()">+ Add Brand</button>
+          </div>
+          <div class="content">
+            <div class="card" style="margin-bottom:16px;background:#F0EEFF;border-color:#EDE9FF">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="font-size:28px">📡</div>
+                <div>
+                  <div style="font-size:14px;font-weight:700;color:#3D3470">WiFi Band Swap Setting</div>
+                  <div style="font-size:12px;color:#6B63A8;margin-top:3px">
+                    Enable "Band Swap" for brands where WLANConfiguration.1 is 5GHz and .5 is 2.4GHz (e.g. Secureye, Ubiquiti). 
+                    Leave disabled for brands where .1 is 2.4GHz and .5 is 5GHz (e.g. Syrotech, Sercomm).
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tbl-card">
+              <div class="tbl-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Brand Name</th>
+                      <th>Band Swap</th>
+                      <th>Status</th>
+                      <th style="padding-right:20px">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="brands-tbody">
+                    <tr><td colspan="5"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
       </div>
       <!-- end .main -->
     </div>
@@ -2696,6 +2744,39 @@
         </div>
       </div>
 
+      <!-- ADD/EDIT ROUTER BRAND -->
+      <div class="modal-bg" id="m-brand" style="display:none">
+        <div class="modal" style="max-width:440px">
+          <div class="modal-title" id="brand-modal-title">Add Router Brand</div>
+          <input type="hidden" id="brand-id" />
+          <div class="fgrid">
+            <div class="ff full">
+              <label>Brand Name *</label>
+              <input id="brand-name" placeholder="e.g. Syrotech, Secureye, Ubiquiti" />
+            </div>
+            <div class="ff full">
+              <label>Band Swap (WLANConfig.1 = 5GHz)</label>
+              <select id="brand-swap">
+                <option value="0">No — .1 is 2.4GHz, .5 is 5GHz (default)</option>
+                <option value="1">Yes — .1 is 5GHz, .5 is 2.4GHz (swapped)</option>
+              </select>
+            </div>
+            <div class="ff full">
+              <label>Status</label>
+              <select id="brand-active">
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div class="errmsg" id="brand-err"></div>
+          <div class="mactions">
+            <button class="btn" onclick="closeM('m-brand')">Cancel</button>
+            <button class="btn bpri" id="brand-btn" onclick="submitBrand()">Save Brand</button>
+          </div>
+        </div>
+      </div>
+
     <!-- SAVE TEMPLATE -->
     <div class="modal-bg" id="m-tpl" style="display: none">
       <div class="modal" style="max-width: 440px">
@@ -2718,7 +2799,7 @@
 
     <script>
       const BASE = "https://isp-billing-api.netflowcloud.workers.dev";
-      const PAGES = ['dashboard','customers','activations','payments','notifications','plans','ott','paylinks'];
+      const PAGES = ['dashboard','customers','activations','payments','notifications','plans','ott','paylinks','brands'];
       let custCache = [],
         plansCache = [],
         ottPlansCache = [],
@@ -2873,6 +2954,7 @@
           year: "numeric",
         });
         loadPlans();
+        loadBrands();
         showPage("dashboard");
       }
 
@@ -2897,6 +2979,7 @@
           loadOttSubscriptions();
         }
         if (name === "paylinks") loadPaymentLinks();
+        if (name === 'brands') loadBrands();
       }
 
       async function loadDash() {
@@ -4266,7 +4349,7 @@
           if (e.key === "Enter") doLogin();
         });
         $("logout-btn").addEventListener("click", doLogout);
-        ["m-add", "m-view", "m-edit", "m-cash", "m-tpl", "m-plan", "m-ott"].forEach(function (id) {
+        ["m-add", "m-view", "m-edit", "m-cash", "m-tpl", "m-plan", "m-ott", "m-brand"].forEach(function (id) {
           $(id).addEventListener("click", function (e) {
             if (e.target === this) closeM(id);
           });
@@ -4288,6 +4371,101 @@
           $("app-shell").style.display = "none";
         }
       });
+
+      // ── ROUTER BRANDS ─────────────────────────────────────────────
+let brandsCache = [];
+
+async function loadBrands() {
+  $('brands-tbody').innerHTML = '<tr><td colspan="5"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+  try {
+    const r = await apiFetch('GET', '/api/admin/router-brands');
+    brandsCache = r.data?.brands || [];
+    if (!brandsCache.length) {
+      $('brands-tbody').innerHTML = '<tr><td colspan="5"><div class="empty">No brands yet</div></td></tr>';
+      return;
+    }
+    $('brands-tbody').innerHTML = brandsCache.map(b =>
+      '<tr>' +
+      '<td style="font-family:var(--mono);color:var(--txt3);font-size:12px;padding-left:20px">#' + b.id + '</td>' +
+      '<td style="font-weight:600;color:var(--txt)">' + b.brand_name + '</td>' +
+      '<td>' + (b.wifi_ssid_swap
+        ? '<span class="badge bwarn">⇄ Swapped</span>'
+        : '<span class="badge bok">✓ Normal</span>') + '</td>' +
+      '<td>' + sbadge(b.is_active ? 'active' : 'inactive') + '</td>' +
+      '<td style="padding-right:20px"><div class="abtns">' +
+      '<button class="btn bsm bedit" onclick="openEditBrand(' + b.id + ')">✏</button>' +
+      '</div></td>' +
+      '</tr>'
+    ).join('');
+    // Also refresh brand dropdowns in add/edit customer
+    populateBrandDropdowns();
+  } catch(e) { console.error(e); }
+}
+
+function populateBrandDropdowns() {
+  ['a-brand', 'e-brand'].forEach(sid => {
+    const sel = $(sid);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— Select —</option>';
+    brandsCache.filter(b => b.is_active).forEach(b => {
+      const o = document.createElement('option');
+      o.value = b.id;
+      o.textContent = b.brand_name + (b.wifi_ssid_swap ? ' (Band Swap)' : '');
+      sel.appendChild(o);
+    });
+    if (cur) sel.value = cur;
+  });
+}
+
+function openAddBrand() {
+  $('brand-modal-title').textContent = 'Add Router Brand';
+  $('brand-id').value = '';
+  $('brand-name').value = '';
+  $('brand-swap').value = '0';
+  $('brand-active').value = '1';
+  $('brand-err').style.display = 'none';
+  $('m-brand').style.display = 'flex';
+}
+
+function openEditBrand(id) {
+  const b = brandsCache.find(x => x.id === id);
+  if (!b) { toast('Not found', 'err'); return; }
+  $('brand-modal-title').textContent = 'Edit Brand — ' + b.brand_name;
+  $('brand-id').value = b.id;
+  $('brand-name').value = b.brand_name || '';
+  $('brand-swap').value = b.wifi_ssid_swap ? '1' : '0';
+  $('brand-active').value = b.is_active ? '1' : '0';
+  $('brand-err').style.display = 'none';
+  $('m-brand').style.display = 'flex';
+}
+
+async function submitBrand() {
+  const btn = $('brand-btn'), err = $('brand-err');
+  err.style.display = 'none';
+  const id = $('brand-id').value;
+  const d = {
+    brand_name: $('brand-name').value.trim(),
+    wifi_ssid_swap: parseInt($('brand-swap').value),
+    is_active: parseInt($('brand-active').value),
+  };
+  if (!d.brand_name) { showErr(err, 'Brand name required'); return; }
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  try {
+    const r = id
+      ? await apiFetch('PUT', '/api/admin/router-brands/' + id, d)
+      : await apiFetch('POST', '/api/admin/router-brands', d);
+    if (r.success) {
+      toast(id ? 'Brand updated!' : 'Brand added!');
+      closeM('m-brand');
+      loadBrands();
+    } else showErr(err, r.error || 'Failed');
+  } catch(e) { showErr(err, 'Network error'); }
+  finally { btn.disabled = false; btn.textContent = 'Save Brand'; }
+}
+
+
 
 
 
