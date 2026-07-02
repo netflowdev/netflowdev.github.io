@@ -1562,9 +1562,12 @@
           </div>
           <div class="nav-item" id="nav-paylinks" onclick="showPage('paylinks')">
             <div class="nav-icon">🔗</div>Payment Links</div>
-
+          
+          <div class="nav-item" id="nav-whatsapp" onclick="showPage('whatsapp')">
+            <div class="nav-icon">💬</div>WhatsApp
+        </div>
           <div class="nav-item" id="nav-brands" onclick="showPage('brands')">
-          <div class="nav-icon">📡</div>Router Brands</div>
+            <div class="nav-icon">📡</div>Router Brands</div>
         </nav>
         <div class="sidebar-ft">
           <div class="user-row">
@@ -2238,6 +2241,145 @@
           </div>
         </div>
 
+        <!-- WHATSAPP PAGE -->
+      <div id="page-whatsapp" style="display:none">
+        <div class="topbar">
+          <div>
+            <div class="pg-title">WhatsApp</div>
+            <div class="pg-sub">// messages & manual send</div>
+          </div>
+          <button class="btn" onclick="loadWhatsAppPage()">↺ Refresh</button>
+        </div>
+        <div class="content">
+
+          <!-- Balance card -->
+          <div class="card" style="margin-bottom:20px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#86efac" id="wa-balance-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+              <div style="display:flex;align-items:center;gap:16px">
+                <div style="font-size:36px">💬</div>
+                <div>
+                  <div style="font-size:14px;font-weight:700;color:#15803d">WhatsApp Balance</div>
+                  <div style="font-size:28px;font-weight:900;color:#15803d;line-height:1" id="wa-bal-remaining">—</div>
+                  <div style="font-size:11px;color:#16a34a;font-family:var(--mono)" id="wa-bal-detail">messages remaining</div>
+                </div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:11px;color:#16a34a;font-family:var(--mono);margin-bottom:4px">USED / TOTAL</div>
+                <div style="font-size:18px;font-weight:700;color:#15803d" id="wa-bal-used">— / —</div>
+                <div style="font-size:10px;color:#16a34a;margin-top:4px">Contact SuperAdmin to top up</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="tabs" style="margin-bottom:20px">
+            <div class="tab active" id="wa-tab-send" onclick="switchWaTab('send')">📤 Send Message</div>
+            <div class="tab" id="wa-tab-history" onclick="switchWaTab('history')">📋 History</div>
+          </div>
+
+          <!-- SEND TAB -->
+          <div id="wa-panel-send">
+            <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:20px">
+              <div class="card">
+                <div class="card-hd">Send WhatsApp Message</div>
+
+                <div class="sec-title">Step 1 — Select Audience</div>
+                <select class="fsel" id="wa-audience" style="width:100%;margin-bottom:8px" onchange="updateWaCount()">
+                  <option value="all_active">All Active Customers</option>
+                  <option value="expired">All Expired Customers</option>
+                  <option value="expiring_3">Expiring in 3 days</option>
+                  <option value="expiring_7">Expiring in 7 days</option>
+                  <option value="single">Single Customer (search below)</option>
+                </select>
+                <div id="wa-single-search" style="display:none;margin-top:8px">
+                  <input class="sbox" id="wa-cust-search" placeholder="Search name or phone..." oninput="searchWaCustomer()" style="width:100%;padding-left:14px"/>
+                  <div id="wa-cust-results" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);margin-top:4px;max-height:180px;overflow-y:auto;box-shadow:var(--sh-sm)"></div>
+                  <div id="wa-cust-selected" style="display:none;margin-top:6px;padding:8px 12px;background:var(--green-l);border:1px solid rgba(5,150,105,0.2);border-radius:var(--r-sm);font-size:12px;color:var(--green);font-weight:600"></div>
+                  <input type="hidden" id="wa-cust-id"/>
+                </div>
+                <div style="font-size:11px;color:var(--txt3);margin-top:8px;font-family:var(--mono)" id="wa-aud-count"></div>
+
+                <div class="sec-title">Step 2 — Template</div>
+                <select class="fsel" id="wa-template" style="width:100%;margin-bottom:8px" onchange="updateWaPreview()">
+                  <option value="expiry_reminder">⏰ Expiry Reminder</option>
+                  <option value="plan_expired">❌ Plan Expired</option>
+                  <option value="payment_received">💳 Payment Received</option>
+                  <option value="new_customer_welcome">👤 New Customer Welcome</option>
+                  <option value="app_features_intro">🎬 App Features & OTT Intro (session only)</option>
+                  <option value="custom_text">✍️ Custom Message (session only)</option>
+                </select>
+                <div id="wa-session-status" style="display:none;margin-top:8px;padding:8px 12px;border-radius:8px;font-size:11.5px;font-weight:600"></div>
+                <div id="wa-custom-box" style="display:none;margin-top:12px">
+                  <div class="ff">
+                    <label>Custom Message</label>
+                    <textarea id="wa-custom-text" rows="5" placeholder="Type your message... only sends if the customer messaged you in the last 24 hours"></textarea>
+                  </div>
+                </div>
+
+                <div class="mactions" style="margin-top:16px">
+                  <button class="btn" onclick="clearWaSend()">Clear</button>
+                  <button class="btn bpri" id="wa-send-btn" onclick="sendWaMessage()" style="background:#25D366;border-color:#25D366">📲 Send WhatsApp</button>
+                </div>
+                <div class="errmsg" id="wa-send-err"></div>
+              </div>
+
+              <div class="card">
+                <div class="card-hd">Preview</div>
+                <div style="background:#e7fde8;border-radius:12px;padding:16px;min-height:120px;border:1px solid #86efac">
+                  <div style="font-size:10px;color:#15803d;font-family:var(--mono);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em">WHATSAPP MESSAGE PREVIEW</div>
+                  <div style="font-size:13px;color:#1a1a1a;line-height:1.6" id="wa-preview-text">Select template to preview...</div>
+                </div>
+                <div style="margin-top:16px">
+                  <div style="font-size:11px;color:var(--txt3);font-family:var(--mono);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em">TEMPLATE NAME</div>
+                  <div style="font-size:12px;color:var(--txt2);font-family:var(--mono)" id="wa-template-name">—</div>
+                </div>
+                <div style="margin-top:12px;padding:12px;background:var(--amber-l);border-radius:8px;border:1px solid rgba(217,119,6,0.2)">
+                  <div style="font-size:11px;color:var(--amber);font-weight:600">⚠️ Note</div>
+                  <div style="font-size:11px;color:var(--txt3);margin-top:4px">Templates must be pre-approved in Meta Business Manager. Each message uses 1 balance.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HISTORY TAB -->
+          <div id="wa-panel-history" style="display:none">
+            <div class="tbl-card">
+              <div style="padding:18px 20px 0;display:flex;align-items:center;justify-content:space-between">
+                <div style="font-size:14px;font-weight:700;color:var(--txt)">WhatsApp Message History</div>
+                <div style="display:flex;gap:8px">
+                  <select class="fsel" id="wa-hist-filter" onchange="loadWaHistory()" style="font-size:12px">
+                    <option value="">All types</option>
+                    <option value="payment_received">Payment Received</option>
+                    <option value="expiry_reminder">Expiry Reminder</option>
+                    <option value="plan_expired">Plan Expired</option>
+                    <option value="new_customer_welcome">New Customer Welcome</option>
+                  </select>
+                  <button class="btn bsm" onclick="loadWaHistory()">↺ Refresh</button>
+                </div>
+              </div>
+              <div class="tbl-wrap" style="margin-top:14px">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="padding-left:20px">#</th>
+                      <th>Customer</th>
+                      <th>Type</th>
+                      <th>Message</th>
+                      <th>Status</th>
+                      <th>Sent At</th>
+                    </tr>
+                  </thead>
+                  <tbody id="wa-hist-tbody">
+                    <tr><td colspan="6"><div class="empty">Click Refresh to load</div></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          </div>
+        </div>
+
         <!-- ROUTER BRANDS -->
         <div id="page-brands" style="display:none">
           <div class="topbar">
@@ -2280,6 +2422,13 @@
             </div>
           </div>
         </div>
+
+
+        
+
+
+
+
 
 
       </div>
@@ -2799,7 +2948,7 @@
 
     <script>
       const BASE = "https://isp-billing-api.netflowcloud.workers.dev";
-      const PAGES = ['dashboard','customers','activations','payments','notifications','plans','ott','paylinks','brands'];
+      const PAGES = ['dashboard','customers','activations','payments','notifications','plans','ott','paylinks','brands','whatsapp'];
       let custCache = [],
         plansCache = [],
         ottPlansCache = [],
@@ -2980,6 +3129,7 @@
         }
         if (name === "paylinks") loadPaymentLinks();
         if (name === 'brands') loadBrands();
+        if (name === 'whatsapp') loadWhatsAppPage();
       }
 
       async function loadDash() {
@@ -4465,7 +4615,228 @@ async function submitBrand() {
   finally { btn.disabled = false; btn.textContent = 'Save Brand'; }
 }
 
+// ── WHATSAPP PAGE ─────────────────────────────────────────────
+let waTab = 'send';
 
+function switchWaTab(tab) {
+  waTab = tab;
+  $('wa-tab-send').classList.toggle('active', tab === 'send');
+  $('wa-tab-history').classList.toggle('active', tab === 'history');
+  $('wa-panel-send').style.display = tab === 'send' ? 'block' : 'none';
+  $('wa-panel-history').style.display = tab === 'history' ? 'block' : 'none';
+  if (tab === 'history') loadWaHistory();
+}
+
+async function loadWhatsAppPage() {
+  await loadWaBalance();
+  updateWaCount();
+  updateWaPreview();
+}
+
+async function loadWaBalance() {
+  try {
+    const r = await apiFetch('GET', '/api/admin/whatsapp-balance');
+    if (r.success) {
+      const d = r.data;
+      const remaining = (d.whatsapp_balance || 0) - (d.whatsapp_used || 0);
+      $('wa-bal-remaining').textContent = remaining;
+      $('wa-bal-used').textContent = (d.whatsapp_used || 0) + ' / ' + (d.whatsapp_balance || 0);
+      $('wa-bal-detail').textContent = d.whatsapp_enabled ? 'messages remaining' : '⚠️ WhatsApp disabled for this franchise';
+      const card = $('wa-balance-card');
+      if (!d.whatsapp_enabled) {
+        card.style.background = 'linear-gradient(135deg,#fef2f2,#fee2e2)';
+        card.style.borderColor = '#fca5a5';
+        $('wa-bal-remaining').style.color = '#dc2626';
+      }
+    }
+  } catch(e) {}
+}
+
+async function updateWaCount() {
+  const audience = $('wa-audience').value;
+  const single = $('wa-single-search');
+  single.style.display = audience === 'single' ? 'block' : 'none';
+  if (audience === 'single') { $('wa-aud-count').textContent = ''; return; }
+
+  try {
+    const r = await apiFetch('GET', '/api/admin/customers?page=1&limit=9999');
+    const all = r.data?.customers || [];
+    const td = today();
+    const in3 = new Date(); in3.setDate(in3.getDate() + 3);
+    const in7 = new Date(); in7.setDate(in7.getDate() + 7);
+    const in3str = in3.toISOString().split('T')[0];
+    const in7str = in7.toISOString().split('T')[0];
+
+    let n = 0;
+    if (audience === 'all_active') n = all.filter(c => c.status === 'active' && c.expiry_date >= td).length;
+    else if (audience === 'expired') n = all.filter(c => c.status === 'expired' || (c.status === 'active' && c.expiry_date < td)).length;
+    else if (audience === 'expiring_3') n = all.filter(c => c.expiry_date <= in3str && c.expiry_date >= td).length;
+    else if (audience === 'expiring_7') n = all.filter(c => c.expiry_date <= in7str && c.expiry_date >= td).length;
+
+    $('wa-aud-count').textContent = '💬 ' + n + ' customers will receive this message';
+  } catch(e) {}
+}
+
+function updateWaPreview() {
+  const t = $('wa-template').value;
+  const previews = {
+    'expiry_reminder': 'Hi [Name]! Your internet plan expires in 3 days on [Date]. Recharge now to avoid disconnection!',
+    'plan_expired': 'Hi [Name]! Your internet plan expired on [Date]. Recharge now to restore your connection!',
+    'payment_received': 'Hi [Name]! Your payment of ₹[Amount] for [Plan] has been received. Valid till [Expiry].',
+    'new_customer_welcome': 'Welcome [Name]! Your broadband account with [Franchise] has been created. Username: [Phone], Password: [Phone].',
+    'app_features_intro': '📱 Manage your connection right from your phone: View plan, Recharge, Change WiFi password, OTT Add-ons & more!',
+    'custom_text': '(Type your own message below)',
+  };
+  $('wa-preview-text').textContent = previews[t] || '—';
+  $('wa-template-name').textContent = t;
+  $('wa-custom-box').style.display = t === 'custom_text' ? 'block' : 'none';
+
+  // Session-gated templates need a live status check
+  if ((t === 'app_features_intro' || t === 'custom_text') && $('wa-audience').value === 'single' && $('wa-cust-id').value) {
+    checkWaSessionStatus();
+  } else {
+    $('wa-session-status').style.display = 'none';
+  }
+}
+
+async function checkWaSessionStatus() {
+  const custId = $('wa-cust-id').value;
+  const box = $('wa-session-status');
+  if (!custId) { box.style.display = 'none'; return; }
+
+  box.style.display = 'block';
+  box.style.background = 'var(--surface-2)';
+  box.style.color = 'var(--txt3)';
+  box.textContent = 'Checking session status...';
+
+  try {
+    const r = await apiFetch('GET', '/api/admin/whatsapp-session-status?customer_id=' + custId);
+    if (r.success) {
+      if (r.data.open) {
+        box.style.background = 'var(--green-l)';
+        box.style.color = 'var(--green)';
+        box.textContent = '🟢 Session open — customer messaged recently, free-form send allowed';
+      } else {
+        box.style.background = 'var(--red-l)';
+        box.style.color = 'var(--red)';
+        box.textContent = '🔴 Session closed — customer hasn\'t messaged in 24h, this send will be skipped';
+      }
+    }
+  } catch(e) { box.style.display = 'none'; }
+}
+
+function searchWaCustomer() {
+  const q = $('wa-cust-search').value.trim().toLowerCase();
+  const res = $('wa-cust-results');
+  $('wa-cust-id').value = '';
+  $('wa-cust-selected').style.display = 'none';
+  if (q.length < 2) { res.style.display = 'none'; return; }
+
+  const matches = custCache.filter(c =>
+    c.name.toLowerCase().includes(q) || (c.phone || '').includes(q)
+  ).slice(0, 8);
+
+  if (!matches.length) {
+    res.style.display = 'block';
+    res.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--txt3)">No customers found</div>';
+    return;
+  }
+  res.style.display = 'block';
+  res.innerHTML = matches.map(c =>
+    '<div onclick="selectWaCustomer(' + c.id + ',\'' + c.name.replace(/'/g,"\\'") + '\')" ' +
+    'style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border)" ' +
+    'onmouseover="this.style.background=\'var(--blue-l)\'" onmouseout="this.style.background=\'\'">' +
+    '<div style="font-weight:600;font-size:13px">' + c.name + '</div>' +
+    '<div style="font-size:11px;color:var(--txt3);font-family:var(--mono)">' + c.phone + ' · ' + fmtDate(c.expiry_date) + '</div>' +
+    '</div>'
+  ).join('');
+}
+
+function selectWaCustomer(id, name) {
+  $('wa-cust-id').value = id;
+  $('wa-cust-search').value = '';
+  $('wa-cust-results').style.display = 'none';
+  const sel = $('wa-cust-selected');
+  sel.style.display = 'block';
+  sel.innerHTML = '✓ Selected: <strong>' + name + '</strong>';
+  updateWaPreview(); // re-check session status now that a customer is picked
+}
+
+async function sendWaMessage() {
+  const btn = $('wa-send-btn'), err = $('wa-send-err');
+  err.style.display = 'none';
+  const audience = $('wa-audience').value;
+  const template = $('wa-template').value;
+  const customerId = $('wa-cust-id').value;
+  const customMessage = $('wa-custom-text').value.trim();
+
+  if (audience === 'single' && !customerId) {
+    err.textContent = 'Please select a customer'; err.style.display = 'block'; return;
+  }
+  if (template === 'custom_text' && !customMessage) {
+    err.textContent = 'Please type a custom message'; err.style.display = 'block'; return;
+  }
+
+  const audienceLabel = $('wa-audience').options[$('wa-audience').selectedIndex].text;
+  if (!confirm('Send "' + template + '" to ' + audienceLabel + '?\n\nThis will use WhatsApp balance.')) return;
+
+  btn.disabled = true; btn.textContent = 'Sending...';
+  try {
+    const r = await apiFetch('POST', '/api/admin/whatsapp-send', {
+      audience, template,
+      customer_id: customerId ? parseInt(customerId) : null,
+      custom_message: template === 'custom_text' ? customMessage : undefined,
+    });
+    if (r.success) {
+      toast('✅ Sent: ' + r.data.sent + ' · Failed: ' + r.data.failed);
+      loadWaBalance();
+      loadWaHistory();
+    } else {
+      err.textContent = r.error || 'Failed'; err.style.display = 'block';
+    }
+  } catch(e) { err.textContent = 'Network error'; err.style.display = 'block'; }
+  finally { btn.disabled = false; btn.textContent = '📲 Send WhatsApp'; }
+}
+
+function clearWaSend() {
+  $('wa-audience').value = 'all_active';
+  $('wa-template').value = 'expiry_reminder';
+  $('wa-cust-id').value = '';
+  $('wa-cust-selected').style.display = 'none';
+  $('wa-single-search').style.display = 'none';
+  $('wa-send-err').style.display = 'none';
+  $('wa-custom-text').value = '';
+  $('wa-custom-box').style.display = 'none';
+  $('wa-session-status').style.display = 'none';
+  updateWaCount();
+  updateWaPreview();
+}
+
+async function loadWaHistory() {
+  const type = $('wa-hist-filter').value;
+  $('wa-hist-tbody').innerHTML = '<tr><td colspan="6"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+  try {
+    const r = await apiFetch('GET', '/api/admin/whatsapp-history' + (type ? '?type=' + type : ''));
+    const rows = r.data?.notifications || [];
+    if (!rows.length) {
+      $('wa-hist-tbody').innerHTML = '<tr><td colspan="6"><div class="empty">No WhatsApp messages sent yet</div></td></tr>';
+      return;
+    }
+    $('wa-hist-tbody').innerHTML = rows.map(n =>
+      '<tr>' +
+      '<td style="padding-left:20px;font-family:var(--mono);color:var(--txt3);font-size:12px">#' + n.id + '</td>' +
+      '<td><div style="font-weight:600;color:var(--txt)">' + (n.customer_name || '—') + '</div>' +
+      '<div style="font-size:11px;color:var(--txt3);font-family:var(--mono)">' + (n.customer_phone || '') + '</div></td>' +
+      '<td><span class="badge binfo">' + (n.type || '—') + '</span></td>' +
+      '<td style="font-size:12px;color:var(--txt3);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (n.message || '—') + '</td>' +
+      '<td>' + sbadge(n.status) + '</td>' +
+      '<td style="font-family:var(--mono);font-size:11px;color:var(--txt3);padding-right:20px">' + fmtDateTime(n.sent_at) + '</td>' +
+      '</tr>'
+    ).join('');
+  } catch(e) {
+    $('wa-hist-tbody').innerHTML = '<tr><td colspan="6"><div class="empty">Failed to load</div></td></tr>';
+  }
+}
 
 
 
