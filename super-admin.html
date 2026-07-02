@@ -197,6 +197,7 @@ tr:hover td{background:rgba(124,109,250,.03);}
               <th>Jaze</th>
               <th>NetAdmin</th>
               <th>Customers</th>
+              <th>WhatsApp</th>
               <th>Status</th>
               <th style="padding-right:16px">Actions</th>
             </tr></thead>
@@ -436,6 +437,120 @@ tr:hover td{background:rgba(124,109,250,.03);}
       </div>
     </div>
 
+    <!-- WHATSAPP SECTION -->
+<div class="sec-title">📱 WhatsApp Settings</div>
+<div class="fgrid">
+  <div class="ff full">
+    <label>WhatsApp Enabled</label>
+    <select id="f-wa-enabled">
+      <option value="0">❌ Disabled — No WhatsApp messages</option>
+      <option value="1">✅ Enabled — Use master or own number</option>
+    </select>
+  </div>
+  <div class="ff">
+    <label>WhatsApp Balance (messages assigned)</label>
+    <input id="f-wa-balance" type="number" placeholder="e.g. 200"/>
+  </div>
+  <div class="ff">
+    <label>Messages Used (read only)</label>
+    <input id="f-wa-used" type="number" placeholder="0" readonly style="opacity:.5"/>
+  </div>
+  <div class="ff full" style="background:rgba(124,109,250,.06);border:1px solid rgba(124,109,250,.2);border-radius:8px;padding:14px">
+    <label style="margin-bottom:10px;display:block">Own WhatsApp Credentials (leave blank to use master)</label>
+    <div class="fgrid">
+      <div class="ff">
+        <label>Phone Number ID</label>
+        <input id="f-wa-phone-id" placeholder="Leave blank = use master"/>
+      </div>
+      <div class="ff">
+        <label>Access Token</label>
+        <input id="f-wa-token" type="password" placeholder="Leave blank = use master"/>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sec-title">📨 Auto Message Settings</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+
+  <!-- Payment Received -->
+  <div style="background:var(--bg);border-radius:8px;padding:14px;border:1px solid var(--border)">
+    <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--accent2)">💳 Payment Received</div>
+    <div class="ff" style="margin-bottom:8px">
+      <label>Auto Send</label>
+      <select id="f-wa-auto-payment">
+        <option value="1">✅ Enabled</option>
+        <option value="0">❌ Disabled</option>
+      </select>
+    </div>
+    <div class="ff">
+      <label>Ignore Balance</label>
+      <select id="f-wa-ignore-payment">
+        <option value="0">No — check balance first</option>
+        <option value="1">Yes — send even if balance = 0</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Expiry Reminder -->
+  <div style="background:var(--bg);border-radius:8px;padding:14px;border:1px solid var(--border)">
+    <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--warn)">⏰ Expiry Reminder (3 days)</div>
+    <div class="ff" style="margin-bottom:8px">
+      <label>Auto Send</label>
+      <select id="f-wa-auto-expiry">
+        <option value="1">✅ Enabled</option>
+        <option value="0">❌ Disabled</option>
+      </select>
+    </div>
+    <div class="ff">
+      <label>Ignore Balance</label>
+      <select id="f-wa-ignore-expiry">
+        <option value="0">No — check balance first</option>
+        <option value="1">Yes — send even if balance = 0</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Plan Expired -->
+  <div style="background:var(--bg);border-radius:8px;padding:14px;border:1px solid var(--border)">
+    <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--danger)">❌ Plan Expired</div>
+    <div class="ff" style="margin-bottom:8px">
+      <label>Auto Send</label>
+      <select id="f-wa-auto-expired">
+        <option value="1">✅ Enabled</option>
+        <option value="0">❌ Disabled</option>
+      </select>
+    </div>
+    <div class="ff">
+      <label>Ignore Balance</label>
+      <select id="f-wa-ignore-expired">
+        <option value="0">No — check balance first</option>
+        <option value="1">Yes — send even if balance = 0</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- New Customer -->
+  <div style="background:var(--bg);border-radius:8px;padding:14px;border:1px solid var(--border)">
+    <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--accent)">👤 New Customer Welcome</div>
+    <div class="ff" style="margin-bottom:8px">
+      <label>Auto Send</label>
+      <select id="f-wa-auto-new">
+        <option value="1">✅ Enabled</option>
+        <option value="0">❌ Disabled</option>
+      </select>
+    </div>
+    <div class="ff">
+      <label>Ignore Balance</label>
+      <select id="f-wa-ignore-new">
+        <option value="0">No — check balance first</option>
+        <option value="1">Yes — send even if balance = 0</option>
+      </select>
+    </div>
+  </div>
+
+</div>
+
     <div class="errmsg" id="f-err"></div>
     <div class="mactions">
       <button class="btn" onclick="closeM('m-franchise')">Cancel</button>
@@ -564,15 +679,32 @@ async function loadDash(){
 }
 
 async function loadFranchises(){
-  $('ftbody').innerHTML='<tr><td colspan="11"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+  $('ftbody').innerHTML='<tr><td colspan="12"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
   try{
     const[fr,cr]=await Promise.all([apiFetch('GET','/api/super/franchises'),apiFetch('GET','/api/admin/customers')]);
     const fs=fr.data?.franchises||[];franchisesCache=fs;
     const cs=cr.data?.customers||[];
-    if(!fs.length){$('ftbody').innerHTML='<tr><td colspan="11"><div class="empty">No franchises yet</div></td></tr>';return;}
+    if(!fs.length){$('ftbody').innerHTML='<tr><td colspan="12"><div class="empty">No franchises yet</div></td></tr>';return;}
     $('ftbody').innerHTML=fs.map(f=>{
       const cnt=cs.filter(c=>c.franchise_id===f.id).length;
-      return '<tr><td style="padding-left:16px;font-family:var(--mono);color:var(--muted)">#'+f.id+'</td><td><div style="font-weight:500">'+f.name+'</div></td><td>'+f.owner_name+'</td><td style="font-family:var(--mono);color:var(--muted)">'+f.phone+'</td><td style="color:var(--muted)">'+(f.city||'—')+'</td><td>'+gwbadge(f.payment_gateway)+'</td><td>'+configured(f.jaze_api_key)+'</td><td>'+configured(f.mikrotik_api_key)+'</td><td style="font-family:var(--mono)">'+cnt+'</td><td>'+sbadge(f.is_active?'active':'inactive')+'</td><td style="padding-right:16px"><div class="abtns"><button class="btn bsm bedit" onclick="openEditFranchise('+f.id+')">✏ Edit</button></div></td></tr>';
+      const waBalance=(f.whatsapp_balance||0)-(f.whatsapp_used||0);
+      const waBadge=f.whatsapp_enabled
+        ?'<span class="badge bok">✅ '+waBalance+' left</span>'
+        :'<span class="badge bgray">Off</span>';
+      return '<tr>'+
+        '<td style="padding-left:16px;font-family:var(--mono);color:var(--muted)">#'+f.id+'</td>'+
+        '<td><div style="font-weight:500">'+f.name+'</div></td>'+
+        '<td>'+f.owner_name+'</td>'+
+        '<td style="font-family:var(--mono);color:var(--muted)">'+f.phone+'</td>'+
+        '<td style="color:var(--muted)">'+(f.city||'—')+'</td>'+
+        '<td>'+gwbadge(f.payment_gateway)+'</td>'+
+        '<td>'+configured(f.jaze_api_key)+'</td>'+
+        '<td>'+configured(f.mikrotik_api_key)+'</td>'+
+        '<td style="font-family:var(--mono)">'+cnt+'</td>'+
+        '<td>'+waBadge+'</td>'+
+        '<td>'+sbadge(f.is_active?'active':'inactive')+'</td>'+
+        '<td style="padding-right:16px"><div class="abtns"><button class="btn bsm bedit" onclick="openEditFranchise('+f.id+')">✏ Edit</button></div></td>'+
+        '</tr>';
     }).join('');
   }catch(e){console.error(e);}
 }
@@ -591,7 +723,35 @@ function openAddFranchise(){
   ].forEach(i=>$(i).value='');
   $('f-gateway').value='easebuzz';$('f-active').value='1';$('f-err').style.display='none';
   $('f-ebz-env').value='production';
+  // WhatsApp settings
+  $('f-wa-enabled').value = f.whatsapp_enabled ? '1' : '0';
+  $('f-wa-balance').value = f.whatsapp_balance || 0;
+  $('f-wa-used').value    = f.whatsapp_used || 0;
+  $('f-wa-phone-id').value = f.whatsapp_phone_id || '';
+  $('f-wa-token').value    = f.whatsapp_token || '';
+  $('f-wa-auto-payment').value  = f.wa_auto_payment  ?? 1;
+  $('f-wa-auto-expiry').value   = f.wa_auto_expiry_reminder ?? 1;
+  $('f-wa-auto-expired').value  = f.wa_auto_plan_expired ?? 1;
+  $('f-wa-auto-new').value      = f.wa_auto_new_customer ?? 1;
+  $('f-wa-ignore-payment').value  = f.wa_ignore_bal_payment ?? 0;
+  $('f-wa-ignore-expiry').value   = f.wa_ignore_bal_expiry_reminder ?? 0;
+  $('f-wa-ignore-expired').value  = f.wa_ignore_bal_plan_expired ?? 0;
+  $('f-wa-ignore-new').value      = f.wa_ignore_bal_new_customer ?? 0;
   updateGWFields();$('m-franchise').style.display='flex';$('f-wifi-method').value='none';
+  // Reset WhatsApp fields
+  $('f-wa-enabled').value='0';
+  $('f-wa-balance').value='0';
+  $('f-wa-used').value='0';
+  $('f-wa-phone-id').value='';
+  $('f-wa-token').value='';
+  $('f-wa-auto-payment').value='1';
+  $('f-wa-auto-expiry').value='1';
+  $('f-wa-auto-expired').value='1';
+  $('f-wa-auto-new').value='1';
+  $('f-wa-ignore-payment').value='0';
+  $('f-wa-ignore-expiry').value='0';
+  $('f-wa-ignore-expired').value='0';
+  $('f-wa-ignore-new').value='0';
 }
 
 async function openEditFranchise(id){
@@ -644,6 +804,18 @@ async function submitFranchise(){
     ssid_prefix:$('f-ssid-prefix').value.trim(),
     wifi_method:$('f-wifi-method').value,
     is_active:parseInt($('f-active').value),
+    whatsapp_enabled: parseInt($('f-wa-enabled').value),
+    whatsapp_balance: parseInt($('f-wa-balance').value) || 0,
+    whatsapp_token:   $('f-wa-token').value.trim() || null,
+    whatsapp_phone_id: $('f-wa-phone-id').value.trim() || null,
+    wa_auto_payment:         parseInt($('f-wa-auto-payment').value),
+    wa_auto_expiry_reminder: parseInt($('f-wa-auto-expiry').value),
+    wa_auto_plan_expired:    parseInt($('f-wa-auto-expired').value),
+    wa_auto_new_customer:    parseInt($('f-wa-auto-new').value),
+    wa_ignore_bal_payment:         parseInt($('f-wa-ignore-payment').value),
+    wa_ignore_bal_expiry_reminder: parseInt($('f-wa-ignore-expiry').value),
+    wa_ignore_bal_plan_expired:    parseInt($('f-wa-ignore-expired').value),
+    wa_ignore_bal_new_customer:    parseInt($('f-wa-ignore-new').value),
   };
   if(!d.name||!d.owner_name||!d.phone){showErr(err,'Name, owner and phone required');return;}
   btn.disabled=true;btn.textContent='Saving...';
