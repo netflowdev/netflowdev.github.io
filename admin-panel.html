@@ -1560,6 +1560,10 @@
             <div class="nav-icon">🎬</div>
             OTT Add-ons
           </div>
+          <div class="nav-item" id="nav-billing" onclick="showPage('billing')">
+            <div class="nav-icon">🧾</div>
+            Billing History
+          </div>
           <div class="nav-item" id="nav-paylinks" onclick="showPage('paylinks')">
             <div class="nav-icon">🔗</div>Payment Links</div>
           
@@ -1787,13 +1791,14 @@
                       <th>Plan</th>
                       <th>Expiry</th>
                       <th>Due</th>
+                      <th>Billing</th>
                       <th>Status</th>
                       <th style="padding-right: 20px">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="ctbody">
                     <tr>
-                      <td colspan="10">
+                      <td colspan="11">
                         <div class="loading">
                           <div class="spinner"></div>
                           Loading...
@@ -1860,7 +1865,7 @@
                       <th>Customer</th>
                       <th>Username</th>
                       <th>Server</th>
-                      <th>Profile</th>
+                      <th>Profile / Reason</th>
                       <th>Expiry</th>
                       <th>Status</th>
                       <th>Created</th>
@@ -2211,6 +2216,73 @@
             </div>
           </div>
         </div>
+
+        <!-- POSTPAID BILLING HISTORY -->
+        <div id="page-billing" style="display:none">
+          <div class="topbar">
+            <div>
+              <div class="pg-title">Billing History</div>
+              <div class="pg-sub">// postpaid bill-by-bill breakdown</div>
+            </div>
+            <button class="btn" onclick="loadBillingHistory()">↺ Refresh</button>
+          </div>
+          <div class="content">
+            <div class="stats3">
+              <div class="sc amber">
+                <div class="sc-icon amber">⏳</div>
+                <div class="sc-label">Pending</div>
+                <div class="sc-val" id="bh-pending" style="color:var(--amber);font-size:28px">—</div>
+                <div class="sc-sub" style="color:var(--amber)">bills unpaid</div>
+              </div>
+              <div class="sc blue">
+                <div class="sc-icon blue">◐</div>
+                <div class="sc-label">Partial</div>
+                <div class="sc-val" id="bh-partial" style="color:var(--blue);font-size:28px">—</div>
+                <div class="sc-sub">part-paid</div>
+              </div>
+              <div class="sc green">
+                <div class="sc-icon green">✓</div>
+                <div class="sc-label">Paid</div>
+                <div class="sc-val" id="bh-paid" style="color:var(--green);font-size:28px">—</div>
+                <div class="sc-sub" style="color:var(--green)">fully cleared</div>
+              </div>
+            </div>
+            <div class="toolbar">
+              <input class="sbox" id="bh-search" placeholder="Search customer name or phone..." oninput="renderBillingHistory()" />
+              <select class="fsel" id="bh-status" onchange="loadBillingHistory()">
+                <option value="">All status</option>
+                <option value="pending">Pending</option>
+                <option value="partial">Partial</option>
+                <option value="paid">Paid</option>
+              </select>
+            </div>
+            <div class="tbl-card">
+              <div class="tbl-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Customer</th>
+                      <th>Plan</th>
+                      <th>Bill Amount</th>
+                      <th>Previous Due</th>
+                      <th>Total Due</th>
+                      <th>Paid</th>
+                      <th>Billing Period</th>
+                      <th>Due Date</th>
+                      <th style="padding-right:20px">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="bh-tbody">
+                    <tr><td colspan="10"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
         <!-- PAYMENT LINKS PAGE -->
         <div id="page-paylinks" style="display:none">
           <div class="topbar">
@@ -2674,6 +2746,33 @@
             <input id="a-due" type="number" placeholder="0" min="0" value="0" />
           </div>
         </div>
+        <div class="sec-title">Billing Type</div>
+        <div class="fgrid">
+          <div class="ff">
+            <label>Billing Type</label>
+            <select id="a-billing-type" onchange="togglePostpaidFieldsAdd()">
+              <option value="prepaid">Prepaid</option>
+              <option value="postpaid">Postpaid</option>
+            </select>
+          </div>
+          <div class="ff"></div>
+          <div class="ff" id="a-postpaid-fields" style="display:none">
+            <label>Grace Period (days)</label>
+            <select id="a-grace-days">
+              <option value="7">7 days</option>
+              <option value="10" selected>10 days</option>
+              <option value="15">15 days</option>
+              <option value="20">20 days</option>
+            </select>
+          </div>
+          <div class="ff" id="a-autosuspend-field" style="display:none">
+            <label>Auto-Suspend on Overdue</label>
+            <select id="a-auto-suspend">
+              <option value="1" selected>ON — auto suspend after grace period</option>
+              <option value="0">OFF — only remind, don't suspend</option>
+            </select>
+          </div>
+        </div>
         <div class="errmsg" id="a-err"></div>
         <div class="mactions">
           <button class="btn" onclick="closeM('m-add')">Cancel</button>
@@ -2837,19 +2936,53 @@
           </div>
         </div>
         <div class="sec-title">Billing</div>
-        <div class="fgrid">
-          <div class="ff">
-            <label>Balance Due (₹)</label>
-            <input id="e-due" type="number" placeholder="0" min="0" />
+          <div class="fgrid">
+            <div class="ff">
+              <label>Balance Due (₹)</label>
+              <input id="e-due" type="number" placeholder="0" min="0" />
+            </div>
+            <div class="ff">
+              <label>Due Payment Mode</label>
+              <select id="e-due-mode">
+                <option value="normal">Normal ( Due + Renew plan)</option>
+                <option value="due_only">Due Only (clear due only)</option>
+              </select>
+            </div>
+            <div class="ff">
+              <label>Billing Type</label>
+              <select id="e-billing-type" onchange="togglePostpaidFieldsEdit()">
+                <option value="prepaid">Prepaid</option>
+                <option value="postpaid">Postpaid</option>
+              </select>
+            </div>
+            <div class="ff"></div>
+            <div class="ff" id="e-postpaid-fields" style="display:none">
+              <label>Grace Period (days)</label>
+              <select id="e-grace-days">
+                <option value="7">7 days</option>
+                <option value="10">10 days</option>
+                <option value="15">15 days</option>
+                <option value="20">20 days</option>
+              </select>
+            </div>
+            <div class="ff" id="e-autosuspend-field" style="display:none">
+              <label>Auto-Suspend on Overdue</label>
+              <select id="e-auto-suspend">
+                <option value="1">ON — auto suspend after grace period</option>
+                <option value="0">OFF — only remind, don't suspend</option>
+              </select>
+            </div>
+            <div class="ff" id="e-currentduedate-field" style="display:none">
+              <label>Current Due Date</label>
+              <input id="e-current-due-date" type="date" />
+            </div>
+            <div class="ff" id="e-nextbilldate-field" style="display:none">
+            <label>Next Bill Date</label>
+            <input id="e-next-bill-date" type="date" />
           </div>
-          <div class="ff">
-            <label>Due Payment Mode</label>
-            <select id="e-due-mode">
-              <option value="normal">Normal ( Due + Renew plan)</option>
-              <option value="due_only">Due Only (clear due only)</option>
-            </select>
           </div>
-        </div>
+
+
         <div class="errmsg" id="e-err"></div>
         <div class="mactions">
           <button class="btn" onclick="closeM('m-edit')">Cancel</button>
@@ -2892,6 +3025,58 @@
           </div>
         </div>
       </div>
+
+      <!-- SUSPEND MODAL -->
+<div class="modal-bg" id="m-suspend" style="display:none">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">Suspend Customer</div>
+    <input type="hidden" id="sp-cust-id"/>
+    <div class="ff" style="margin-bottom:14px">
+      <label>Reason</label>
+      <select id="sp-reason" onchange="$('sp-other-wrap').style.display = this.value === 'Other' ? 'block' : 'none';">
+        <option value="Non-payment">Non-payment</option>
+        <option value="Customer request">Customer request</option>
+        <option value="Technical issue">Technical issue</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="ff" id="sp-other-wrap" style="display:none;margin-bottom:14px">
+      <label>Custom Reason</label>
+      <input id="sp-other-text" placeholder="Type reason..."/>
+    </div>
+    <div class="errmsg" id="sp-err"></div>
+    <div class="mactions">
+      <button class="btn" onclick="closeM('m-suspend')">Cancel</button>
+      <button class="btn" style="background:var(--amber);border-color:var(--amber);color:#fff" id="sp-btn" onclick="submitSuspend()">Suspend</button>
+    </div>
+  </div>
+</div>
+
+<!-- REACTIVATE MODAL -->
+<div class="modal-bg" id="m-reactivate" style="display:none">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">Reactivate Customer</div>
+    <input type="hidden" id="rc-cust-id"/>
+    <div class="ff" style="margin-bottom:14px">
+      <label>Reason</label>
+      <select id="rc-type" onchange="toggleReactivateFields()">
+        <option value="paid">Payment received</option>
+        <option value="more_time">Customer requested more time</option>
+      </select>
+    </div>
+    <div class="ff" id="rc-duedate-wrap" style="display:none;margin-bottom:14px">
+      <label>New Due Date</label>
+      <input id="rc-new-due-date" type="date"/>
+    </div>
+    <div class="errmsg" id="rc-err"></div>
+    <div class="mactions">
+      <button class="btn" onclick="closeM('m-reactivate')">Cancel</button>
+      <button class="btn" style="background:var(--green);border-color:var(--green);color:#fff" id="rc-btn" onclick="submitReactivate()">Reactivate</button>
+    </div>
+  </div>
+</div>
+
+
 
       <!-- ADD/EDIT ROUTER BRAND -->
       <div class="modal-bg" id="m-brand" style="display:none">
@@ -2948,7 +3133,7 @@
 
     <script>
       const BASE = "https://isp-billing-api.netflowcloud.workers.dev";
-      const PAGES = ['dashboard','customers','activations','payments','notifications','plans','ott','paylinks','brands','whatsapp'];
+      const PAGES = ['dashboard','customers','activations','payments','notifications','plans','ott','paylinks','brands','whatsapp','billing'];
       let custCache = [],
         plansCache = [],
         ottPlansCache = [],
@@ -3036,9 +3221,10 @@
         return '<span class="badge bgray">' + (m || "—") + "</span>";
       }
       function abadge(a) {
-        return a === "jaze_renew"
-          ? '<span class="badge binfo">Jaze</span>'
-          : '<span class="badge bwarn">NetAdmin</span>';
+        if (a === "jaze_renew") return '<span class="badge binfo">Jaze</span>';
+        if (a === "suspend") return '<span class="badge bwarn">⏸ Suspend</span>';
+        if (a === "reactivate") return '<span class="badge bok">▶ Reactivate</span>';
+        return '<span class="badge bwarn">NetAdmin</span>';
       }
       function esc(s) {
         return (s || "").replace(/'/g, "&#39;").replace(/\\/g, "\\\\");
@@ -3130,6 +3316,7 @@
         if (name === "paylinks") loadPaymentLinks();
         if (name === 'brands') loadBrands();
         if (name === 'whatsapp') loadWhatsAppPage();
+        if (name === 'billing') loadBillingHistory();
       }
 
       async function loadDash() {
@@ -3185,7 +3372,7 @@
       function _renderCustPage() {
         const cs = _custAll;
         if (!cs.length) {
-          $("ctbody").innerHTML = '<tr><td colspan="10"><div class="empty">No customers found</div></td></tr>';
+          $("ctbody").innerHTML = '<tr><td colspan="11"><div class="empty">No customers found</div></td></tr>';
           $("cpagination").style.display = "none";
           return;
         }
@@ -3196,6 +3383,21 @@
         $("ctbody").innerHTML = slice.map(function(c, i) {
           const n = c.name.replace(/'/g, "\\'");
           const sr = start + i + 1;
+
+          const postpaidBtn = c.billing_type === 'postpaid'
+            ? (realSt(c) === 'suspended'
+                ? '<button class="btn bsm" style="background:var(--green-l);border-color:rgba(5,150,105,0.2);color:var(--green)" onclick="openReactivateModal(' + c.id + ')" title="Reactivate">▶</button>'
+                : '<button class="btn bsm" style="background:var(--amber-l);border-color:rgba(217,119,6,0.2);color:var(--amber)" onclick="openSuspendModal(' + c.id + ')" title="Suspend">⏸</button>')
+            : '';
+
+          const generateBillBtn = c.billing_type === 'postpaid'
+          ? '<button class="btn bsm bpurple-btn" onclick="generateBillNow(' + c.id + ',' + "'" + n + "'" + ')" title="Generate Bill Now">🧾</button>'
+          : '';
+
+          const billingBadge = c.billing_type === 'postpaid'
+            ? '<span class="badge bpurple">Postpaid</span>'
+            : '<span class="badge bgray">Prepaid</span>';
+
           return '<tr>' +
             '<td style="font-family:var(--mono);color:var(--txt3);font-size:12px;font-weight:600">' + sr + '</td>' +
             '<td style="font-weight:600;color:var(--txt)">' + c.name + '</td>' +
@@ -3207,10 +3409,14 @@
             '<td style="color:' + (c.balance_due > 0 ? "var(--red)" : "var(--txt3)") + ';font-family:var(--mono);font-weight:' + (c.balance_due > 0 ? "700" : "400") + '">' +
             (c.balance_due > 0 ? "₹" + c.balance_due : "—") +
             (c.due_payment_mode === "due_only" ? ' <span class="badge berr" style="font-size:9px;padding:2px 6px">DUE ONLY</span>' : "") +
-            '</td><td>' + sbadge(realSt(c)) + '</td>' +
+            '</td>' +
+            '<td>' + billingBadge + '</td>' +
+            '<td>' + sbadge(realSt(c)) + '</td>' +
             '<td style="padding-right:20px"><div class="abtns">' +
             '<button class="btn bsm bview" onclick="openView(' + c.id + ')">👁</button>' +
             '<button class="btn bsm bedit" onclick="openEdit(' + c.id + ')">✏</button>' +
+            generateBillBtn +
+            postpaidBtn +
             '<button class="btn bsm bpurple-btn" onclick="generateLink(' + c.id + ",'" + n + "')" + '" title="Payment Link">🔗</button>' +
             '<button class="btn bsm bdanger" onclick="deleteCustomer(' + c.id + ',' + "'" + n + "'" + ')">🗑</button>' +
             '</div></td></tr>';
@@ -3293,9 +3499,18 @@
               ? '<span style="color:var(--red);font-weight:700">₹' + c.balance_due + "</span>"
               : '<span style="color:var(--green);font-weight:600">₹0</span>',
             true,
-          );
+          ) +
+          di("Billing Type", c.billing_type === "postpaid" ? '<span class="badge bpurple">Postpaid</span>' : '<span class="badge bgray">Prepaid</span>') +
+          (c.billing_type === "postpaid"
+            ? di("Current Due Date", fmtDate(c.current_due_date), "", "mono") +
+              di("Next Bill Date", fmtDate(c.next_bill_date), "", "mono") +
+              di("Grace Period", (c.grace_period_days || 10) + " days") +
+              di("Auto-Suspend", c.auto_suspend_enabled ? "ON" : "OFF")
+            : "");
         $("m-view").style.display = "flex";
       }
+
+
       function di(l, v, c, m) {
         return (
           '<div class="ditem' +
@@ -3339,6 +3554,10 @@
         $("a-pon-port").value = "";
         $("a-onu-id").value = "";
         $("a-wifi-band").value = "single";
+        $("a-billing-type").value = "prepaid";
+        $("a-grace-days").value = "10";
+        $("a-auto-suspend").value = "1";
+        togglePostpaidFieldsAdd();
         $("a-err").style.display = "none";
         $("m-add").style.display = "flex";
       }
@@ -3376,6 +3595,12 @@
         if ($("e-wifi-ssid")) $("e-wifi-ssid").value = c.wifi_ssid || "";
         if ($("e-wifi-band")) $("e-wifi-band").value = c.wifi_band || "single";
         $("e-due").value = c.balance_due || 0;
+        $("e-billing-type").value = c.billing_type || "prepaid";
+        $("e-grace-days").value = c.grace_period_days || 10;
+        $("e-auto-suspend").value = c.auto_suspend_enabled ?? 1;
+        $("e-current-due-date").value = c.current_due_date || "";
+        $("e-next-bill-date").value = c.next_bill_date || "";
+        togglePostpaidFieldsEdit();
         if ($("e-due-mode")) $("e-due-mode").value = c.due_payment_mode || "normal";
         $("m-edit").style.display = "flex";
       }
@@ -3408,6 +3633,9 @@
           wifi_ssid: $("a-wifi-ssid").value.trim() || null,
           wifi_band: $("a-wifi-band").value || "single",
           balance_due: parseFloat($("a-due").value) || 0,
+          billing_type: $("a-billing-type").value,
+          grace_period_days: parseInt($("a-grace-days").value) || 10,
+          auto_suspend_enabled: parseInt($("a-auto-suspend").value),
         };
         if (!d.name || !d.phone) {
           showErr(err, "Name and phone required");
@@ -3461,6 +3689,11 @@
           wifi_band: $("e-wifi-band") ? $("e-wifi-band").value || "single" : "single",
           balance_due: parseFloat($("e-due").value) || 0,
           due_payment_mode: $("e-due-mode") ? $("e-due-mode").value : "normal",
+          billing_type: $("e-billing-type").value,
+          grace_period_days: parseInt($("e-grace-days").value) || 10,
+          auto_suspend_enabled: parseInt($("e-auto-suspend").value),
+          current_due_date: $("e-current-due-date").value || null,
+          next_bill_date: $("e-next-bill-date").value || null,
         };
         const np = $("e-pass").value.trim();
         if (np) d.password = np;
@@ -3590,6 +3823,57 @@
         } catch (e) {
           console.error(e);
         }
+      }
+
+
+      // ── POSTPAID BILLING HISTORY ────────────────────────────────
+      let _billingAll = [];
+
+      async function loadBillingHistory() {
+        $("bh-tbody").innerHTML = '<tr><td colspan="10"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+        const status = $("bh-status").value;
+        try {
+          const r = await apiFetch("GET", "/api/admin/postpaid/billing-history" + (status ? "?status=" + status : ""));
+          _billingAll = r.data?.billing_history || [];
+
+          $("bh-pending").textContent = _billingAll.filter(b => b.status === "pending").length;
+          $("bh-partial").textContent = _billingAll.filter(b => b.status === "partial").length;
+          $("bh-paid").textContent = _billingAll.filter(b => b.status === "paid").length;
+
+          renderBillingHistory();
+        } catch (e) {
+          $("bh-tbody").innerHTML = '<tr><td colspan="10"><div class="empty">Failed to load</div></td></tr>';
+        }
+      }
+
+      function renderBillingHistory() {
+        const q = $("bh-search").value.trim().toLowerCase();
+        let rows = _billingAll;
+        if (q) {
+          rows = rows.filter(b =>
+            (b.customer_name || "").toLowerCase().includes(q) ||
+            (b.customer_phone || "").includes(q)
+          );
+        }
+        if (!rows.length) {
+          $("bh-tbody").innerHTML = '<tr><td colspan="10"><div class="empty">No billing records found</div></td></tr>';
+          return;
+        }
+        $("bh-tbody").innerHTML = rows.map(b =>
+          '<tr>' +
+          '<td style="font-family:var(--mono);color:var(--txt3);font-size:12px;padding-left:20px">#' + b.id + '</td>' +
+          '<td><div style="font-weight:600;color:var(--txt)">' + (b.customer_name || "—") + '</div>' +
+          '<div style="font-size:11px;color:var(--txt3);font-family:var(--mono)">' + (b.customer_phone || "") + '</div></td>' +
+          '<td style="color:var(--txt2)">' + (b.plan_name || "—") + '</td>' +
+          '<td style="font-family:var(--mono);font-weight:700;color:var(--txt)">₹' + (b.bill_amount || 0) + '</td>' +
+          '<td style="font-family:var(--mono);color:var(--txt3)">₹' + (b.previous_due || 0) + '</td>' +
+          '<td style="font-family:var(--mono);font-weight:700;color:' + (b.status === 'paid' ? 'var(--green)' : 'var(--red)') + '">₹' + (b.total_due_after || 0) + '</td>' +
+          '<td style="font-family:var(--mono);color:var(--txt3)">₹' + (b.paid_amount || 0) + '</td>' +
+          '<td style="font-family:var(--mono);font-size:11.5px;color:var(--txt)">' + fmtDate(b.bill_date) + ' → ' + fmtDate(b.period_end_date) + '</td>' +
+          '<td style="font-family:var(--mono);font-size:12px;color:var(--txt)">' + fmtDate(b.due_date) + '</td>' +
+          '<td style="padding-right:20px">' + sbadge(b.status) + '</td>' +
+          '</tr>'
+        ).join("");
       }
 
       async function deletePayment(id) {
@@ -4499,7 +4783,7 @@
           if (e.key === "Enter") doLogin();
         });
         $("logout-btn").addEventListener("click", doLogout);
-        ["m-add", "m-view", "m-edit", "m-cash", "m-tpl", "m-plan", "m-ott", "m-brand"].forEach(function (id) {
+        ["m-add", "m-view", "m-edit", "m-cash", "m-tpl", "m-plan", "m-ott", "m-brand", "m-suspend", "m-reactivate"].forEach(function (id) {
           $(id).addEventListener("click", function (e) {
             if (e.target === this) closeM(id);
           });
@@ -4837,6 +5121,106 @@ async function loadWaHistory() {
     $('wa-hist-tbody').innerHTML = '<tr><td colspan="6"><div class="empty">Failed to load</div></td></tr>';
   }
 }
+
+// ── Postpaid field toggles ──────────────────────────────────
+function togglePostpaidFieldsAdd() {
+  const isPost = $('a-billing-type').value === 'postpaid';
+  $('a-postpaid-fields').style.display = isPost ? 'block' : 'none';
+  $('a-autosuspend-field').style.display = isPost ? 'block' : 'none';
+}
+function togglePostpaidFieldsEdit() {
+  const isPost = $('e-billing-type').value === 'postpaid';
+  $('e-postpaid-fields').style.display = isPost ? 'block' : 'none';
+  $('e-autosuspend-field').style.display = isPost ? 'block' : 'none';
+  $('e-currentduedate-field').style.display = isPost ? 'block' : 'none';
+  $('e-nextbilldate-field').style.display = isPost ? 'block' : 'none';
+}
+
+// ── Suspend modal ────────────────────────────────────────────
+function openSuspendModal(custId) {
+  $('sp-cust-id').value = custId;
+  $('sp-reason').value = 'Non-payment';
+  $('sp-other-text').value = '';
+  $('sp-other-wrap').style.display = 'none';
+  $('sp-err').style.display = 'none';
+  $('m-suspend').style.display = 'flex';
+}
+
+async function generateBillNow(id, name) {
+  if (!confirm('Generate a new bill for ' + name + ' right now?\n\nThis will add the plan price to their current balance due, regardless of the normal billing cycle date.')) return;
+  try {
+    const r = await apiFetch('POST', '/api/admin/postpaid/generate-bill', { customer_id: id });
+    if (r.success) {
+      toast('Bill generated! Due ₹' + r.data.total_due_after + ' by ' + fmtDate(r.data.due_date));
+      loadCustomers();
+    } else {
+      toast(r.error || 'Failed to generate bill', 'err');
+    }
+  } catch(e) {
+    toast('Network error', 'err');
+  }
+}
+
+async function submitSuspend() {
+  const btn = $('sp-btn'), err = $('sp-err');
+  err.style.display = 'none';
+  const custId = parseInt($('sp-cust-id').value);
+  let reason = $('sp-reason').value;
+  if (reason === 'Other') {
+    reason = $('sp-other-text').value.trim();
+    if (!reason) { showErr(err, 'Please enter a reason'); return; }
+  }
+  btn.disabled = true; btn.textContent = 'Suspending...';
+  try {
+    const r = await apiFetch('POST', '/api/admin/postpaid/suspend', { customer_id: custId, reason });
+    if (r.success) {
+      toast('Customer suspended');
+      closeM('m-suspend');
+      loadCustomers();
+    } else showErr(err, r.error || 'Failed');
+  } catch(e) { showErr(err, 'Network error'); }
+  finally { btn.disabled = false; btn.textContent = 'Suspend'; }
+}
+
+// ── Reactivate modal ─────────────────────────────────────────
+function openReactivateModal(custId) {
+  $('rc-cust-id').value = custId;
+  $('rc-type').value = 'paid';
+  $('rc-new-due-date').value = '';
+  $('rc-duedate-wrap').style.display = 'none';
+  $('rc-err').style.display = 'none';
+  $('m-reactivate').style.display = 'flex';
+}
+function toggleReactivateFields() {
+  $('rc-duedate-wrap').style.display = $('rc-type').value === 'more_time' ? 'block' : 'none';
+}
+
+async function submitReactivate() {
+  const btn = $('rc-btn'), err = $('rc-err');
+  err.style.display = 'none';
+  const custId = parseInt($('rc-cust-id').value);
+  const reactivateType = $('rc-type').value;
+  const newDueDate = $('rc-new-due-date').value;
+  if (reactivateType === 'more_time' && !newDueDate) {
+    showErr(err, 'Please select a new due date');
+    return;
+  }
+  btn.disabled = true; btn.textContent = 'Reactivating...';
+  try {
+    const r = await apiFetch('POST', '/api/admin/postpaid/reactivate', {
+      customer_id: custId,
+      reactivate_type: reactivateType,
+      new_due_date: reactivateType === 'more_time' ? newDueDate : undefined,
+    });
+    if (r.success) {
+      toast('Customer reactivated');
+      closeM('m-reactivate');
+      loadCustomers();
+    } else showErr(err, r.error || 'Failed');
+  } catch(e) { showErr(err, 'Network error'); }
+  finally { btn.disabled = false; btn.textContent = 'Reactivate'; }
+}
+
 
 
 
