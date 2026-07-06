@@ -6,11 +6,11 @@
 <title>SuperAdmin ISP SaaS Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-:root{--bg:#0a0c10;--surface:#111318;--card:#181c26;--border:#252a3a;--accent:#7c6dfa;--accent2:#00d4aa;--danger:#ff4f6d;--warn:#ffb930;--text:#e8eaf0;--muted:#6b7291;--font:'Syne',sans-serif;--mono:'DM Mono',monospace;}
+:root{--bg:#f4f5f9;--surface:#ffffff;--card:#ffffff;--border:#e1e3ec;--accent:#7c6dfa;--accent2:#00a883;--danger:#e63958;--warn:#d69414;--text:#1a1c25;--muted:#6b7291;--font:'Syne',sans-serif;--mono:'DM Mono',monospace;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;}
 .shell{display:flex;height:100vh;overflow:hidden;}
-.sidebar{width:230px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar{width:230px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;box-shadow:1px 0 3px rgba(0,0,0,.03);}
 .main{flex:1;overflow-y:auto;padding:28px;}
 .logo{padding:24px 20px;border-bottom:1px solid var(--border);}
 .logo-name{font-size:16px;font-weight:700;color:var(--accent);}
@@ -18,7 +18,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .logo-badge{display:inline-block;background:var(--accent);color:#fff;font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:4px;margin-top:6px;}
 .nav{padding:12px 0;flex:1;}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border-left:2px solid transparent;}
-.nav-item:hover{color:var(--text);background:rgba(124,109,250,.06);}
+.nav-item:hover{color:var(--text);background:rgba(124,109,250,.08);}
 .nav-item.active{color:var(--accent);background:rgba(124,109,250,.1);border-left-color:var(--accent);}
 .nav-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
 .nav-section{font-size:10px;color:var(--muted);padding:16px 20px 6px;letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono);}
@@ -30,23 +30,23 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .logout-btn{margin-top:10px;width:100%;padding:7px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--font);transition:all .15s;}
 .logout-btn:hover{border-color:var(--danger);color:var(--danger);}
 .login-wrap{display:flex;align-items:center;justify-content:center;height:100vh;}
-.login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:400px;}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:400px;box-shadow:0 4px 24px rgba(0,0,0,.06);}
 .login-logo{font-size:22px;font-weight:700;color:var(--accent);margin-bottom:4px;}
 .login-sub{font-size:12px;color:var(--muted);margin-bottom:32px;font-family:var(--mono);}
 .field{margin-bottom:16px;}
 .field label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;font-family:var(--mono);text-transform:uppercase;}
-.field input{width:100%;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border .15s;}
+.field input{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border .15s;}
 .field input:focus{border-color:var(--accent);}
 .btn-primary{width:100%;padding:11px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;}
 .btn-primary:hover{opacity:.88;}
 .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
-.login-err{background:rgba(255,79,109,.12);border:1px solid rgba(255,79,109,.3);border-radius:8px;padding:10px 14px;color:var(--danger);font-size:13px;margin-bottom:16px;display:none;}
+.login-err{background:rgba(230,57,88,.08);border:1px solid rgba(230,57,88,.25);border-radius:8px;padding:10px 14px;color:var(--danger);font-size:13px;margin-bottom:16px;display:none;}
 .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
 .page-title{font-size:22px;font-weight:700;}
 .page-sub{font-size:13px;color:var(--muted);margin-top:2px;font-family:var(--mono);}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
 .stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;transition:border-color .15s;cursor:pointer;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;transition:border-color .15s;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.03);}
 .stat-card:hover{border-color:var(--accent);}
 .stat-label{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;}
 .stat-val{font-size:28px;font-weight:700;line-height:1;}
@@ -54,40 +54,40 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .up{color:var(--accent2);}
 .down{color:var(--danger);}
 .warn{color:var(--warn);}
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.03);}
 .card-title{font-size:14px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
 .tbl-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
 th{text-align:left;font-size:11px;color:var(--muted);padding:0 12px 10px 0;border-bottom:1px solid var(--border);font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
-td{padding:12px 12px 12px 0;border-bottom:1px solid rgba(42,47,66,.6);vertical-align:middle;}
+td{padding:12px 12px 12px 0;border-bottom:1px solid var(--border);vertical-align:middle;}
 tr:last-child td{border-bottom:none;}
-tr:hover td{background:rgba(124,109,250,.03);}
+tr:hover td{background:rgba(124,109,250,.04);}
 .badge{display:inline-block;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:500;font-family:var(--mono);white-space:nowrap;}
-.bok{background:rgba(0,212,170,.15);color:var(--accent2);}
-.bwarn{background:rgba(255,185,48,.15);color:var(--warn);}
-.berr{background:rgba(255,79,109,.15);color:var(--danger);}
-.binfo{background:rgba(124,109,250,.15);color:var(--accent);}
-.bgray{background:rgba(107,114,145,.15);color:var(--muted);}
-.btn{padding:7px 14px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap;}
-.btn:hover{background:var(--surface);border-color:var(--accent);color:var(--accent);}
+.bok{background:rgba(0,168,131,.12);color:var(--accent2);}
+.bwarn{background:rgba(214,148,20,.12);color:var(--warn);}
+.berr{background:rgba(230,57,88,.12);color:var(--danger);}
+.binfo{background:rgba(124,109,250,.12);color:var(--accent);}
+.bgray{background:rgba(107,114,145,.12);color:var(--muted);}
+.btn{padding:7px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn:hover{background:var(--bg);border-color:var(--accent);color:var(--accent);}
 .bpu{background:var(--accent);border-color:var(--accent);color:#fff;}
 .bpu:hover{opacity:.88;}
 .bsm{padding:4px 10px;font-size:11px;}
-.bedit{background:rgba(255,185,48,.1);border-color:var(--warn);color:var(--warn);}
+.bedit{background:rgba(214,148,20,.08);border-color:var(--warn);color:var(--warn);}
 .bedit:hover{background:var(--warn);color:#000;}
 .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
-.sbox{padding:8px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;width:240px;transition:border .15s;}
+.sbox{padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;width:240px;transition:border .15s;}
 .sbox:focus{border-color:var(--accent);}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;}
+.modal-bg{position:fixed;inset:0;background:rgba(20,22,30,.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.12);}
 .modal-title{font-size:18px;font-weight:700;margin-bottom:20px;}
 .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .ff{display:flex;flex-direction:column;gap:5px;}
 .ff.full{grid-column:1/-1;}
 .ff label{font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em;}
-.ff input,.ff select{padding:9px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border .15s;}
+.ff input,.ff select{padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border .15s;}
 .ff input:focus,.ff select:focus{border-color:var(--accent);}
-.ff select option{background:var(--card);}
+.ff select option{background:var(--surface);}
 .mactions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
 .errmsg{color:var(--danger);font-size:12px;margin-top:12px;display:none;}
 .sec-title{font-size:11px;font-weight:600;color:var(--accent);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
@@ -95,12 +95,12 @@ tr:hover td{background:rgba(124,109,250,.03);}
 .spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .empty{text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:13px;}
-.toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;z-index:200;transform:translateY(80px);opacity:0;transition:all .25s;max-width:320px;}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;z-index:200;transform:translateY(80px);opacity:0;transition:all .25s;max-width:320px;box-shadow:0 4px 16px rgba(0,0,0,.1);}
 .toast.show{transform:translateY(0);opacity:1;}
 .toast.ok{border-color:var(--accent2);color:var(--accent2);}
 .toast.err{border-color:var(--danger);color:var(--danger);}
 .abtns{display:flex;gap:4px;}
-.fcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px;transition:border-color .15s;}
+.fcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px;transition:border-color .15s;box-shadow:0 1px 3px rgba(0,0,0,.03);}
 .fcard:hover{border-color:var(--accent);}
 .fcard-name{font-size:16px;font-weight:700;margin-bottom:4px;}
 .fcard-meta{font-size:12px;color:var(--muted);font-family:var(--mono);}
@@ -108,10 +108,10 @@ tr:hover td{background:rgba(124,109,250,.03);}
 .fsi{background:var(--bg);border-radius:8px;padding:10px;text-align:center;}
 .fsi-val{font-size:18px;font-weight:700;}
 .fsi-lbl{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:2px;}
-.warn-box{background:rgba(255,185,48,.08);border:1px solid rgba(255,185,48,.3);border-radius:8px;padding:12px;font-size:12px;color:var(--warn);margin-bottom:14px;}
+.warn-box{background:rgba(214,148,20,.06);border:1px solid rgba(214,148,20,.25);border-radius:8px;padding:12px;font-size:12px;color:var(--warn);margin-bottom:14px;}
 .isp-box{border-radius:8px;padding:14px;margin-bottom:0;}
-.isp-jaze{background:rgba(0,212,170,.05);border:1px solid rgba(0,212,170,.2);}
-.isp-netadmin{background:rgba(255,185,48,.05);border:1px solid rgba(255,185,48,.2);}
+.isp-jaze{background:rgba(0,168,131,.05);border:1px solid rgba(0,168,131,.2);}
+.isp-netadmin{background:rgba(214,148,20,.05);border:1px solid rgba(214,148,20,.2);}
 .isp-box-title{font-size:12px;font-weight:600;margin-bottom:10px;}
 </style>
 </head>
@@ -437,38 +437,42 @@ tr:hover td{background:rgba(124,109,250,.03);}
       </div>
     </div>
 
-    <!-- WHATSAPP SECTION -->
-<div class="sec-title">📱 WhatsApp Settings</div>
-<div class="fgrid">
-  <div class="ff full">
-    <label>WhatsApp Enabled</label>
-    <select id="f-wa-enabled">
-      <option value="0">❌ Disabled — No WhatsApp messages</option>
-      <option value="1">✅ Enabled — Use master or own number</option>
-    </select>
-  </div>
-  <div class="ff">
-    <label>WhatsApp Balance (messages assigned)</label>
-    <input id="f-wa-balance" type="number" placeholder="e.g. 200"/>
-  </div>
-  <div class="ff">
-    <label>Messages Used (read only)</label>
-    <input id="f-wa-used" type="number" placeholder="0" readonly style="opacity:.5"/>
-  </div>
-  <div class="ff full" style="background:rgba(124,109,250,.06);border:1px solid rgba(124,109,250,.2);border-radius:8px;padding:14px">
-    <label style="margin-bottom:10px;display:block">Own WhatsApp Credentials (leave blank to use master)</label>
-    <div class="fgrid">
-      <div class="ff">
-        <label>Phone Number ID</label>
-        <input id="f-wa-phone-id" placeholder="Leave blank = use master"/>
-      </div>
-      <div class="ff">
-        <label>Access Token</label>
-        <input id="f-wa-token" type="password" placeholder="Leave blank = use master"/>
+  <!-- WHATSAPP SECTION -->
+  <div class="sec-title">📱 WhatsApp Settings</div>
+  <div class="fgrid">
+    <div class="ff full">
+      <label>WhatsApp Enabled</label>
+      <select id="f-wa-enabled">
+        <option value="0">❌ Disabled — No WhatsApp messages</option>
+        <option value="1">✅ Enabled — Use master or own number</option>
+      </select>
+    </div>
+    <div class="ff">
+      <label>WhatsApp Balance (remaining)</label>
+      <div id="f-wa-remaining-display" style="padding:9px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--accent2);font-family:var(--mono);font-size:13px">—</div>
+    </div>
+    <div class="ff">
+      <label>&nbsp;</label>
+      <button type="button" class="btn bpu" onclick="openTopUpModal()">+ Top Up Balance</button>
+    </div>
+    <div class="ff full">
+      <label>Owner WhatsApp Number (for daily reports)</label>
+      <input id="f-wa-owner-number" placeholder="919876543210 — country code, no + or spaces"/>
+    </div>
+    <div class="ff full" style="background:rgba(124,109,250,.06);border:1px solid rgba(124,109,250,.2);border-radius:8px;padding:14px">
+      <label style="margin-bottom:10px;display:block">Own WhatsApp Credentials (leave blank to use master)</label>
+      <div class="fgrid">
+        <div class="ff">
+          <label>Phone Number ID</label>
+          <input id="f-wa-phone-id" placeholder="Leave blank = use master"/>
+        </div>
+        <div class="ff">
+          <label>Access Token</label>
+          <input id="f-wa-token" type="password" placeholder="Leave blank = use master"/>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 <div class="sec-title">📨 Auto Message Settings</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -657,7 +661,12 @@ function showPage(name){
 
 async function loadDash(){
   try{
-    const[fr,cr,pr,ar]=await Promise.all([apiFetch('GET','/api/super/franchises'),apiFetch('GET','/api/admin/customers'),apiFetch('GET','/api/admin/payments'),apiFetch('GET','/api/super/admins')]);
+    const[fr,cr,pr,ar]=await Promise.all([
+      apiFetch('GET','/api/super/franchises'),
+      apiFetch('GET','/api/admin/customers?limit=10000'),
+      apiFetch('GET','/api/admin/payments?limit=10000'),
+      apiFetch('GET','/api/super/admins')
+    ]);
     const fs=fr.data?.franchises||[];franchisesCache=fs;
     const cs=cr.data?.customers||[];
     const ps=pr.data?.payments||[];
@@ -681,7 +690,7 @@ async function loadDash(){
 async function loadFranchises(){
   $('ftbody').innerHTML='<tr><td colspan="12"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
   try{
-    const[fr,cr]=await Promise.all([apiFetch('GET','/api/super/franchises'),apiFetch('GET','/api/admin/customers')]);
+    const[fr,cr]=await Promise.all([apiFetch('GET','/api/super/franchises'),apiFetch('GET','/api/admin/customers?limit=10000')]);
     const fs=fr.data?.franchises||[];franchisesCache=fs;
     const cs=cr.data?.customers||[];
     if(!fs.length){$('ftbody').innerHTML='<tr><td colspan="12"><div class="empty">No franchises yet</div></td></tr>';return;}
@@ -719,31 +728,12 @@ function openAddFranchise(){
   ['f-name','f-owner','f-phone','f-email','f-city','f-state',
    'f-jaze-url','f-jaze-user','f-jaze-key','f-mk-key','f-mk-note',
    'f-tr069-url','f-tr069-user','f-tr069-pass','f-ssid-prefix',
-   'f-ebz-key','f-ebz-salt'
+   'f-ebz-key','f-ebz-salt','f-wa-owner-number','f-wa-phone-id','f-wa-token'
   ].forEach(i=>$(i).value='');
   $('f-gateway').value='easebuzz';$('f-active').value='1';$('f-err').style.display='none';
-  $('f-ebz-env').value='production';
-  // WhatsApp settings
-  $('f-wa-enabled').value = f.whatsapp_enabled ? '1' : '0';
-  $('f-wa-balance').value = f.whatsapp_balance || 0;
-  $('f-wa-used').value    = f.whatsapp_used || 0;
-  $('f-wa-phone-id').value = f.whatsapp_phone_id || '';
-  $('f-wa-token').value    = f.whatsapp_token || '';
-  $('f-wa-auto-payment').value  = f.wa_auto_payment  ?? 1;
-  $('f-wa-auto-expiry').value   = f.wa_auto_expiry_reminder ?? 1;
-  $('f-wa-auto-expired').value  = f.wa_auto_plan_expired ?? 1;
-  $('f-wa-auto-new').value      = f.wa_auto_new_customer ?? 1;
-  $('f-wa-ignore-payment').value  = f.wa_ignore_bal_payment ?? 0;
-  $('f-wa-ignore-expiry').value   = f.wa_ignore_bal_expiry_reminder ?? 0;
-  $('f-wa-ignore-expired').value  = f.wa_ignore_bal_plan_expired ?? 0;
-  $('f-wa-ignore-new').value      = f.wa_ignore_bal_new_customer ?? 0;
-  updateGWFields();$('m-franchise').style.display='flex';$('f-wifi-method').value='none';
-  // Reset WhatsApp fields
+  $('f-ebz-env').value='production';$('f-wifi-method').value='none';
+  $('f-wa-remaining-display').textContent='0 remaining (0/0 used)';
   $('f-wa-enabled').value='0';
-  $('f-wa-balance').value='0';
-  $('f-wa-used').value='0';
-  $('f-wa-phone-id').value='';
-  $('f-wa-token').value='';
   $('f-wa-auto-payment').value='1';
   $('f-wa-auto-expiry').value='1';
   $('f-wa-auto-expired').value='1';
@@ -752,7 +742,9 @@ function openAddFranchise(){
   $('f-wa-ignore-expiry').value='0';
   $('f-wa-ignore-expired').value='0';
   $('f-wa-ignore-new').value='0';
+  updateGWFields();$('m-franchise').style.display='flex';
 }
+
 
 async function openEditFranchise(id){
   let f=franchisesCache.find(x=>x.id===id);
@@ -780,7 +772,11 @@ async function openEditFranchise(id){
   $('f-tr069-pass').value=f.tr069_password||'';
   $('f-ssid-prefix').value=f.ssid_prefix||'';
   $('f-wifi-method').value=f.wifi_method||'none';
+  $('f-wa-remaining-display').textContent = ((f.whatsapp_balance||0)-(f.whatsapp_used||0)) + ' remaining (' + (f.whatsapp_used||0) + '/' + (f.whatsapp_balance||0) + ' used)';
+  $('f-wa-owner-number').value = f.owner_whatsapp_number || '';
   $('f-active').value=f.is_active?'1':'0';$('f-err').style.display='none';
+  $('f-wa-remaining-display').textContent = ((f.whatsapp_balance||0) - (f.whatsapp_used||0)) + ' remaining (' + (f.whatsapp_used||0) + '/' + (f.whatsapp_balance||0) + ' used)';
+  $('f-wa-owner-number').value = f.owner_whatsapp_number || '';
   updateGWFields();$('m-franchise').style.display='flex';
 }
 
@@ -805,7 +801,7 @@ async function submitFranchise(){
     wifi_method:$('f-wifi-method').value,
     is_active:parseInt($('f-active').value),
     whatsapp_enabled: parseInt($('f-wa-enabled').value),
-    whatsapp_balance: parseInt($('f-wa-balance').value) || 0,
+    owner_whatsapp_number: $('f-wa-owner-number').value.trim() || null,
     whatsapp_token:   $('f-wa-token').value.trim() || null,
     whatsapp_phone_id: $('f-wa-phone-id').value.trim() || null,
     wa_auto_payment:         parseInt($('f-wa-auto-payment').value),
@@ -990,6 +986,33 @@ window.addEventListener('load',function(){
   if(getToken())startApp();
   else{$('login-page').style.display='flex';$('app-shell').style.display='none';}
 });
+
+
+
+let currentTopUpFranchiseId = null;
+
+function openTopUpModal(){
+  currentTopUpFranchiseId = $('f-id').value;
+  if(!currentTopUpFranchiseId){ toast('Please save the franchise first, then top up.', 'err'); return; }
+  const amount = prompt('How many messages would you like to add?');
+  if(!amount || isNaN(amount) || parseInt(amount) <= 0) return;
+  submitTopUp(parseInt(amount));
+}
+
+async function submitTopUp(amount){
+  try{
+    const r = await apiFetch('POST', '/api/super/whatsapp-balance/' + currentTopUpFranchiseId, { amount });
+    if(r.success){
+      toast('✅ ' + amount + ' messages added!');
+      const updated = await apiFetch('GET', '/api/super/whatsapp-balance/' + currentTopUpFranchiseId);
+      $('f-wa-remaining-display').textContent = updated.data.remaining + ' remaining (' + updated.data.whatsapp_used + '/' + updated.data.whatsapp_balance + ' used)';
+      loadFranchises();
+    } else {
+      toast(r.error || 'Failed to add balance', 'err');
+    }
+  }catch(e){ toast('Network error', 'err'); }
+}
+
 </script>
 </body>
 </html>
