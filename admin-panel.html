@@ -2361,7 +2361,9 @@
                   <option value="expired">All Expired Customers</option>
                   <option value="expiring_3">Expiring in 3 days</option>
                   <option value="expiring_7">Expiring in 7 days</option>
+                  <option value="due_balance">Customers with Due Balance</option>
                   <option value="single">Single Customer (search below)</option>
+                  <option value="multiple">Select Multiple Customers</option>
                 </select>
                 <div id="wa-single-search" style="display:none;margin-top:8px">
                   <input class="sbox" id="wa-cust-search" placeholder="Search name or phone..." oninput="searchWaCustomer()" style="width:100%;padding-left:14px"/>
@@ -2369,11 +2371,17 @@
                   <div id="wa-cust-selected" style="display:none;margin-top:6px;padding:8px 12px;background:var(--green-l);border:1px solid rgba(5,150,105,0.2);border-radius:var(--r-sm);font-size:12px;color:var(--green);font-weight:600"></div>
                   <input type="hidden" id="wa-cust-id"/>
                 </div>
+                <div id="wa-multi-search" style="display:none;margin-top:8px">
+                  <input class="sbox" id="wa-multi-filter" placeholder="Search to filter list..." oninput="renderWaMultiList()" style="width:100%;padding-left:14px"/>
+                  <div id="wa-multi-list" style="max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r-sm);padding:8px;background:var(--surface-2);margin-top:8px"></div>
+                  <div style="font-size:11px;color:var(--txt3);margin-top:6px;font-family:var(--mono)" id="wa-multi-count"></div>
+                </div>
                 <div style="font-size:11px;color:var(--txt3);margin-top:8px;font-family:var(--mono)" id="wa-aud-count"></div>
 
                 <div class="sec-title">Step 2 — Template</div>
                 <select class="fsel" id="wa-template" style="width:100%;margin-bottom:8px" onchange="updateWaPreview()">
-                  <option value="expiry_reminder">⏰ Expiry Reminder</option>
+                  <option value="payment_due_reminder">💰 Payment Due Reminder</option>
+                  <option value="expiry_reminder">⏰ Expiring Soon </option>
                   <option value="plan_expired">❌ Plan Expired</option>
                   <option value="payment_received">💳 Payment Received</option>
                   <option value="new_customer_welcome">👤 New Customer Welcome</option>
@@ -4912,6 +4920,12 @@ function switchWaTab(tab) {
 }
 
 async function loadWhatsAppPage() {
+  if (!custCache.length) {
+    try {
+      const r = await apiFetch('GET', '/api/admin/customers?page=1&limit=9999');
+      custCache = r.data?.customers || [];
+    } catch(e) {}
+  }
   await loadWaBalance();
   updateWaCount();
   updateWaPreview();
@@ -4938,13 +4952,15 @@ async function loadWaBalance() {
 
 async function updateWaCount() {
   const audience = $('wa-audience').value;
-  const single = $('wa-single-search');
-  single.style.display = audience === 'single' ? 'block' : 'none';
+  $('wa-single-search').style.display = audience === 'single' ? 'block' : 'none';
+  $('wa-multi-search').style.display = audience === 'multiple' ? 'block' : 'none';
+  if (audience === 'multiple') { loadWaMultiList(); $('wa-aud-count').textContent = ''; return; }
   if (audience === 'single') { $('wa-aud-count').textContent = ''; return; }
 
   try {
     const r = await apiFetch('GET', '/api/admin/customers?page=1&limit=9999');
     const all = r.data?.customers || [];
+    custCache = all;
     const td = today();
     const in3 = new Date(); in3.setDate(in3.getDate() + 3);
     const in7 = new Date(); in7.setDate(in7.getDate() + 7);
@@ -4956,9 +4972,56 @@ async function updateWaCount() {
     else if (audience === 'expired') n = all.filter(c => c.status === 'expired' || (c.status === 'active' && c.expiry_date < td)).length;
     else if (audience === 'expiring_3') n = all.filter(c => c.expiry_date <= in3str && c.expiry_date >= td).length;
     else if (audience === 'expiring_7') n = all.filter(c => c.expiry_date <= in7str && c.expiry_date >= td).length;
+    else if (audience === 'due_balance') n = all.filter(c => (c.balance_due || 0) > 0).length;
 
     $('wa-aud-count').textContent = '💬 ' + n + ' customers will receive this message';
   } catch(e) {}
+}
+
+let waMultiSelected = new Set();
+
+async function loadWaMultiList() {
+  if (!custCache.length) {
+    try {
+      const r = await apiFetch('GET', '/api/admin/customers?page=1&limit=9999');
+      custCache = r.data?.customers || [];
+    } catch(e) {}
+  }
+  renderWaMultiList();
+}
+
+function renderWaMultiList() {
+  const q = $('wa-multi-filter').value.trim().toLowerCase();
+  const el = $('wa-multi-list');
+  let list = custCache;
+  if (q) list = list.filter(c => c.name.toLowerCase().includes(q) || (c.phone||'').includes(q));
+  list = list.slice(0, 200);
+
+  if (!list.length) { el.innerHTML = '<div style="padding:10px;font-size:12px;color:var(--txt3)">No customers found</div>'; return; }
+
+  el.innerHTML = list.map(c => {
+    const due = c.balance_due || 0;
+    const billing = c.billing_type === 'postpaid'
+      ? '<span class="badge bpurple" style="font-size:9px;padding:2px 6px">Postpaid</span>'
+      : '<span class="badge bgray" style="font-size:9px;padding:2px 6px">Prepaid</span>';
+    const dueTxt = due > 0 ? ' · <span style="color:var(--red);font-weight:700">Due ₹' + due + '</span>' : '';
+    const checked = waMultiSelected.has(c.id) ? 'checked' : '';
+    return '<div class="chk-row"><input type="checkbox" id="wam' + c.id + '" ' + checked + ' onchange="toggleWaMulti(' + c.id + ')"/>' +
+      '<label for="wam' + c.id + '" style="cursor:pointer;flex:1;font-size:12.5px"><strong>' + c.name + '</strong> ' +
+      '<span style="color:var(--txt3);font-family:var(--mono)">' + c.phone + '</span>' + dueTxt + '</label>' + billing + '</div>';
+  }).join('');
+
+  updateWaMultiCount();
+}
+
+function toggleWaMulti(id) {
+  if (waMultiSelected.has(id)) waMultiSelected.delete(id);
+  else waMultiSelected.add(id);
+  updateWaMultiCount();
+}
+
+function updateWaMultiCount() {
+  $('wa-multi-count').textContent = waMultiSelected.size + ' customer(s) selected';
 }
 
 function updateWaPreview() {
@@ -4966,6 +5029,7 @@ function updateWaPreview() {
   const previews = {
     'expiry_reminder': 'Hi [Name]! Your internet plan expires in 3 days on [Date]. Recharge now to avoid disconnection!',
     'plan_expired': 'Hi [Name]! Your internet plan expired on [Date]. Recharge now to restore your connection!',
+    'payment_due_reminder': 'Dear Customer [Name],Your broadband bill payment of ₹[Amount] has not been received yet. Please pay immediately using the link below to avoid any service interruption.',
     'payment_received': 'Hi [Name]! Your payment of ₹[Amount] for [Plan] has been received. Valid till [Expiry].',
     'new_customer_welcome': 'Welcome [Name]! Your broadband account with [Franchise] has been created. Username: [Phone], Password: [Phone].',
     'app_features_intro': '📱 Manage your connection right from your phone: View plan, Recharge, Change WiFi password, OTT Add-ons & more!',
@@ -5026,14 +5090,19 @@ function searchWaCustomer() {
     return;
   }
   res.style.display = 'block';
-  res.innerHTML = matches.map(c =>
-    '<div onclick="selectWaCustomer(' + c.id + ',\'' + c.name.replace(/'/g,"\\'") + '\')" ' +
+  res.innerHTML = matches.map(c => {
+    const due = c.balance_due || 0;
+    const billing = c.billing_type === 'postpaid'
+      ? '<span class="badge bpurple" style="font-size:9px;padding:2px 6px">Postpaid</span>'
+      : '<span class="badge bgray" style="font-size:9px;padding:2px 6px">Prepaid</span>';
+    const dueTxt = due > 0 ? ' · <span style="color:var(--red);font-weight:700">Due ₹' + due + '</span>' : ' · <span style="color:var(--green)">No due</span>';
+    return '<div onclick="selectWaCustomer(' + c.id + ',\'' + c.name.replace(/'/g,"\\'") + '\')" ' +
     'style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border)" ' +
     'onmouseover="this.style.background=\'var(--blue-l)\'" onmouseout="this.style.background=\'\'">' +
-    '<div style="font-weight:600;font-size:13px">' + c.name + '</div>' +
-    '<div style="font-size:11px;color:var(--txt3);font-family:var(--mono)">' + c.phone + ' · ' + fmtDate(c.expiry_date) + '</div>' +
-    '</div>'
-  ).join('');
+    '<div style="font-weight:600;font-size:13px">' + c.name + ' ' + billing + '</div>' +
+    '<div style="font-size:11px;color:var(--txt3);font-family:var(--mono)">' + c.phone + ' · ' + fmtDate(c.expiry_date) + dueTxt + '</div>' +
+    '</div>';
+  }).join('');
 }
 
 function selectWaCustomer(id, name) {
@@ -5057,11 +5126,16 @@ async function sendWaMessage() {
   if (audience === 'single' && !customerId) {
     err.textContent = 'Please select a customer'; err.style.display = 'block'; return;
   }
+  if (audience === 'multiple' && waMultiSelected.size === 0) {
+    err.textContent = 'Please select at least one customer'; err.style.display = 'block'; return;
+  }
   if (template === 'custom_text' && !customMessage) {
     err.textContent = 'Please type a custom message'; err.style.display = 'block'; return;
   }
 
-  const audienceLabel = $('wa-audience').options[$('wa-audience').selectedIndex].text;
+  const audienceLabel = audience === 'multiple'
+    ? (waMultiSelected.size + ' selected customers')
+    : $('wa-audience').options[$('wa-audience').selectedIndex].text;
   if (!confirm('Send "' + template + '" to ' + audienceLabel + '?\n\nThis will use WhatsApp balance.')) return;
 
   btn.disabled = true; btn.textContent = 'Sending...';
@@ -5069,10 +5143,11 @@ async function sendWaMessage() {
     const r = await apiFetch('POST', '/api/admin/whatsapp-send', {
       audience, template,
       customer_id: customerId ? parseInt(customerId) : null,
+      customer_ids: audience === 'multiple' ? Array.from(waMultiSelected) : undefined,
       custom_message: template === 'custom_text' ? customMessage : undefined,
     });
     if (r.success) {
-      toast('✅ Sent: ' + r.data.sent + ' · Failed: ' + r.data.failed);
+      toast('✅ Sent: ' + r.data.sent + ' · Failed: ' + r.data.failed + (r.data.skipped ? ' · Skipped: ' + r.data.skipped : ''));
       loadWaBalance();
       loadWaHistory();
     } else {
@@ -5088,6 +5163,8 @@ function clearWaSend() {
   $('wa-cust-id').value = '';
   $('wa-cust-selected').style.display = 'none';
   $('wa-single-search').style.display = 'none';
+  $('wa-multi-search').style.display = 'none';
+  waMultiSelected.clear();
   $('wa-send-err').style.display = 'none';
   $('wa-custom-text').value = '';
   $('wa-custom-box').style.display = 'none';
