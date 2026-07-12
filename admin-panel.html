@@ -1573,6 +1573,10 @@
           <div class="nav-item" id="nav-brands" onclick="showPage('brands')">
             <div class="nav-icon">📡</div>Router Brands</div>
         </nav>
+        <div class="nav-item" id="nav-iptv" onclick="showPage('iptv')">
+            <div class="nav-icon">📺</div>
+            IPTV
+          </div>
         <div class="sidebar-ft">
           <div class="user-row">
             <div class="avatar" id="sb-avatar">A</div>
@@ -2503,7 +2507,97 @@
           </div>
         </div>
 
-
+         <!-- IPTV -->
+        <div id="page-iptv" style="display:none">
+          <div class="topbar">
+            <div>
+              <div class="pg-title">IPTV</div>
+              <div class="pg-sub">// customers, device pairing & franchise plan</div>
+            </div>
+            <button class="btn bpri" onclick="openAddIptv()">+ Add IPTV Customer</button>
+          </div>
+          <div class="content">
+ 
+            <div class="tabs" style="margin-bottom:20px;max-width:420px">
+              <div class="tab active" id="iptv-tab-customers" onclick="switchIptvTab('customers')">Customers</div>
+              <div class="tab" id="iptv-tab-config" onclick="switchIptvTab('config')">Franchise Plan</div>
+            </div>
+ 
+            <!-- CUSTOMERS TAB -->
+            <div id="iptv-panel-customers">
+              <div class="toolbar">
+                <input class="sbox" id="iptv-search" placeholder="Search name or mobile..." oninput="loadIptvCustomers()" />
+                <button class="btn" onclick="loadIptvCustomers()">↺ Refresh</button>
+              </div>
+              <div class="tbl-card">
+                <div class="tbl-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Mobile</th>
+                        <th>Server URL</th>
+                        <th>Status</th>
+                        <th>Devices</th>
+                        <th style="padding-right:20px">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="iptv-tbody">
+                      <tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+ 
+<!-- FRANCHISE CONFIG TAB -->
+            <div id="iptv-panel-config" style="display:none">
+              <div class="card" style="max-width:600px">
+                <div class="card-hd">Franchise IPTV Plan</div>
+                <div class="dgrid" id="iptv-config-view" style="margin-bottom:18px"></div>
+                <div id="iptv-config-editable" style="display:none">
+                  <div class="sec-title">Edit Plan (SuperAdmin only)</div>
+                  <div class="fgrid">
+                    <div class="ff full">
+                      <label>Default Server URL (Xtream)</label>
+                      <input id="iptv-cfg-url" placeholder="http://provider.example.com:8080" />
+                    </div>
+                    <div class="ff">
+                      <label>Purchased Slots (users)</label>
+                      <input id="iptv-cfg-slots" type="number" placeholder="50" />
+                    </div>
+                    <div class="ff">
+                      <label>Grace Period (days)</label>
+                      <input id="iptv-cfg-grace" type="number" placeholder="3" />
+                    </div>
+                    <div class="ff">
+                      <label>Subscription Start</label>
+                      <input id="iptv-cfg-start" type="date" />
+                    </div>
+                    <div class="ff">
+                      <label>Subscription Expiry</label>
+                      <input id="iptv-cfg-expiry" type="date" />
+                    </div>
+                    <div class="ff">
+                      <label>Status</label>
+                      <select id="iptv-cfg-status">
+                        <option value="active">Active</option>
+                        <option value="grace">Grace</option>
+                        <option value="suspended">Suspended</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="errmsg" id="iptv-cfg-err"></div>
+                  <div class="mactions">
+                    <button class="btn bpri" id="iptv-cfg-btn" onclick="submitIptvConfig()">Save Plan</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+ 
+          </div>
+        </div>
         
 
 
@@ -2999,6 +3093,76 @@
       </div>
     </div>
 
+
+    <!-- ADD/EDIT IPTV CUSTOMER -->
+    <div class="modal-bg" id="m-iptv" style="display:none">
+      <div class="modal">
+        <div class="modal-title" id="iptv-modal-title">Add IPTV Customer</div>
+        <input type="hidden" id="iptv-id" />
+        <div class="fgrid">
+          <div class="ff full">
+            <label>Name *</label>
+            <input id="iptv-name" placeholder="Customer name" />
+          </div>
+          <div class="ff">
+            <label>Mobile</label>
+            <input id="iptv-mobile" placeholder="9876543210" />
+          </div>
+          <div class="ff">
+            <label>Status</label>
+            <select id="iptv-status">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="ff full">
+            <label>Address</label>
+            <input id="iptv-address" placeholder="Optional" />
+          </div>
+          <div class="ff full">
+            <label>Server URL Override (leave blank = use franchise default)</label>
+            <input id="iptv-server-url" placeholder="http://provider.example.com:8080" />
+          </div>
+          <div class="ff">
+            <label>Xtream Username</label>
+            <input id="iptv-username" placeholder="Xtream username" />
+          </div>
+          <div class="ff">
+            <label>Xtream Password</label>
+            <input id="iptv-password" placeholder="Xtream password" />
+          </div>
+          <div class="ff full">
+            <label>Notes</label>
+            <input id="iptv-notes" placeholder="Optional" />
+          </div>
+        </div>
+        <div class="errmsg" id="iptv-err"></div>
+        <div class="mactions">
+          <button class="btn" onclick="closeM('m-iptv')">Cancel</button>
+          <button class="btn bpri" id="iptv-btn" onclick="submitIptv()">Save</button>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- PAIR DEVICE -->
+    <div class="modal-bg" id="m-pair" style="display:none">
+      <div class="modal" style="max-width:420px">
+        <div class="modal-title">Pair TV Device</div>
+        <input type="hidden" id="pair-cust-id" />
+        <div style="font-size:13px;color:var(--txt3);margin-bottom:14px" id="pair-cust-label"></div>
+        <div class="ff">
+          <label>6-Digit Code (shown on customer's TV)</label>
+          <input id="pair-code" placeholder="A7X9K2" style="text-transform:uppercase;font-family:var(--mono);font-size:18px;letter-spacing:3px;text-align:center" maxlength="6" />
+        </div>
+        <div class="errmsg" id="pair-err"></div>
+        <div class="mactions">
+          <button class="btn" onclick="closeM('m-pair')">Cancel</button>
+          <button class="btn bpri" id="pair-btn" onclick="submitPairDevice()">Pair Device</button>
+        </div>
+      </div>
+    </div>
+
+
     <!-- CASH PAYMENT -->
       <div class="modal-bg" id="m-cash" style="display: none">
         <div class="modal" style="max-width: 460px">
@@ -3141,7 +3305,7 @@
 
     <script>
       const BASE = "https://isp-billing-api.netflowcloud.workers.dev";
-      const PAGES = ['dashboard','customers','activations','payments','notifications','plans','ott','paylinks','brands','whatsapp','billing'];
+      const PAGES = ['dashboard','customers','activations','payments','notifications','plans','ott','paylinks','brands','whatsapp','billing','iptv'];
       let custCache = [],
         plansCache = [],
         ottPlansCache = [],
@@ -3323,6 +3487,7 @@
         }
         if (name === "paylinks") loadPaymentLinks();
         if (name === 'brands') loadBrands();
+        if (name === 'iptv') { loadIptvCustomers(); loadIptvConfig(); }
         if (name === 'whatsapp') loadWhatsAppPage();
         if (name === 'billing') loadBillingHistory();
       }
@@ -4785,34 +4950,203 @@
         });
       });
 
-      window.addEventListener("load", function () {
-        $("login-btn").addEventListener("click", doLogin);
-        $("login-pass").addEventListener("keydown", function (e) {
-          if (e.key === "Enter") doLogin();
-        });
-        $("logout-btn").addEventListener("click", doLogout);
-        ["m-add", "m-view", "m-edit", "m-cash", "m-tpl", "m-plan", "m-ott", "m-brand", "m-suspend", "m-reactivate"].forEach(function (id) {
-          $(id).addEventListener("click", function (e) {
-            if (e.target === this) closeM(id);
-          });
-        });
-        if (getToken()) {
-          startApp();
-          apiFetch("GET", "/api/admin/voice-prefs").then((r) => {
-            if (r.success) {
-              voiceEnabled = r.data.voice_enabled === 1;
-              voiceLang = r.data.voice_language || "hi-IN";
-              updateVoiceUI();
-              $("voice-settings-btn").style.display = "flex";
-              const b = $("voice-banner");
-              if (b) b.style.display = "block";
-            }
-          });
-        } else {
-          $("login-page").style.display = "flex";
-          $("app-shell").style.display = "none";
+
+      // ── IPTV ─────────────────────────────────────────────────────
+let iptvCustCache = [];
+ 
+function switchIptvTab(tab) {
+  $('iptv-tab-customers').classList.toggle('active', tab === 'customers');
+  $('iptv-tab-config').classList.toggle('active', tab === 'config');
+  $('iptv-panel-customers').style.display = tab === 'customers' ? 'block' : 'none';
+  $('iptv-panel-config').style.display = tab === 'config' ? 'block' : 'none';
+}
+ 
+async function loadIptvCustomers() {
+  $('iptv-tbody').innerHTML = '<tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+  const search = $('iptv-search').value.trim();
+  try {
+    const r = await apiFetch('GET', '/api/admin/iptv/customers' + (search ? '?search=' + encodeURIComponent(search) : ''));
+    iptvCustCache = r.data?.customers || [];
+    if (!iptvCustCache.length) {
+      $('iptv-tbody').innerHTML = '<tr><td colspan="7"><div class="empty">No IPTV customers yet</div></td></tr>';
+      return;
+    }
+    $('iptv-tbody').innerHTML = iptvCustCache.map(c =>
+      '<tr>' +
+      '<td style="font-family:var(--mono);color:var(--txt3);font-size:12px;padding-left:20px">#' + c.id + '</td>' +
+      '<td style="font-weight:600;color:var(--txt)">' + (c.name || '—') + '</td>' +
+      '<td style="font-family:var(--mono);font-size:12px;color:var(--txt3)">' + (c.mobile || '—') + '</td>' +
+      '<td style="font-size:11px;color:var(--txt3);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (c.server_url || '<span style="color:var(--txt3)">(franchise default)</span>') + '</td>' +
+      '<td>' + sbadge(c.status) + '</td>' +
+      '<td style="font-family:var(--mono);font-size:12px">' + (c.device_count || 0) + '</td>' +
+      '<td style="padding-right:20px"><div class="abtns">' +
+      '<button class="btn bsm bedit" onclick="openEditIptv(' + c.id + ')">✏</button>' +
+      '<button class="btn bsm bpurple-btn" onclick="openPairModal(' + c.id + ',\'' + (c.name || '').replace(/'/g,"\\'") + '\')">📺 Pair</button>' +
+      '</div></td></tr>'
+    ).join('');
+  } catch(e) {
+    $('iptv-tbody').innerHTML = '<tr><td colspan="7"><div class="empty">Failed to load</div></td></tr>';
+  }
+}
+ 
+function openAddIptv() {
+  $('iptv-modal-title').textContent = 'Add IPTV Customer';
+  $('iptv-id').value = '';
+  ['iptv-name','iptv-mobile','iptv-address','iptv-server-url','iptv-username','iptv-password','iptv-notes'].forEach(i => $(i).value = '');
+  $('iptv-status').value = 'active';
+  $('iptv-err').style.display = 'none';
+  $('m-iptv').style.display = 'flex';
+}
+ 
+function openEditIptv(id) {
+  const c = iptvCustCache.find(x => x.id === id);
+  if (!c) { toast('Not found', 'err'); return; }
+  $('iptv-modal-title').textContent = 'Edit — ' + c.name;
+  $('iptv-id').value = c.id;
+  $('iptv-name').value = c.name || '';
+  $('iptv-mobile').value = c.mobile || '';
+  $('iptv-address').value = c.address || '';
+  $('iptv-server-url').value = c.server_url || '';
+  $('iptv-username').value = c.iptv_username || '';
+  $('iptv-password').value = c.iptv_password || '';
+  $('iptv-notes').value = c.notes || '';
+  $('iptv-status').value = c.status || 'active';
+  $('iptv-err').style.display = 'none';
+  $('m-iptv').style.display = 'flex';
+}
+ 
+async function submitIptv() {
+  const btn = $('iptv-btn'), err = $('iptv-err');
+  err.style.display = 'none';
+  const id = $('iptv-id').value;
+  const d = {
+    name: $('iptv-name').value.trim(),
+    mobile: $('iptv-mobile').value.trim(),
+    address: $('iptv-address').value.trim(),
+    server_url: $('iptv-server-url').value.trim(),
+    iptv_username: $('iptv-username').value.trim(),
+    iptv_password: $('iptv-password').value.trim(),
+    notes: $('iptv-notes').value.trim(),
+    status: $('iptv-status').value,
+  };
+  if (!d.name) { showErr(err, 'Name is required'); return; }
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const r = id
+      ? await apiFetch('PUT', '/api/admin/iptv/customers/' + id, d)
+      : await apiFetch('POST', '/api/admin/iptv/customers', d);
+    if (r.success) {
+      toast(id ? 'Updated!' : 'IPTV customer added!');
+      closeM('m-iptv');
+      loadIptvCustomers();
+    } else showErr(err, r.error || 'Failed');
+  } catch(e) { showErr(err, 'Network error'); }
+  finally { btn.disabled = false; btn.textContent = 'Save'; }
+}
+ 
+function openPairModal(custId, custName) {
+  $('pair-cust-id').value = custId;
+  $('pair-cust-label').textContent = 'Pairing device for: ' + custName;
+  $('pair-code').value = '';
+  $('pair-err').style.display = 'none';
+  $('m-pair').style.display = 'flex';
+}
+ 
+async function submitPairDevice() {
+  const btn = $('pair-btn'), err = $('pair-err');
+  err.style.display = 'none';
+  const code = $('pair-code').value.trim().toUpperCase();
+  const custId = parseInt($('pair-cust-id').value);
+  if (!code || code.length !== 6) { showErr(err, 'Enter the 6-character code shown on the TV'); return; }
+  btn.disabled = true; btn.textContent = 'Pairing...';
+  try {
+    const r = await apiFetch('POST', '/api/admin/iptv/pair', { code, iptv_customer_id: custId });
+    if (r.success) {
+      toast('✅ Device paired!');
+      closeM('m-pair');
+      loadIptvCustomers();
+    } else showErr(err, r.error || 'Failed');
+  } catch(e) { showErr(err, 'Network error'); }
+  finally { btn.disabled = false; btn.textContent = 'Pair Device'; }
+}
+ 
+async function loadIptvConfig() {
+  try {
+    const r = await apiFetch('GET', '/api/admin/iptv/franchise-config');
+    const c = r.data || {};
+    const isSuperAdmin = getUser().role === 'super_admin';
+ 
+    $('iptv-config-view').innerHTML =
+      di('Default Server URL', c.default_server_url, 'full', 'mono') +
+      di('Purchased Slots', c.purchased_slots || 0) +
+      di('Status', sbadge(c.subscription_status || 'active'), true) +
+      di('Subscription Start', fmtDate(c.subscription_start_date)) +
+      di('Subscription Expiry', fmtDate(c.subscription_expiry_date)) +
+      di('Grace Period', (c.grace_period_days || 3) + ' days');
+ 
+    $('iptv-config-editable').style.display = isSuperAdmin ? 'block' : 'none';
+    if (isSuperAdmin) {
+      $('iptv-cfg-url').value = c.default_server_url || '';
+      $('iptv-cfg-slots').value = c.purchased_slots || 0;
+      $('iptv-cfg-grace').value = c.grace_period_days || 3;
+      $('iptv-cfg-start').value = c.subscription_start_date || '';
+      $('iptv-cfg-expiry').value = c.subscription_expiry_date || '';
+      $('iptv-cfg-status').value = c.subscription_status || 'active';
+    }
+  } catch(e) { console.error(e); }
+}
+ 
+async function submitIptvConfig() {
+  const btn = $('iptv-cfg-btn'), err = $('iptv-cfg-err');
+  err.style.display = 'none';
+  const u = getUser();
+  const d = {
+    franchise_id: u.franchise_id,
+    default_server_url: $('iptv-cfg-url').value.trim(),
+    purchased_slots: parseInt($('iptv-cfg-slots').value) || 0,
+    grace_period_days: parseInt($('iptv-cfg-grace').value) || 3,
+    subscription_start_date: $('iptv-cfg-start').value || null,
+    subscription_expiry_date: $('iptv-cfg-expiry').value || null,
+    subscription_status: $('iptv-cfg-status').value,
+  };
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const r = await apiFetch('PUT', '/api/admin/iptv/franchise-config', d);
+    if (r.success) { toast('Plan saved!'); loadIptvConfig(); }
+    else showErr(err, r.error || 'Failed');
+  } catch(e) { showErr(err, 'Network error'); }
+  finally { btn.disabled = false; btn.textContent = 'Save Plan'; }
+}
+
+
+  window.addEventListener("load", function () {
+    $("login-btn").addEventListener("click", doLogin);
+    $("login-pass").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") doLogin();
+    });
+    $("logout-btn").addEventListener("click", doLogout);
+    ["m-add", "m-view", "m-edit", "m-cash", "m-tpl", "m-plan", "m-ott", "m-brand", "m-suspend", "m-reactivate"].forEach(function (id) {
+      $(id).addEventListener("click", function (e) {
+        if (e.target === this) closeM(id);
+      });
+    });
+    if (getToken()) {
+      startApp();
+      apiFetch("GET", "/api/admin/voice-prefs").then((r) => {
+        if (r.success) {
+          voiceEnabled = r.data.voice_enabled === 1;
+          voiceLang = r.data.voice_language || "hi-IN";
+          updateVoiceUI();
+          $("voice-settings-btn").style.display = "flex";
+          const b = $("voice-banner");
+          if (b) b.style.display = "block";
         }
       });
+    } else {
+      $("login-page").style.display = "flex";
+      $("app-shell").style.display = "none";
+    }
+  });
 
       // ── ROUTER BRANDS ─────────────────────────────────────────────
 let brandsCache = [];
