@@ -27,8 +27,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
 .error-title{font-size:18px;font-weight:700;color:#E24B4A;margin-bottom:8px}
 .error-msg{font-size:13px;color:#9B94C9;line-height:1.5}
 
-/* success */
+/* no due */
+.state-nodue{text-align:center;padding:20px 0}
+.nodue-icon{font-size:52px;margin-bottom:14px}
+.nodue-title{font-size:19px;font-weight:800;color:#1A1640;margin-bottom:8px}
+.nodue-msg{font-size:13px;color:#9B94C9;line-height:1.6}
+
+/* success / already-paid (shared look) */
 .state-success{text-align:center;padding:20px 0}
+.state-paid{text-align:center;padding:20px 0}
 .success-icon{font-size:56px;margin-bottom:14px}
 .success-title{font-size:20px;font-weight:800;color:#00B87A;margin-bottom:8px}
 .success-msg{font-size:13px;color:#9B94C9;line-height:1.6}
@@ -56,7 +63,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
 .plan-meta-label{font-size:10px;color:#9B94C9;text-transform:uppercase;letter-spacing:0.06em}
 .plan-meta-val{font-size:14px;font-weight:600;color:#1A1640}
 
-/* due-only card */
+/* generic "amount due" card — used for due_only AND postpaid, no wording gives away which */
 .due-only-card{background:#FFF7F0;border:1.5px solid #FFE0C2;border-radius:16px;padding:16px 18px;margin-bottom:20px;display:none}
 .due-only-label{font-size:10px;font-weight:700;color:#D97706;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
 .due-only-title{font-size:17px;font-weight:700;color:#1A1640}
@@ -102,7 +109,31 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
     <div class="error-msg" id="err-msg">This payment link is invalid or has been deactivated. Please contact your ISP.</div>
   </div>
 
-  <!-- Success -->
+  <!-- No due pending -->
+  <div class="state-nodue" id="state-nodue" style="display:none">
+    <div class="nodue-icon">🎉</div>
+    <div class="nodue-title">You're All Set!</div>
+    <div class="nodue-msg">There's no payment pending on your account right now.<br/>We'll let you know if anything changes.</div>
+  </div>
+
+  <!-- Already paid recently (loaded directly, not via redirect) -->
+  <div class="state-paid" id="state-paid" style="display:none">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Payment Already Received</div>
+    <div class="success-msg">We've already received this payment. No further action needed.</div>
+    <div class="txn-card">
+      <div class="txn-row">
+        <span class="txn-label">Amount Paid</span>
+        <span class="txn-val" id="paid-amount">—</span>
+      </div>
+      <div class="txn-row">
+        <span class="txn-label">Paid On</span>
+        <span class="txn-val" id="paid-date">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success (redirect back from gateway) -->
   <div class="state-success" id="state-success" style="display:none">
     <div class="success-icon">✅</div>
     <div class="success-title">Payment Successful!</div>
@@ -153,10 +184,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
       </div>
     </div>
 
+    <!-- Generic "amount due" card — shown for BOTH due_only (prepaid) and postpaid_due.
+         Wording is deliberately neutral so a postpaid customer never sees the word "postpaid". -->
     <div class="due-only-card" id="due-only-card">
       <div class="due-only-label">Payment For</div>
-      <div class="due-only-title">Outstanding Due Clearance</div>
-      <div class="due-only-sub">This payment will clear your pending balance. Your current plan will not change.</div>
+      <div class="due-only-title">Amount Due</div>
+      <div class="due-only-sub">This payment will clear your pending balance.</div>
     </div>
 
     <div class="due-note" id="due-note">
@@ -178,7 +211,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
 <script>
 const BASE = 'https://isp-billing-api.netflowcloud.workers.dev';
 let linkData = null;
-let currentTxnId = '';
 
 function getToken() {
   const params = new URLSearchParams(window.location.search);
@@ -186,7 +218,7 @@ function getToken() {
 }
 
 function show(state) {
-  ['loading','error','success','payment'].forEach(s => {
+  ['loading','error','nodue','paid','success','payment'].forEach(s => {
     const el = document.getElementById('state-' + s);
     if (el) el.style.display = s === state ? 'block' : 'none';
   });
@@ -209,13 +241,15 @@ function applyBranding(data) {
   }
 }
 
-function isDueOnly() {
-  return linkData && linkData.recharge_type === 'due_only';
+// "Payment-for" types that should show the generic amount-due card
+// instead of the plan card — covers both prepaid due_only and postpaid_due.
+function isGenericDue() {
+  return linkData && (linkData.recharge_type === 'due_only' || linkData.recharge_type === 'postpaid_due');
 }
 
 function formatDate(d) {
   if (!d) return d;
-  const dt = new Date(d + 'T00:00:00');
+  const dt = new Date(d.replace(' ', 'T'));
   if (isNaN(dt)) return d;
   return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 }
@@ -241,7 +275,7 @@ function checkReturnFromPayment() {
       document.getElementById('txn-expiry-row').style.display = 'flex';
     }
 
-    if (type === 'due_only') {
+    if (type === 'due_only' || type === 'postpaid_due') {
       document.getElementById('success-msg').textContent = 'Your outstanding due has been cleared successfully.';
       document.getElementById('activation-note').style.display = 'none';
     } else {
@@ -252,7 +286,7 @@ function checkReturnFromPayment() {
     show('success');
     return true;
   }
-  return false; // failure or no params — fall through to normal payment UI
+  return false; // failure or no params — fall through to normal flow
 }
 
 async function loadLink() {
@@ -271,15 +305,30 @@ async function loadLink() {
     linkData = data.data;
     applyBranding(linkData);
 
+    // Redirect-return from gateway takes priority (has txn/ref/expiry details)
     if (checkReturnFromPayment()) return;
 
+    // Backend live status — this is what makes the link safe to reopen anytime
+    if (linkData.status === 'no_due') {
+      show('nodue');
+      return;
+    }
+
+    if (linkData.status === 'paid') {
+      document.getElementById('paid-amount').textContent = '₹' + linkData.amount;
+      document.getElementById('paid-date').textContent = formatDate(linkData.paid_at);
+      show('paid');
+      return;
+    }
+
+    // status === 'due' — normal payment screen
     const name = linkData.customer_name || 'Customer';
     document.getElementById('cust-avatar').textContent = name.charAt(0).toUpperCase();
     document.getElementById('cust-name').textContent = name;
     document.getElementById('cust-phone').textContent = linkData.customer_phone || '';
     document.getElementById('pay-amount').textContent = '₹' + (linkData.amount || 0);
 
-    if (isDueOnly()) {
+    if (isGenericDue()) {
       document.getElementById('plan-card').style.display = 'none';
       document.getElementById('due-only-card').style.display = 'block';
       document.getElementById('due-note').style.display = 'none';
@@ -324,8 +373,6 @@ async function startPayment() {
       btn.textContent = 'Pay Now →';
       return;
     }
-
-    currentTxnId = data.data.txnid;
 
     const ebzEnv = data.data.env || 'test';
     const accessKey = data.data.access_key;
