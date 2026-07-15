@@ -27,15 +27,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
 .error-title{font-size:18px;font-weight:700;color:#E24B4A;margin-bottom:8px}
 .error-msg{font-size:13px;color:#9B94C9;line-height:1.5}
 
-/* no due */
-.state-nodue{text-align:center;padding:20px 0}
-.nodue-icon{font-size:52px;margin-bottom:14px}
-.nodue-title{font-size:19px;font-weight:800;color:#1A1640;margin-bottom:8px}
-.nodue-msg{font-size:13px;color:#9B94C9;line-height:1.6}
-
-/* success / already-paid (shared look) */
+/* success / no-due (shared look) */
 .state-success{text-align:center;padding:20px 0}
-.state-paid{text-align:center;padding:20px 0}
 .success-icon{font-size:56px;margin-bottom:14px}
 .success-title{font-size:20px;font-weight:800;color:#00B87A;margin-bottom:8px}
 .success-msg{font-size:13px;color:#9B94C9;line-height:1.6}
@@ -63,7 +56,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
 .plan-meta-label{font-size:10px;color:#9B94C9;text-transform:uppercase;letter-spacing:0.06em}
 .plan-meta-val{font-size:14px;font-weight:600;color:#1A1640}
 
-/* generic "amount due" card — used for due_only AND postpaid, no wording gives away which */
+/* due-only card — generic label, never says prepaid/postpaid */
 .due-only-card{background:#FFF7F0;border:1.5px solid #FFE0C2;border-radius:16px;padding:16px 18px;margin-bottom:20px;display:none}
 .due-only-label{font-size:10px;font-weight:700;color:#D97706;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
 .due-only-title{font-size:17px;font-weight:700;color:#1A1640}
@@ -110,37 +103,28 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
   </div>
 
   <!-- No due pending -->
-  <div class="state-nodue" id="state-nodue" style="display:none">
-    <div class="nodue-icon">🎉</div>
-    <div class="nodue-title">You're All Set!</div>
-    <div class="nodue-msg">There's no payment pending on your account right now.<br/>We'll let you know if anything changes.</div>
-  </div>
-
-  <!-- Already paid recently (loaded directly, not via redirect) -->
-  <div class="state-paid" id="state-paid" style="display:none">
+  <div class="state-success" id="state-nodue" style="display:none">
     <div class="success-icon">✅</div>
-    <div class="success-title">Payment Already Received</div>
-    <div class="success-msg">We've already received this payment. No further action needed.</div>
-    <div class="txn-card">
-      <div class="txn-row">
-        <span class="txn-label">Amount Paid</span>
-        <span class="txn-val" id="paid-amount">—</span>
-      </div>
-      <div class="txn-row">
-        <span class="txn-label">Paid On</span>
-        <span class="txn-val" id="paid-date">—</span>
-      </div>
-    </div>
+    <div class="success-title">All Clear!</div>
+    <div class="success-msg">There's no payment pending on your account right now.</div>
   </div>
 
-  <!-- Success (redirect back from gateway) -->
+  <!-- Success / Already Paid -->
   <div class="state-success" id="state-success" style="display:none">
     <div class="success-icon">✅</div>
-    <div class="success-title">Payment Successful!</div>
+    <div class="success-title" id="success-title">Payment Successful!</div>
     <div class="success-msg" id="success-msg">Thank you for your payment.</div>
 
     <div class="txn-card">
-      <div class="txn-row">
+      <div class="txn-row" id="txn-amount-row" style="display:none">
+        <span class="txn-label">Amount Paid</span>
+        <span class="txn-val" id="txn-amount">—</span>
+      </div>
+      <div class="txn-row" id="txn-paidon-row" style="display:none">
+        <span class="txn-label">Paid On</span>
+        <span class="txn-val" id="txn-paidon">—</span>
+      </div>
+      <div class="txn-row" id="txn-internal-row" style="display:none">
         <span class="txn-label">Transaction ID</span>
         <span class="txn-val" id="txn-internal">—</span>
       </div>
@@ -184,12 +168,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
       </div>
     </div>
 
-    <!-- Generic "amount due" card — shown for BOTH due_only (prepaid) and postpaid_due.
-         Wording is deliberately neutral so a postpaid customer never sees the word "postpaid". -->
     <div class="due-only-card" id="due-only-card">
       <div class="due-only-label">Payment For</div>
-      <div class="due-only-title">Amount Due</div>
-      <div class="due-only-sub">This payment will clear your pending balance.</div>
+      <div class="due-only-title">Outstanding Due Clearance</div>
+      <div class="due-only-sub">This payment will clear your pending balance. Your current plan will not change.</div>
     </div>
 
     <div class="due-note" id="due-note">
@@ -211,6 +193,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
 <script>
 const BASE = 'https://isp-billing-api.netflowcloud.workers.dev';
 let linkData = null;
+let currentTxnId = '';
 
 function getToken() {
   const params = new URLSearchParams(window.location.search);
@@ -218,7 +201,7 @@ function getToken() {
 }
 
 function show(state) {
-  ['loading','error','nodue','paid','success','payment'].forEach(s => {
+  ['loading','error','nodue','success','payment'].forEach(s => {
     const el = document.getElementById('state-' + s);
     if (el) el.style.display = s === state ? 'block' : 'none';
   });
@@ -241,20 +224,29 @@ function applyBranding(data) {
   }
 }
 
-// "Payment-for" types that should show the generic amount-due card
-// instead of the plan card — covers both prepaid due_only and postpaid_due.
-function isGenericDue() {
+// due_only (prepaid) aur postpaid_due — dono hi "generic due" card use karte hain,
+// UI mein kahin bhi 'postpaid' word nahi dikhta
+function isDueOnly() {
   return linkData && (linkData.recharge_type === 'due_only' || linkData.recharge_type === 'postpaid_due');
 }
 
 function formatDate(d) {
   if (!d) return d;
-  const dt = new Date(d.replace(' ', 'T'));
+  const dt = new Date(d + 'T00:00:00');
   if (isNaN(dt)) return d;
   return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+// paid_at aata hai 'YYYY-MM-DD HH:MM:SS' (IST) format mein
+function formatDateTime(d) {
+  if (!d) return d;
+  const dt = new Date(d.replace(' ', 'T') + '+05:30');
+  if (isNaN(dt)) return d;
+  return dt.toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
 // Returns true if we've already shown the success screen (caller should stop)
+// — ye tab chalta hai jab Easebuzz redirect karke wapas laata hai (surl/furl)
 function checkReturnFromPayment() {
   const params = new URLSearchParams(window.location.search);
   const status = params.get('status');
@@ -264,6 +256,7 @@ function checkReturnFromPayment() {
   const type   = params.get('type');
 
   if (status === 'success' && txnid) {
+    document.getElementById('txn-internal-row').style.display = 'flex';
     document.getElementById('txn-internal').textContent = txnid;
 
     if (ref) {
@@ -289,6 +282,21 @@ function checkReturnFromPayment() {
   return false; // failure or no params — fall through to normal flow
 }
 
+// Page load ke time backend ne bataya ki abhi-abhi (5-10 min ke andar) payment ho chuka hai
+function showAlreadyPaid() {
+  document.getElementById('success-title').textContent = 'Payment Received!';
+  document.getElementById('success-msg').textContent = 'Thank you — your payment has already been received.';
+  document.getElementById('activation-note').style.display = 'none';
+
+  document.getElementById('txn-amount-row').style.display = 'flex';
+  document.getElementById('txn-amount').textContent = '₹' + (linkData.amount || 0);
+
+  document.getElementById('txn-paidon-row').style.display = 'flex';
+  document.getElementById('txn-paidon').textContent = formatDateTime(linkData.paid_at);
+
+  show('success');
+}
+
 async function loadLink() {
   const token = getToken();
   if (!token) { showError('Invalid Link', 'No payment token found in this URL.'); return; }
@@ -305,30 +313,28 @@ async function loadLink() {
     linkData = data.data;
     applyBranding(linkData);
 
-    // Redirect-return from gateway takes priority (has txn/ref/expiry details)
+    // Redirect wapas (Easebuzz se) ka case sabse pehle check karo
     if (checkReturnFromPayment()) return;
 
-    // Backend live status — this is what makes the link safe to reopen anytime
+    // Backend ne live status decide kiya hai — usi ke hisaab se screen dikhao
     if (linkData.status === 'no_due') {
       show('nodue');
       return;
     }
 
     if (linkData.status === 'paid') {
-      document.getElementById('paid-amount').textContent = '₹' + linkData.amount;
-      document.getElementById('paid-date').textContent = formatDate(linkData.paid_at);
-      show('paid');
+      showAlreadyPaid();
       return;
     }
 
-    // status === 'due' — normal payment screen
+    // status === 'due' → normal payment form
     const name = linkData.customer_name || 'Customer';
     document.getElementById('cust-avatar').textContent = name.charAt(0).toUpperCase();
     document.getElementById('cust-name').textContent = name;
     document.getElementById('cust-phone').textContent = linkData.customer_phone || '';
     document.getElementById('pay-amount').textContent = '₹' + (linkData.amount || 0);
 
-    if (isGenericDue()) {
+    if (isDueOnly()) {
       document.getElementById('plan-card').style.display = 'none';
       document.getElementById('due-only-card').style.display = 'block';
       document.getElementById('due-note').style.display = 'none';
@@ -373,6 +379,8 @@ async function startPayment() {
       btn.textContent = 'Pay Now →';
       return;
     }
+
+    currentTxnId = data.data.txnid;
 
     const ebzEnv = data.data.env || 'test';
     const accessKey = data.data.access_key;
