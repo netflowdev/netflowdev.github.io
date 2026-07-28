@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IPTV Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#F6F5F1; --panel:#FFFFFF; --panel2:#FAFAF7; --border:#E7E3D9; --border-s:#D3CCBB;
+    --accent:#D97706; --accent-l:rgba(217,119,6,0.08); --accent-g:rgba(217,119,6,0.2);
+    --live:#0F9D82; --live-l:rgba(15,157,130,0.08);
+    --danger:#DC2626; --danger-l:rgba(220,38,38,0.07);
+    --warn:#B45309; --warn-l:rgba(180,83,9,0.08);
+    --text:#1B1E24; --text2:#5B6270; --text3:#8E93A0;
+    --screen-bg:#14181F; --screen-text:#FFB020;
+    --disp:"Oswald",sans-serif; --font:"Inter",sans-serif; --mono:"JetBrains Mono",monospace;
+    --r:12px; --r-lg:16px; --r-sm:8px;
+    --sh:0 10px 30px rgba(20,20,10,0.08);
+    --sh-md:0 4px 16px rgba(20,20,10,0.06);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;-webkit-font-smoothing:antialiased}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:var(--border-s);border-radius:4px}
+
+  /* ── LOGIN ── */
+  .login-wrap{display:flex;align-items:center;justify-content:center;height:100vh;position:relative;overflow:hidden;background:var(--bg)}
+  .login-wrap::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,0,0,0.015) 39px, rgba(0,0,0,0.015) 40px);pointer-events:none}
+  .login-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r-lg);padding:44px 40px;width:400px;box-shadow:var(--sh);position:relative}
+  .signal-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 9px;border:1px solid rgba(217,119,6,0.28);border-radius:20px;background:var(--accent-l);margin-bottom:22px}
+  .signal-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent-g);animation:pulse 1.8s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.35}}
+  .signal-badge span{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--accent);text-transform:uppercase}
+  .login-title{font-family:var(--disp);font-size:32px;font-weight:600;letter-spacing:0.01em;line-height:1}
+  .login-sub{font-size:12px;color:var(--text3);margin:8px 0 32px;font-family:var(--mono)}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:10px;color:var(--text3);margin-bottom:7px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.09em}
+  .field input{width:100%;padding:12px 14px;background:var(--panel2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:.15s}
+  .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-l)}
+  .btn-pri{width:100%;padding:13px;background:var(--accent);border:none;border-radius:var(--r-sm);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;transition:.15s}
+  .btn-pri:hover{background:#c26905;box-shadow:0 4px 20px var(--accent-g)}
+  .btn-pri:disabled{opacity:.4;cursor:not-allowed}
+  .login-err{background:var(--danger-l);border:1px solid rgba(220,38,38,0.2);border-radius:var(--r-sm);padding:11px 14px;color:var(--danger);font-size:12.5px;margin-bottom:16px;display:none}
+
+  /* ── SHELL ── */
+  .shell{display:flex;height:100vh;overflow:hidden}
+  .sidebar{width:230px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+  .logo{padding:24px 22px 20px;border-bottom:1px solid var(--border)}
+  .logo-row{display:flex;align-items:center;gap:9px}
+  .logo-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent-g);animation:pulse 1.8s ease-in-out infinite}
+  .logo-name{font-family:var(--disp);font-size:19px;font-weight:600;letter-spacing:0.01em}
+  .logo-sub{font-size:9.5px;color:var(--text3);margin-top:5px;font-family:var(--mono);letter-spacing:0.08em;text-transform:uppercase}
+  .franchise-tag{margin-top:12px;padding:6px 10px;background:var(--panel2);border:1px solid var(--border);border-radius:7px;font-size:11px;color:var(--text2);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .nav{padding:14px 0;flex:1}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:11px 22px;cursor:pointer;color:var(--text2);font-size:13.5px;font-weight:500;border-left:2.5px solid transparent;transition:.15s}
+  .nav-item:hover{color:var(--text);background:rgba(0,0,0,0.02)}
+  .nav-item.active{color:var(--accent);background:var(--accent-l);border-left-color:var(--accent)}
+  .sidebar-ft{padding:16px 18px;border-top:1px solid var(--border)}
+  .user-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .avatar{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent),#f0a94a);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
+  .user-name{font-size:12.5px;font-weight:600}
+  .user-role{font-size:9.5px;color:var(--text3);font-family:var(--mono);margin-top:1px}
+  .logout-btn{width:100%;padding:8px;background:transparent;border:1px solid rgba(220,38,38,0.22);border-radius:8px;color:var(--danger);cursor:pointer;font-size:11.5px;font-family:var(--font);font-weight:500;transition:.15s}
+  .logout-btn:hover{background:var(--danger-l)}
+
+  .main{flex:1;overflow-y:auto}
+  .topbar{position:sticky;top:0;z-index:10;background:rgba(246,245,241,0.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:20px 32px;display:flex;align-items:center;justify-content:space-between}
+  .pg-title{font-family:var(--disp);font-size:24px;font-weight:600;letter-spacing:0.01em}
+  .pg-sub{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--mono)}
+  .content{padding:24px 32px 48px}
+
+  .btn{padding:9px 16px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--panel2);color:var(--text2);font-family:var(--font);font-size:12.5px;font-weight:500;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .btn:hover{border-color:var(--border-s);color:var(--text);background:#fff}
+  .bpri{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+  .bpri:hover{background:#c26905;box-shadow:0 4px 16px var(--accent-g);color:#fff}
+  .bsm{padding:6px 11px;font-size:11px;border-radius:7px}
+  .bedit{background:var(--warn-l);border-color:rgba(180,83,9,0.22);color:var(--warn)}
+  .bedit:hover{background:var(--warn);color:#fff}
+  .bpair{background:var(--live-l);border-color:rgba(15,157,130,0.22);color:var(--live)}
+  .bpair:hover{background:var(--live);color:#fff}
+  .bdanger{background:var(--danger-l);border-color:rgba(220,38,38,0.2);color:var(--danger)}
+  .bdanger:hover{background:var(--danger);color:#fff}
+
+  .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+  .sbox{padding:10px 14px;background:var(--panel);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font);font-size:13px;outline:none;width:280px}
+  .sbox:focus{border-color:var(--accent)}
+  .sbox::placeholder{color:var(--text3)}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+  .sc{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh-md)}
+  .sc-label{font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+  .sc-val{font-family:var(--disp);font-size:30px;font-weight:600;line-height:1}
+
+  .tbl-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-md)}
+  .tbl-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;font-size:10px;color:var(--text3);padding:16px 14px 14px 20px;border-bottom:1px solid var(--border);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;font-weight:600}
+  td{padding:14px 14px 14px 20px;border-bottom:1px solid rgba(231,227,217,0.8);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover td{background:rgba(217,119,6,0.02)}
+
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:10.5px;font-weight:600;font-family:var(--mono);white-space:nowrap}
+  .badge::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+  .bok{background:var(--live-l);color:var(--live)}
+  .bwarn{background:var(--warn-l);color:var(--warn)}
+  .berr{background:var(--danger-l);color:var(--danger)}
+  .bgray{background:rgba(0,0,0,0.045);color:var(--text2)}
+
+  .device-link{background:none;border:none;padding:0;color:var(--accent);font-family:var(--mono);font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+
+  .empty,.loading{text-align:center;padding:44px;color:var(--text3);font-family:var(--mono);font-size:11px}
+  .loading{display:flex;align-items:center;justify-content:center;gap:10px}
+  .spinner{width:15px;height:15px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .toast{position:fixed;bottom:24px;right:24px;background:#22262E;color:#F1F3F7;border:1px solid #333a45;border-radius:var(--r);padding:13px 20px;font-size:13px;font-weight:500;z-index:200;transform:translateY(80px);opacity:0;transition:.28s cubic-bezier(.34,1.56,.64,1);box-shadow:var(--sh)}
+  .toast.show{transform:translateY(0);opacity:1}
+  .toast.ok{border-color:rgba(15,157,130,0.5)}
+  .toast.err{border-color:rgba(220,38,38,0.5)}
+
+  .modal-bg{position:fixed;inset:0;background:rgba(20,20,15,0.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;backdrop-filter:blur(3px)}
+  .modal{background:var(--panel);border:1px solid var(--border);border-radius:var(--r-lg);padding:30px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh);animation:mIn .2s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes mIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+  .modal-title{font-family:var(--disp);font-size:19px;font-weight:600;margin-bottom:22px}
+  .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  .ff{display:flex;flex-direction:column;gap:6px}
+  .ff.full{grid-column:1/-1}
+  .ff label{font-size:9.5px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em}
+  .ff input,.ff select{padding:10px 12px;background:var(--panel2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:var(--font);font-size:13px;outline:none}
+  .ff input:focus,.ff select:focus{border-color:var(--accent)}
+  .mactions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
+  .errmsg{color:var(--danger);font-size:12px;margin-top:12px;display:none;background:var(--danger-l);padding:10px 13px;border-radius:var(--r-sm);border:1px solid rgba(220,38,38,0.18)}
+
+  .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ditem{background:var(--panel2);border-radius:var(--r-sm);padding:12px 14px;border:1px solid var(--border)}
+  .ditem.full{grid-column:1/-1}
+  .dlabel{font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px}
+  .dval{font-size:13px;color:var(--text);word-break:break-all;font-weight:500}
+
+  /* pairing code — signature element: a dark LCD-style channel display sitting inside the light UI */
+  .code-display{background:var(--screen-bg);border:1px solid #262b35;border-radius:var(--r-sm);padding:22px;text-align:center;margin:6px 0 4px;position:relative;overflow:hidden}
+  .code-display::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(180deg, transparent, transparent 2px, rgba(255,176,32,0.025) 2px, rgba(255,176,32,0.025) 4px);pointer-events:none}
+  .code-input{width:100%;background:transparent;border:none;outline:none;text-align:center;font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:10px;color:var(--screen-text);text-shadow:0 0 14px rgba(255,176,32,0.35);text-transform:uppercase}
+  .code-input::placeholder{color:#3a3f4a;text-shadow:none}
+
+  .sec-title{font-size:10px;font-weight:700;color:var(--accent);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.09em;margin:20px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+  .hint{font-size:11.5px;color:var(--text3);margin-top:8px;line-height:1.5}
+
+  .device-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+  .device-row:last-child{border-bottom:none}
+  .device-row input{flex:1;padding:8px 10px;background:var(--panel2);border:1px solid var(--border);border-radius:7px;font-size:12.5px;color:var(--text);outline:none}
+  .device-row input:focus{border-color:var(--accent)}
+  .device-meta{font-size:10px;color:var(--text3);font-family:var(--mono);white-space:nowrap}
+
+  @media(max-width:768px){
+    .shell{display:block;height:100vh;overflow-y:auto}
+    .sidebar{position:fixed;top:0;left:0;bottom:0;z-index:150;transform:translateX(-100%);transition:.25s;width:250px}
+    .sidebar.open{transform:translateX(0)}
+    .main{overflow-y:unset}
+    .mob-menu-btn{display:flex}
+    .topbar{padding:14px 16px 14px 60px}
+    .content{padding:16px 14px 40px}
+    .stats{grid-template-columns:1fr 1fr}
+    .fgrid,.dgrid{grid-template-columns:1fr}
+    .sbox{width:100%}
+  }
+  .mob-menu-btn{display:none;position:fixed;top:14px;left:14px;z-index:300;width:36px;height:36px;border-radius:9px;background:var(--panel);border:1px solid var(--border);color:var(--text);font-size:17px;cursor:pointer;align-items:center;justify-content:center;box-shadow:var(--sh-md)}
+  .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:149}
+  .mob-overlay.show{display:block}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<button class="mob-menu-btn" id="mob-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="mob-overlay" id="mob-overlay" onclick="closeSidebar()"></div>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="login-page">
+  <div class="login-card">
+    <div class="signal-badge"><span class="signal-dot"></span><span>Signal Active</span></div>
+    <div class="login-title">IPTV Portal</div>
+    <div class="login-sub">// franchise stream management</div>
+    <div class="login-err" id="login-err"></div>
+    <div class="field"><label>Username</label><input id="login-phone" placeholder="admin" autocomplete="username" /></div>
+    <div class="field"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" /></div>
+    <button class="btn-pri" id="login-btn">Sign in →</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="shell" id="app-shell" style="display:none">
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-row"><span class="logo-dot"></span><span class="logo-name">IPTV Portal</span></div>
+      <div class="logo-sub">// stream ops console</div>
+      <div class="franchise-tag" id="franchise-tag">—</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active" id="nav-customers" onclick="showPage('customers')">📺 Customers</div>
+      <div class="nav-item" id="nav-plan" onclick="showPage('plan')">📡 Franchise Setting</div>
+    </nav>
+    <div class="sidebar-ft">
+      <div class="user-row">
+        <div class="avatar" id="sb-avatar">A</div>
+        <div><div class="user-name" id="sb-name">Admin</div><div class="user-role" id="sb-role">admin</div></div>
+      </div>
+      <button class="logout-btn" id="logout-btn">Sign out</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- CUSTOMERS -->
+    <div id="page-customers">
+      <div class="topbar">
+        <div><div class="pg-title">Customers</div><div class="pg-sub">// IPTV subscriber list</div></div>
+        <button class="btn bpri" onclick="openAddCust()">+ Add Customer</button>
+      </div>
+      <div class="content">
+        <div class="stats">
+          <div class="sc"><div class="sc-label">Customers</div><div class="sc-val" id="s-total">—</div></div>
+          <div class="sc"><div class="sc-label">Active</div><div class="sc-val" style="color:var(--live)" id="s-active">—</div></div>
+          <div class="sc"><div class="sc-label">Device Slots Used</div><div class="sc-val" id="s-slots">—</div></div>
+        </div>
+        <div class="hint" style="margin-bottom:14px">Billing is based on <strong>active devices</strong>, not customer count — one customer can hold multiple paired devices, each counted separately against your plan.</div>
+        <div class="toolbar">
+          <input class="sbox" id="c-search" placeholder="Search name or mobile..." oninput="loadCustomers()" />
+          <button class="btn" onclick="loadCustomers()">↺ Refresh</button>
+        </div>
+        <div class="tbl-card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Name</th><th>Mobile</th><th>Server URL</th><th>Status</th><th>Devices</th><th style="padding-right:20px">Actions</th></tr></thead>
+              <tbody id="c-tbody"><tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FRANCHISE PLAN -->
+    <div id="page-plan" style="display:none">
+      <div class="topbar">
+        <div><div class="pg-title">Franchise Plan</div><div class="pg-sub">// your Xtream connection & slot plan</div></div>
+      </div>
+      <div class="content">
+        <div class="tbl-card" style="padding:24px;max-width:600px">
+          <div class="sec-title">Current Plan</div>
+          <div class="dgrid" id="plan-view" style="margin-bottom:8px"></div>
+          <div class="hint">Device slots and subscription are managed by NetFlow. Contact them to top up.</div>
+
+          <div class="sec-title">Your Xtream Server URL</div>
+          <div class="hint" style="margin-top:0;margin-bottom:12px">This is your own IPTV provider's server URL. You can update it anytime — no need to contact NetFlow.</div>
+          <div class="ff full">
+            <label>Default Server URL</label>
+            <input id="plan-url" placeholder="http://provider.example.com:8080" />
+          </div>
+          <div class="errmsg" id="plan-err"></div>
+          <div class="mactions"><button class="btn bpri" id="plan-btn" onclick="submitPlanUrl()">Save URL</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT CUSTOMER -->
+<div class="modal-bg" id="m-cust" style="display:none">
+  <div class="modal">
+    <div class="modal-title" id="cust-modal-title">Add Customer</div>
+    <input type="hidden" id="c-id" />
+    <div class="fgrid">
+      <div class="ff full"><label>Name *</label><input id="c-name" placeholder="Customer name" /></div>
+      <div class="ff"><label>Mobile</label><input id="c-mobile" placeholder="9876543210" /></div>
+      <div class="ff"><label>Status</label><select id="c-status"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+      <div class="ff full"><label>Address</label><input id="c-address" placeholder="Optional" /></div>
+      <div class="ff full"><label>Server URL Override (blank = use franchise default)</label><input id="c-server-url" placeholder="http://provider.example.com:8080" /></div>
+      <div class="ff"><label>Xtream Username</label><input id="c-username" /></div>
+      <div class="ff"><label>Xtream Password</label><input id="c-password" /></div>
+      <div class="ff full"><label>Notes</label><input id="c-notes" placeholder="Optional" /></div>
+    </div>
+    <div class="errmsg" id="cust-err"></div>
+    <div class="mactions"><button class="btn" onclick="closeM('m-cust')">Cancel</button><button class="btn bpri" id="cust-btn" onclick="submitCust()">Save</button></div>
+  </div>
+</div>
+
+<!-- PAIR DEVICE -->
+<div class="modal-bg" id="m-pair" style="display:none">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">Pair TV Device</div>
+    <input type="hidden" id="pair-cust-id" />
+    <div class="hint" id="pair-cust-label" style="margin-bottom:14px"></div>
+    <div class="code-display">
+      <input class="code-input" id="pair-code" placeholder="XXXXXX" maxlength="6" />
+    </div>
+    <div class="hint" style="margin-bottom:14px">Enter the 6-digit code currently shown on the customer's TV screen.</div>
+    <div class="ff full"><label>Device Name (e.g. Living Room TV)</label><input id="pair-device-name" placeholder="Optional, helps you identify it later" /></div>
+    <div class="errmsg" id="pair-err"></div>
+    <div class="mactions"><button class="btn" onclick="closeM('m-pair')">Cancel</button><button class="btn bpri" id="pair-btn" onclick="submitPair()">Pair Device</button></div>
+  </div>
+</div>
+
+<!-- DEVICES LIST -->
+<div class="modal-bg" id="m-devices" style="display:none">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-title" id="devices-modal-title">Devices</div>
+    <div id="devices-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+    <div class="mactions"><button class="btn" onclick="closeM('m-devices')">Close</button></div>
+  </div>
+</div>
+
+<script>
+const BASE = "https://isp-billing-api.netflowcloud.workers.dev";
+let custCache = [];
+let currentDevicesCustId = null;
+
+function $(id){ return document.getElementById(id); }
+function toast(msg,type='ok'){ const t=$('toast'); t.textContent=msg; t.className='toast '+type+' show'; setTimeout(()=>t.className='toast',3200); }
+function closeM(id){ $(id).style.display='none'; }
+function showErr(el,msg){ el.textContent=msg; el.style.display='block'; }
+function getToken(){ return localStorage.getItem('iptv_token'); }
+function getUser(){ return JSON.parse(localStorage.getItem('iptv_user')||'{}'); }
+
+async function apiFetch(m,p,b){
+  const h={'Content-Type':'application/json'};
+  const t=getToken(); if(t) h['Authorization']='Bearer '+t;
+  const res=await fetch(BASE+p,{method:m,headers:h,body:b?JSON.stringify(b):undefined});
+  if(res.status===401){ toast('Session expired. Please login again.','err'); setTimeout(doLogout,1800); return {success:false,error:'Session expired'}; }
+  return res.json();
+}
+
+function doLogout(){
+  localStorage.removeItem('iptv_token'); localStorage.removeItem('iptv_user');
+  $('app-shell').style.display='none'; $('login-page').style.display='flex';
+}
+
+async function doLogin(){
+  const phone=$('login-phone').value.trim(), pass=$('login-pass').value, err=$('login-err'), btn=$('login-btn');
+  err.style.display='none';
+  if(!phone||!pass){ err.textContent='Enter credentials'; err.style.display='block'; return; }
+  btn.disabled=true; btn.textContent='Signing in...';
+  try{
+    const r=await apiFetch('POST','/api/auth/admin/login',{phone,password:pass});
+    if(r.success){
+      localStorage.setItem('iptv_token', r.data.token);
+      localStorage.setItem('iptv_user', JSON.stringify(r.data.admin));
+      startApp();
+    } else { err.textContent=r.error||'Login failed'; err.style.display='block'; }
+  } catch(e){ err.textContent='Network error'; err.style.display='block'; }
+  finally{ btn.disabled=false; btn.textContent='Sign in →'; }
+}
+
+function startApp(){
+  $('login-page').style.display='none';
+  $('app-shell').style.display='flex';
+  const u=getUser();
+  const ini=(u.name||'A').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  $('sb-avatar').textContent=ini;
+  $('sb-name').textContent=u.name||'Admin';
+  $('sb-role').textContent=u.role||'admin';
+  $('franchise-tag').textContent = u.role==='super_admin' ? 'SuperAdmin view' : ('Franchise #'+(u.franchise_id||'—'));
+  showPage('customers');
+}
+
+function showPage(name){
+  ['customers','plan'].forEach(p=>{
+    $('page-'+p).style.display = p===name ? 'block':'none';
+    const nav=$('nav-'+p); if(nav) nav.classList.toggle('active', p===name);
+  });
+  if(name==='customers') loadCustomers();
+  if(name==='plan') loadPlan();
+}
+
+// ── CUSTOMERS ──────────────────────────────────────
+async function loadCustomers(){
+  const search=$('c-search').value.trim();
+  $('c-tbody').innerHTML='<tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+  try{
+    const r=await apiFetch('GET','/api/admin/iptv/customers'+(search?'?search='+encodeURIComponent(search):''));
+    custCache = r.data?.customers || [];
+    $('s-total').textContent = custCache.length;
+    $('s-active').textContent = custCache.filter(c=>c.status==='active').length;
+    const activeDevices = custCache.reduce((sum,c)=>sum+(c.device_count||0),0);
+    try{
+      const pr=await apiFetch('GET','/api/admin/iptv/franchise-config');
+      const slots = pr.data?.purchased_slots || 0;
+      $('s-slots').textContent = activeDevices + ' / ' + slots;
+    }catch(e){ $('s-slots').textContent = activeDevices; }
+
+    if(!custCache.length){
+      $('c-tbody').innerHTML='<tr><td colspan="7"><div class="empty">No IPTV customers yet</div></td></tr>';
+      return;
+    }
+    $('c-tbody').innerHTML = custCache.map(c =>
+      '<tr>'+
+      '<td style="font-family:var(--mono);color:var(--text3);font-size:12px">#'+c.id+'</td>'+
+      '<td style="font-weight:600">'+(c.name||'—')+'</td>'+
+      '<td style="font-family:var(--mono);font-size:12px;color:var(--text2)">'+(c.mobile||'—')+'</td>'+
+      '<td style="font-size:11px;color:var(--text3);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(c.server_url||'<span style="color:var(--text3)">(franchise default)</span>')+'</td>'+
+      '<td>'+sbadge(c.status)+'</td>'+
+      '<td><button class="device-link" onclick="openDevices('+c.id+',\''+(c.name||'').replace(/'/g,"\\'")+'\')">'+(c.device_count||0)+' device'+((c.device_count||0)===1?'':'s')+'</button></td>'+
+      '<td style="padding-right:20px"><div style="display:flex;gap:6px;flex-wrap:wrap">'+
+      '<button class="btn bsm bedit" onclick="openEditCust('+c.id+')">✏ Edit</button>'+
+      '<button class="btn bsm bpair" onclick="openPair('+c.id+',\''+(c.name||'').replace(/'/g,"\\'")+'\')">📺 Pair</button>'+
+      '<button class="btn bsm bdanger" onclick="deleteCust('+c.id+',\''+(c.name||'').replace(/'/g,"\\'")+'\')">🗑</button>'+
+      '</div></td></tr>'
+    ).join('');
+  }catch(e){ $('c-tbody').innerHTML='<tr><td colspan="7"><div class="empty">Failed to load</div></td></tr>'; }
+}
+
+function sbadge(s){
+  const m={active:'bok',inactive:'bgray',suspended:'bwarn'};
+  return '<span class="badge '+(m[s]||'bgray')+'">'+(s||'—')+'</span>';
+}
+
+function openAddCust(){
+  $('cust-modal-title').textContent='Add Customer';
+  $('c-id').value='';
+  ['c-name','c-mobile','c-address','c-server-url','c-username','c-password','c-notes'].forEach(i=>$(i).value='');
+  $('c-status').value='active';
+  $('cust-err').style.display='none';
+  $('m-cust').style.display='flex';
+}
+
+function openEditCust(id){
+  const c=custCache.find(x=>x.id===id);
+  if(!c){ toast('Not found','err'); return; }
+  $('cust-modal-title').textContent='Edit — '+c.name;
+  $('c-id').value=c.id;
+  $('c-name').value=c.name||'';
+  $('c-mobile').value=c.mobile||'';
+  $('c-address').value=c.address||'';
+  $('c-server-url').value=c.server_url||'';
+  $('c-username').value=c.iptv_username||'';
+  $('c-password').value=c.iptv_password||'';
+  $('c-notes').value=c.notes||'';
+  $('c-status').value=c.status||'active';
+  $('cust-err').style.display='none';
+  $('m-cust').style.display='flex';
+}
+
+async function submitCust(){
+  const btn=$('cust-btn'), err=$('cust-err');
+  err.style.display='none';
+  const id=$('c-id').value;
+  const d={
+    name:$('c-name').value.trim(), mobile:$('c-mobile').value.trim(), address:$('c-address').value.trim(),
+    server_url:$('c-server-url').value.trim(), iptv_username:$('c-username').value.trim(),
+    iptv_password:$('c-password').value.trim(), notes:$('c-notes').value.trim(), status:$('c-status').value,
+  };
+  if(!d.name){ showErr(err,'Name is required'); return; }
+  btn.disabled=true; btn.textContent='Saving...';
+  try{
+    const r = id ? await apiFetch('PUT','/api/admin/iptv/customers/'+id,d) : await apiFetch('POST','/api/admin/iptv/customers',d);
+    if(r.success){ toast(id?'Updated!':'Customer added!'); closeM('m-cust'); loadCustomers(); }
+    else showErr(err, r.error||'Failed');
+  }catch(e){ showErr(err,'Network error'); }
+  finally{ btn.disabled=false; btn.textContent='Save'; }
+}
+
+async function deleteCust(id,name){
+  if(!confirm('Delete '+name+'? This will also free up all their paired devices.\n\nThis cannot be undone.')) return;
+  try{
+    const r=await apiFetch('DELETE','/api/admin/iptv/customers/'+id);
+    if(r.success){ toast('🗑 '+name+' deleted'); loadCustomers(); }
+    else toast(r.error||'Delete failed','err');
+  }catch(e){ toast('Network error','err'); }
+}
+
+function openPair(custId,custName){
+  $('pair-cust-id').value=custId;
+  $('pair-cust-label').textContent='Pairing device for: '+custName;
+  $('pair-code').value=''; $('pair-device-name').value='';
+  $('pair-err').style.display='none';
+  $('m-pair').style.display='flex';
+  setTimeout(()=>$('pair-code').focus(),50);
+}
+
+async function submitPair(){
+  const btn=$('pair-btn'), err=$('pair-err');
+  err.style.display='none';
+  const code=$('pair-code').value.trim().toUpperCase();
+  const custId=parseInt($('pair-cust-id').value);
+  const deviceName=$('pair-device-name').value.trim();
+  if(!code||code.length!==6){ showErr(err,'Enter the 6-character code shown on the TV'); return; }
+  btn.disabled=true; btn.textContent='Pairing...';
+  try{
+    const r=await apiFetch('POST','/api/admin/iptv/pair',{code,iptv_customer_id:custId,device_name:deviceName});
+    if(r.success){ toast('✅ Device paired!'); closeM('m-pair'); loadCustomers(); }
+    else showErr(err, r.error||'Failed');
+  }catch(e){ showErr(err,'Network error'); }
+  finally{ btn.disabled=false; btn.textContent='Pair Device'; }
+}
+
+// ── DEVICES ──────────────────────────────────────────
+async function openDevices(custId,custName){
+  currentDevicesCustId=custId;
+  $('devices-modal-title').textContent='Devices — '+custName;
+  $('devices-list').innerHTML='<div class="loading"><div class="spinner"></div>Loading...</div>';
+  $('m-devices').style.display='flex';
+  await renderDevices(custId);
+}
+
+async function renderDevices(custId){
+  try{
+    const r=await apiFetch('GET','/api/admin/iptv/customers/'+custId+'/devices');
+    const devices=r.data?.devices||[];
+    if(!devices.length){ $('devices-list').innerHTML='<div class="empty">No devices paired yet</div>'; return; }
+    $('devices-list').innerHTML = devices.map(d =>
+      '<div class="device-row">'+
+      '<input value="'+(d.device_name||'').replace(/"/g,'&quot;')+'" placeholder="Unnamed device" '+(d.is_active?'':'disabled')+' '+
+      'onchange="renameDevice('+d.id+',this.value)"/>'+
+      '<span class="device-meta">'+(d.is_active?'🟢 Active':'⚪ Inactive')+'</span>'+
+      (d.is_active ? '<button class="btn bsm bdanger" onclick="deactivateDevice('+d.id+')">Deactivate</button>' : '')+
+      '</div>'
+    ).join('');
+  }catch(e){ $('devices-list').innerHTML='<div class="empty">Failed to load</div>'; }
+}
+
+async function renameDevice(deviceId,name){
+  try{
+    const r=await apiFetch('PUT','/api/admin/iptv/devices/'+deviceId,{device_name:name.trim()});
+    if(r.success) toast('Device renamed'); else toast(r.error||'Failed','err');
+  }catch(e){ toast('Network error','err'); }
+}
+
+async function deactivateDevice(deviceId){
+  if(!confirm('Deactivate this device? It will stop working immediately and free up one slot.')) return;
+  try{
+    const r=await apiFetch('DELETE','/api/admin/iptv/devices/'+deviceId);
+    if(r.success){ toast('Device deactivated'); await renderDevices(currentDevicesCustId); loadCustomers(); }
+    else toast(r.error||'Failed','err');
+  }catch(e){ toast('Network error','err'); }
+}
+
+// ── FRANCHISE PLAN ──────────────────────────────────
+function di(l,v,c){ return '<div class="ditem'+(c?' '+c:'')+'"><div class="dlabel">'+l+'</div><div class="dval">'+(v||'—')+'</div></div>'; }
+function fmtDate(d){ if(!d) return '—'; const [y,m,day]=d.split('-'); return day+'-'+m+'-'+y; }
+
+async function loadPlan(){
+  try{
+    const r=await apiFetch('GET','/api/admin/iptv/franchise-config');
+    const c=r.data||{};
+    $('plan-view').innerHTML =
+      di('Device Slots', c.purchased_slots||0)+
+      di('Status', sbadge(c.subscription_status||'active'))+
+      di('Subscription Start', fmtDate(c.subscription_start_date))+
+      di('Subscription Expiry', fmtDate(c.subscription_expiry_date))+
+      di('Grace Period', (c.grace_period_days||3)+' days','full');
+    $('plan-url').value = c.default_server_url || '';
+  }catch(e){ console.error(e); }
+}
+
+async function submitPlanUrl(){
+  const btn=$('plan-btn'), err=$('plan-err');
+  err.style.display='none';
+  const url=$('plan-url').value.trim();
+  btn.disabled=true; btn.textContent='Saving...';
+  try{
+    const r=await apiFetch('PUT','/api/admin/iptv/franchise-config/url',{default_server_url:url});
+    if(r.success){ toast('Server URL updated!'); loadPlan(); }
+    else showErr(err, r.error||'Failed');
+  }catch(e){ showErr(err,'Network error'); }
+  finally{ btn.disabled=false; btn.textContent='Save URL'; }
+}
+
+// ── MOBILE ──────────────────────────────────────────
+function toggleSidebar(){ document.querySelector('.sidebar').classList.toggle('open'); $('mob-overlay').classList.toggle('show'); }
+function closeSidebar(){ document.querySelector('.sidebar').classList.remove('open'); $('mob-overlay').classList.remove('show'); }
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('.nav-item').forEach(el=>el.addEventListener('click',()=>{ if(window.innerWidth<=768) closeSidebar(); }));
+});
+
+window.addEventListener('load', function(){
+  $('login-btn').addEventListener('click', doLogin);
+  $('login-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+  $('logout-btn').addEventListener('click', doLogout);
+  $('pair-code').addEventListener('keydown', e=>{ if(e.key==='Enter') submitPair(); });
+  ['m-cust','m-pair','m-devices'].forEach(id=>{
+    $(id).addEventListener('click', function(e){ if(e.target===this) closeM(id); });
+  });
+  if(getToken()){ startApp(); }
+  else { $('login-page').style.display='flex'; $('app-shell').style.display='none'; }
+});
+</script>
+</body>
+</html>
