@@ -193,6 +193,7 @@ tr:hover td{background:rgba(124,109,250,.04);}
               <th>Owner</th>
               <th>Phone</th>
               <th>City</th>
+              <th>Type</th>
               <th>Payment GW</th>
               <th>Jaze</th>
               <th>NetAdmin</th>
@@ -371,6 +372,12 @@ tr:hover td{background:rgba(124,109,250,.04);}
       <div class="ff"><label>Email</label><input id="f-email" type="email" placeholder="owner@franchise.com"/></div>
       <div class="ff"><label>City</label><input id="f-city" placeholder="City name"/></div>
       <div class="ff"><label>State</label><input id="f-state" placeholder="State name"/></div>
+      <div class="ff"><label>Franchise Type</label>
+        <select id="f-type">
+          <option value="full">Full ISP (broadband + everything)</option>
+          <option value="iptv_only">IPTV Only</option>
+        </select>
+      </div>
       <div class="ff"><label>Status</label><select id="f-active"><option value="1">Active</option><option value="0">Inactive</option></select></div>
     </div>
 
@@ -555,6 +562,51 @@ tr:hover td{background:rgba(124,109,250,.04);}
 
 </div>
 
+<!-- IPTV PLAN SECTION -->
+  <div class="sec-title">📺 IPTV Plan</div>
+  <div id="iptv-plan-locked" style="background:var(--bg);border-radius:8px;padding:14px;font-size:12px;color:var(--muted)">
+    Save this franchise first, then reopen it to manage its IPTV device slots and subscription.
+  </div>
+  <div id="iptv-plan-fields" style="display:none">
+    <div class="fgrid">
+      <div class="ff">
+        <label>Device Slots (purchased)</label>
+        <input id="f-iptv-slots" type="number" placeholder="50"/>
+      </div>
+      <div class="ff">
+        <label>Subscription Status</label>
+        <select id="f-iptv-status">
+          <option value="active">Active</option>
+          <option value="grace">Grace</option>
+          <option value="suspended">Suspended</option>
+        </select>
+      </div>
+      <div class="ff">
+        <label>Subscription Start</label>
+        <input id="f-iptv-start" type="date"/>
+      </div>
+      <div class="ff">
+        <label>Subscription Expiry</label>
+        <input id="f-iptv-expiry" type="date"/>
+      </div>
+      <div class="ff">
+        <label>Grace Period (days)</label>
+        <input id="f-iptv-grace" type="number" placeholder="3"/>
+      </div>
+      <div class="ff">
+        <label>Franchise's Xtream URL (read-only)</label>
+        <div id="f-iptv-url-display" style="padding:9px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:var(--mono);font-size:12px;word-break:break-all">—</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px">The franchise sets its own Xtream URL from their IPTV portal — you only manage slots and billing here.</div>
+    <div class="errmsg" id="f-iptv-err"></div>
+    <div class="mactions" style="margin-top:12px">
+      <button class="btn bpu" id="f-iptv-btn" onclick="submitIptvPlan()">Save IPTV Plan</button>
+    </div>
+  </div>
+
+
+
     <div class="errmsg" id="f-err"></div>
     <div class="mactions">
       <button class="btn" onclick="closeM('m-franchise')">Cancel</button>
@@ -614,10 +666,11 @@ async function apiFetch(method,path,body){
 
 function today(){return new Date().toISOString().split('T')[0];}
 function realSt(c){if(!c.expiry_date)return c.status||'unknown';if(c.expiry_date<today()&&c.status==='active')return 'expired';return c.status||'unknown';}
-function sbadge(s){const m={active:'bok',expired:'berr',suspended:'bwarn',confirmed:'bok',pending:'bwarn',failed:'berr',success:'bok',inactive:'bgray'};return '<span class="badge '+(m[s]||'bgray')+'">'+(s||'—')+'</span>';}
+function sbadge(s){const m={active:'bok',expired:'berr',suspended:'bwarn',confirmed:'bok',pending:'bwarn',failed:'berr',success:'bok',inactive:'bgray',grace:'bwarn'};return '<span class="badge '+(m[s]||'bgray')+'">'+(s||'—')+'</span>';}
 function gwbadge(g){const m={easebuzz:'berr',none:'bgray'};return '<span class="badge '+(m[g]||'bgray')+'">'+(g||'—')+'</span>';}
 function ispbadge(a){return a==='jaze_renew'?'<span class="badge bok">Jaze</span>':'<span class="badge bwarn">NetAdmin</span>';}
 function configured(val){return val?'<span class="badge bok">✓ Set</span>':'<span class="badge bgray">Not set</span>';}
+function typebadge(t){return t==='iptv_only'?'<span class="badge binfo">📺 IPTV Only</span>':'<span class="badge bgray">Full ISP</span>';}
 
 function doLogout(){localStorage.removeItem('ngn_sa_token');localStorage.removeItem('ngn_sa_user');$('app-shell').style.display='none';$('login-page').style.display='flex';}
 
@@ -682,7 +735,7 @@ async function loadDash(){
       const fp=ps.filter(p=>p.franchise_id===f.id&&p.status==='success');
       const frev=fp.reduce((s,p)=>s+(p.amount_total||0),0);
       const act=fc.filter(c=>c.status==='active'&&(!c.expiry_date||c.expiry_date>=td)).length;
-      return '<div class="fcard"><div style="display:flex;align-items:center;justify-content:space-between"><div><div class="fcard-name">'+f.name+'</div><div class="fcard-meta">'+f.owner_name+' · '+f.phone+' · '+(f.city||'—')+', '+(f.state||'—')+'</div></div><div style="display:flex;gap:8px;align-items:center">'+gwbadge(f.payment_gateway)+'<span class="badge '+(f.is_active?'bok':'bgray')+'">'+(f.is_active?'active':'inactive')+'</span><button class="btn bsm bedit" onclick="openEditFranchise('+f.id+')">✏ Edit</button></div></div><div class="fstats"><div class="fsi"><div class="fsi-val">'+fc.length+'</div><div class="fsi-lbl">Customers</div></div><div class="fsi"><div class="fsi-val" style="color:var(--accent2)">'+act+'</div><div class="fsi-lbl">Active</div></div><div class="fsi"><div class="fsi-val" style="color:var(--accent2)">₹'+frev.toLocaleString('en-IN')+'</div><div class="fsi-lbl">Revenue</div></div></div></div>';
+      return '<div class="fcard"><div style="display:flex;align-items:center;justify-content:space-between"><div><div class="fcard-name">'+f.name+'</div><div class="fcard-meta">'+f.owner_name+' · '+f.phone+' · '+(f.city||'—')+', '+(f.state||'—')+'</div></div><div style="display:flex;gap:8px;align-items:center">'+typebadge(f.franchise_type)+gwbadge(f.payment_gateway)+'<span class="badge '+(f.is_active?'bok':'bgray')+'">'+(f.is_active?'active':'inactive')+'</span><button class="btn bsm bedit" onclick="openEditFranchise('+f.id+')">✏ Edit</button></div></div><div class="fstats"><div class="fsi"><div class="fsi-val">'+fc.length+'</div><div class="fsi-lbl">Customers</div></div><div class="fsi"><div class="fsi-val" style="color:var(--accent2)">'+act+'</div><div class="fsi-lbl">Active</div></div><div class="fsi"><div class="fsi-val" style="color:var(--accent2)">₹'+frev.toLocaleString('en-IN')+'</div><div class="fsi-lbl">Revenue</div></div></div></div>';
     }).join('');
   }catch(e){console.error(e);}
 }
@@ -706,6 +759,7 @@ async function loadFranchises(){
         '<td>'+f.owner_name+'</td>'+
         '<td style="font-family:var(--mono);color:var(--muted)">'+f.phone+'</td>'+
         '<td style="color:var(--muted)">'+(f.city||'—')+'</td>'+
+        '<td>'+typebadge(f.franchise_type)+'</td>'+
         '<td>'+gwbadge(f.payment_gateway)+'</td>'+
         '<td>'+configured(f.jaze_api_key)+'</td>'+
         '<td>'+configured(f.mikrotik_api_key)+'</td>'+
@@ -731,6 +785,9 @@ function openAddFranchise(){
    'f-ebz-key','f-ebz-salt','f-wa-owner-number','f-wa-phone-id','f-wa-token'
   ].forEach(i=>$(i).value='');
   $('f-gateway').value='easebuzz';$('f-active').value='1';$('f-err').style.display='none';
+  $('f-type').value='full';
+  $('iptv-plan-locked').style.display='block';
+  $('iptv-plan-fields').style.display='none';
   $('f-ebz-env').value='production';$('f-wifi-method').value='none';
   $('f-wa-remaining-display').textContent='0 remaining (0/0 used)';
   $('f-wa-enabled').value='0';
@@ -777,7 +834,27 @@ async function openEditFranchise(id){
   $('f-active').value=f.is_active?'1':'0';$('f-err').style.display='none';
   $('f-wa-remaining-display').textContent = ((f.whatsapp_balance||0) - (f.whatsapp_used||0)) + ' remaining (' + (f.whatsapp_used||0) + '/' + (f.whatsapp_balance||0) + ' used)';
   $('f-wa-owner-number').value = f.owner_whatsapp_number || '';
-  updateGWFields();$('m-franchise').style.display='flex';
+  $('f-type').value = f.franchise_type || 'full';
+  updateGWFields();
+
+  $('iptv-plan-locked').style.display='none';
+  $('iptv-plan-fields').style.display='block';
+  $('f-iptv-err').style.display='none';
+  $('f-iptv-slots').value='';$('f-iptv-start').value='';$('f-iptv-expiry').value='';
+  $('f-iptv-grace').value='3';$('f-iptv-status').value='active';
+  $('f-iptv-url-display').textContent='Loading...';
+  try{
+    const ir=await apiFetch('GET','/api/admin/iptv/franchise-config?franchise_id='+f.id);
+    const c=ir.data||{};
+    $('f-iptv-slots').value=c.purchased_slots||0;
+    $('f-iptv-status').value=c.subscription_status||'active';
+    $('f-iptv-start').value=c.subscription_start_date||'';
+    $('f-iptv-expiry').value=c.subscription_expiry_date||'';
+    $('f-iptv-grace').value=c.grace_period_days||3;
+    $('f-iptv-url-display').textContent=c.default_server_url||'(not set by franchise yet)';
+  }catch(e){ $('f-iptv-url-display').textContent='—'; }
+
+  $('m-franchise').style.display='flex';
 }
 
 async function submitFranchise(){
@@ -787,6 +864,7 @@ async function submitFranchise(){
     name:$('f-name').value.trim(),owner_name:$('f-owner').value.trim(),
     phone:$('f-phone').value.trim(),email:$('f-email').value.trim(),
     city:$('f-city').value.trim(),state:$('f-state').value.trim(),
+    franchise_type:$('f-type').value,
     payment_gateway:$('f-gateway').value,
     easebuzz_key:$('f-ebz-key').value.trim(),
     easebuzz_salt:$('f-ebz-salt').value.trim(),
@@ -817,10 +895,40 @@ async function submitFranchise(){
   btn.disabled=true;btn.textContent='Saving...';
   try{
     const r=id?await apiFetch('PUT','/api/super/franchises/'+id,d):await apiFetch('POST','/api/super/franchises',d);
-    if(r.success){toast(id?'Franchise updated!':'Franchise added! ID: '+r.data?.id);closeM('m-franchise');loadFranchises();loadDash();}
+    if(r.success){
+      toast(id?'Franchise updated!':'Franchise added! ID: '+r.data?.id);
+      if(!id && r.data?.id){
+        loadFranchises();loadDash();
+        openEditFranchise(r.data.id);
+        return;
+      }
+      closeM('m-franchise');loadFranchises();loadDash();
+    }
     else showErr(err,r.error||'Failed');
   }catch(e){showErr(err,'Network error');}
   finally{btn.disabled=false;btn.textContent='Save Franchise';}
+}
+
+async function submitIptvPlan(){
+  const btn=$('f-iptv-btn'), err=$('f-iptv-err');
+  err.style.display='none';
+  const franchiseId=parseInt($('f-id').value);
+  if(!franchiseId){ showErr(err,'Save the franchise first'); return; }
+  const d={
+    franchise_id: franchiseId,
+    purchased_slots: parseInt($('f-iptv-slots').value) || 0,
+    subscription_status: $('f-iptv-status').value,
+    subscription_start_date: $('f-iptv-start').value || null,
+    subscription_expiry_date: $('f-iptv-expiry').value || null,
+    grace_period_days: parseInt($('f-iptv-grace').value) || 3,
+  };
+  btn.disabled=true; btn.textContent='Saving...';
+  try{
+    const r=await apiFetch('PUT','/api/admin/iptv/franchise-config',d);
+    if(r.success){ toast('IPTV plan updated!'); }
+    else showErr(err, r.error||'Failed');
+  }catch(e){ showErr(err,'Network error'); }
+  finally{ btn.disabled=false; btn.textContent='Save IPTV Plan'; }
 }
 
 async function loadAdmins(){
