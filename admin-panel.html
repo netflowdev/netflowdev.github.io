@@ -2444,7 +2444,7 @@
               <div style="text-align:right">
                 <div style="font-size:11px;color:#16a34a;font-family:var(--mono);margin-bottom:4px">USED / TOTAL</div>
                 <div style="font-size:18px;font-weight:700;color:#15803d" id="wa-bal-used">— / —</div>
-                <div style="font-size:10px;color:#16a34a;margin-top:4px">Contact SuperAdmin to top up</div>
+                <button class="btn bsm" style="margin-top:6px" onclick="openRcModal('whatsapp_credits','Recharge WhatsApp Credits')">⚡ Recharge Now</button>
               </div>
             </div>
           </div>
@@ -2627,6 +2627,27 @@
  
             <!-- CUSTOMERS TAB -->
             <div id="iptv-panel-customers">
+              <div class="stats3" style="margin-bottom:20px">
+                <div class="sc blue">
+                  <div class="sc-icon blue">👥</div>
+                  <div class="sc-label">Customers</div>
+                  <div class="sc-val" id="iptv-s-total" style="font-size:28px">—</div>
+                  <div class="sc-sub">IPTV subscriber list</div>
+                </div>
+                <div class="sc green">
+                  <div class="sc-icon green">✓</div>
+                  <div class="sc-label">Active</div>
+                  <div class="sc-val" id="iptv-s-active" style="color:var(--green);font-size:28px">—</div>
+                  <div class="sc-sub" style="color:var(--green)">active</div>
+                </div>
+                <div class="sc amber">
+                  <div class="sc-icon amber">📺</div>
+                  <div class="sc-label">Device Slots Used</div>
+                  <div class="sc-val" id="iptv-s-slots" style="color:var(--amber);font-size:28px">—</div>
+                  <div class="sc-sub" style="color:var(--amber)">of purchased plan</div>
+                </div>
+              </div>
+              <div style="margin:-10px 0 16px;font-size:11.5px;color:var(--txt3);line-height:1.5">Billing is based on <b>active devices</b>, not customer count — one customer can hold multiple paired devices, each counted separately against your plan.</div>
               <div class="toolbar">
                 <input class="sbox" id="iptv-search" placeholder="Search name or mobile..." oninput="loadIptvCustomers()" />
                 <button class="btn" onclick="loadIptvCustomers()">↺ Refresh</button>
@@ -2658,6 +2679,7 @@
             <div id="iptv-panel-config" style="display:none">
               <div class="card" style="max-width:600px">
                 <div class="card-hd">Franchise IPTV Plan</div>
+                <div id="iptv-recharge-banner" style="display:none;margin-bottom:14px"></div>
                 <div class="dgrid" id="iptv-config-view" style="margin-bottom:18px"></div>
                 <div id="iptv-url-editable" style="display:none">
                   <div class="sec-title">Your Xtream Server URL</div>
@@ -3261,6 +3283,15 @@
       </div>
     </div>
  
+    <!-- RECHARGE PLANS -->
+    <div class="modal-bg" id="m-recharge" style="display:none">
+      <div class="modal" style="max-width:420px">
+        <div class="modal-title" id="rc-title">Recharge</div>
+        <div id="rc-body"><div class="loading"><div class="spinner"></div>Loading plans...</div></div>
+        <div class="mactions"><button class="btn" onclick="closeM('m-recharge')">Close</button></div>
+      </div>
+    </div>
+
     <!-- PAIR DEVICE -->
     <div class="modal-bg" id="m-pair" style="display:none">
       <div class="modal" style="max-width:420px">
@@ -5173,7 +5204,19 @@
 
       // ── IPTV ─────────────────────────────────────────────────────
 let iptvCustCache = [];
- 
+let iptvPurchasedSlots = null; // filled in by loadIptvConfig()
+
+function updateIptvStatCards() {
+  const totalEl = $('iptv-s-total'), activeEl = $('iptv-s-active'), slotsEl = $('iptv-s-slots');
+  if (!totalEl) return; // stats bar not in DOM yet
+  const total = iptvCustCache.length;
+  const active = iptvCustCache.filter(c => c.status === 'active').length;
+  const used = iptvCustCache.reduce((sum, c) => sum + (c.device_count || 0), 0);
+  totalEl.textContent = total;
+  activeEl.textContent = active;
+  slotsEl.textContent = used + (iptvPurchasedSlots !== null ? ' / ' + iptvPurchasedSlots : '');
+}
+
 function switchIptvTab(tab) {
   $('iptv-tab-customers').classList.toggle('active', tab === 'customers');
   $('iptv-tab-config').classList.toggle('active', tab === 'config');
@@ -5187,6 +5230,7 @@ async function loadIptvCustomers() {
   try {
     const r = await apiFetch('GET', '/api/admin/iptv/customers' + (search ? '?search=' + encodeURIComponent(search) : ''));
     iptvCustCache = r.data?.customers || [];
+    updateIptvStatCards();
     if (!iptvCustCache.length) {
       $('iptv-tbody').innerHTML = '<tr><td colspan="8"><div class="empty">No IPTV customers yet</div></td></tr>';
       return;
@@ -5351,6 +5395,8 @@ async function loadIptvConfig() {
     const r = await apiFetch('GET', '/api/admin/iptv/franchise-config');
     const c = r.data || {};
     const isSuperAdmin = getUser().role === 'super_admin';
+    iptvPurchasedSlots = c.purchased_slots || 0;
+    updateIptvStatCards();
  
     $('iptv-config-view').innerHTML =
       di('Default Server URL', c.default_server_url, 'full', 'mono') +
@@ -5359,7 +5405,29 @@ async function loadIptvConfig() {
       di('Subscription Start', fmtDate(c.subscription_start_date)) +
       di('Subscription Expiry', fmtDate(c.subscription_expiry_date)) +
       di('Grace Period', (c.grace_period_days || 3) + ' days');
- 
+
+    if (!isSuperAdmin) {
+      const expiry = c.subscription_expiry_date ? new Date(c.subscription_expiry_date) : null;
+      const daysLeft = expiry ? Math.ceil((expiry - new Date()) / 86400000) : null;
+      const lowSlots = (c.purchased_slots || 0) <= 2;
+      const banner = $('iptv-recharge-banner');
+      if (banner) {
+        if ((daysLeft !== null && daysLeft <= 7) || lowSlots) {
+          banner.style.display = 'block';
+          banner.innerHTML =
+            '<div class="card" style="background:#fff7ed;border-color:#fdba74;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">' +
+            '<div style="font-size:13px;color:#c2410c">' +
+              (daysLeft !== null && daysLeft <= 7 ? '⏰ Subscription expires in ' + daysLeft + ' day(s). ' : '') +
+              (lowSlots ? '📺 Only ' + (c.purchased_slots||0) + ' slot(s) left.' : '') +
+            '</div>' +
+            '<button class="btn bpri bsm" onclick="openRcModal(\'iptv_slots\',\'Recharge IPTV Slots\')">⚡ Recharge Now</button>' +
+            '</div>';
+        } else {
+          banner.style.display = 'none';
+        }
+      }
+    }
+
     $('iptv-config-editable').style.display = isSuperAdmin ? 'block' : 'none';
     $('iptv-url-editable').style.display = isSuperAdmin ? 'none' : 'block';
     if (isSuperAdmin) {
@@ -5923,6 +5991,54 @@ async function submitReactivate() {
   } catch(e) { showErr(err, 'Network error'); }
   finally { btn.disabled = false; btn.textContent = 'Reactivate'; }
 }
+
+// ── Recharge modal (IPTV slots / WhatsApp credits) ──────────────
+let rcType = null;
+function openRcModal(type, title) {
+  rcType = type;
+  $('rc-title').textContent = title;
+  $('rc-body').innerHTML = '<div class="loading"><div class="spinner"></div>Loading plans...</div>';
+  $('m-recharge').style.display = 'flex';
+  loadRcPlans(type);
+}
+async function loadRcPlans(type) {
+  try {
+    const r = await apiFetch('GET', '/api/admin/platform-topup-plans?type=' + type);
+    const plans = r.data?.plans || [];
+    if (!plans.length) { $('rc-body').innerHTML = '<div class="empty">No plans available. Contact NetFlow.</div>'; return; }
+    $('rc-body').innerHTML = plans.map(p =>
+      '<div style="border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px">' +
+        '<div>' +
+          '<div style="font-weight:700;font-size:14px">' + p.label + '</div>' +
+          '<div style="font-size:11px;color:var(--muted)">Qty: ' + p.quantity + (p.validity_days ? ' &nbsp;•&nbsp; Validity ' + p.validity_days + ' days' : '') + '</div>' +
+          '<div style="font-weight:900;color:var(--accent2);font-size:16px;margin-top:4px">₹' + p.price + '</div>' +
+        '</div>' +
+        '<button class="btn bpri bsm" style="white-space:nowrap" onclick="buyRcPlan(' + p.id + ')">Buy Now</button>' +
+      '</div>'
+    ).join('') + '<div class="errmsg" id="rc-err"></div>';
+  } catch(e) { $('rc-body').innerHTML = '<div class="empty">Failed to load plans</div>'; }
+}
+
+async function buyRcPlan(planId) {
+  try {
+    const r = await apiFetch('POST', '/api/super/platform-orders', { order_type: rcType, plan_id: planId });
+    if (r.success) { window.open(r.data.pay_url, '_blank'); closeM('m-recharge'); toast('Redirecting to payment...'); }
+    else { const e=$('rc-err'); if(e){ e.textContent = r.error || 'Failed'; e.style.display = 'block'; } }
+  } catch(e) { const el=$('rc-err'); if(el){ el.textContent = 'Network error'; el.style.display = 'block'; } }
+}
+
+window.addEventListener('message', function(e){
+  if (e.data && e.data.type === 'platform-topup-result') {
+    if (e.data.success) {
+      toast('Recharge successful!');
+      loadIptvConfig();
+      if (typeof loadWhatsAppPage === 'function') loadWhatsAppPage();
+    } else {
+      toast('Payment failed or cancelled', 'err');
+    }
+  }
+});
+
 
 
 
