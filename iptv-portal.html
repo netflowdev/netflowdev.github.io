@@ -230,8 +230,8 @@
         <div class="tbl-card">
           <div class="tbl-wrap">
             <table>
-              <thead><tr><th>#</th><th>Name</th><th>Mobile</th><th>Server URL</th><th>Status</th><th>Devices</th><th style="padding-right:20px">Actions</th></tr></thead>
-              <tbody id="c-tbody"><tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
+              <thead><tr><th>#</th><th>Name</th><th>Mobile</th><th>Server URL</th><th>Username</th><th>Status</th><th>Devices</th><th style="padding-right:20px">Actions</th></tr></thead>
+              <tbody id="c-tbody"><tr><td colspan="8"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
             </table>
           </div>
         </div>
@@ -373,7 +373,7 @@ function showPage(name){
 // ── CUSTOMERS ──────────────────────────────────────
 async function loadCustomers(){
   const search=$('c-search').value.trim();
-  $('c-tbody').innerHTML='<tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+  $('c-tbody').innerHTML='<tr><td colspan="8"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
   try{
     const r=await apiFetch('GET','/api/admin/iptv/customers'+(search?'?search='+encodeURIComponent(search):''));
     custCache = r.data?.customers || [];
@@ -387,7 +387,7 @@ async function loadCustomers(){
     }catch(e){ $('s-slots').textContent = activeDevices; }
 
     if(!custCache.length){
-      $('c-tbody').innerHTML='<tr><td colspan="7"><div class="empty">No IPTV customers yet</div></td></tr>';
+      $('c-tbody').innerHTML='<tr><td colspan="8"><div class="empty">No IPTV customers yet</div></td></tr>';
       return;
     }
     $('c-tbody').innerHTML = custCache.map(c =>
@@ -396,6 +396,7 @@ async function loadCustomers(){
       '<td style="font-weight:600">'+(c.name||'—')+'</td>'+
       '<td style="font-family:var(--mono);font-size:12px;color:var(--text2)">'+(c.mobile||'—')+'</td>'+
       '<td style="font-size:11px;color:var(--text3);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(c.server_url||'<span style="color:var(--text3)">(franchise default)</span>')+'</td>'+
+      '<td style="font-family:var(--mono);font-size:12px;color:var(--text2)">'+(c.iptv_username||'—')+'</td>'+
       '<td>'+sbadge(c.status)+'</td>'+
       '<td><button class="device-link" onclick="openDevices('+c.id+',\''+(c.name||'').replace(/'/g,"\\'")+'\')">'+(c.device_count||0)+' device'+((c.device_count||0)===1?'':'s')+'</button></td>'+
       '<td style="padding-right:20px"><div style="display:flex;gap:6px;flex-wrap:wrap">'+
@@ -404,7 +405,7 @@ async function loadCustomers(){
       '<button class="btn bsm bdanger" onclick="deleteCust('+c.id+',\''+(c.name||'').replace(/'/g,"\\'")+'\')">🗑</button>'+
       '</div></td></tr>'
     ).join('');
-  }catch(e){ $('c-tbody').innerHTML='<tr><td colspan="7"><div class="empty">Failed to load</div></td></tr>'; }
+  }catch(e){ $('c-tbody').innerHTML='<tr><td colspan="8"><div class="empty">Failed to load</div></td></tr>'; }
 }
 
 function sbadge(s){
