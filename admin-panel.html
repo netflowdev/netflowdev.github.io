@@ -575,6 +575,42 @@
         border-color: var(--red);
         color: #fff;
       }
+      .device-link {
+        background: none;
+        border: none;
+        padding: 0;
+        color: var(--amber);
+        font-family: var(--mono);
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .device-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .device-row:last-child { border-bottom: none; }
+      .device-row input {
+        flex: 1;
+        padding: 8px 10px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        font-size: 12.5px;
+        color: var(--txt);
+        outline: none;
+      }
+      .device-row input:focus { border-color: var(--amber); }
+      .device-meta {
+        font-size: 10px;
+        color: var(--txt3);
+        font-family: var(--mono);
+        white-space: nowrap;
+      }
       .bpurple-btn {
         background: var(--purple-l);
         border-color: rgba(124, 58, 237, 0.2);
@@ -1544,6 +1580,10 @@
             <div class="nav-icon">₹</div>
             Payments
           </div>
+          <div class="nav-item" id="nav-settlements" onclick="showPage('settlements')">
+            <div class="nav-icon">🏦</div>
+            Settlements
+          </div>
           <div class="nav-item" id="nav-activations" onclick="showPage('activations')">
             <div class="nav-icon">⚡</div>
             Activations
@@ -1944,6 +1984,67 @@
                   <tbody id="ptbody">
                     <tr>
                       <td colspan="10">
+                        <div class="loading">
+                          <div class="spinner"></div>
+                          Loading...
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTLEMENTS -->
+        <div id="page-settlements" style="display: none">
+          <div class="topbar">
+            <div>
+              <div class="pg-title">Settlements</div>
+              <div class="pg-sub">// Easebuzz payout / bank settlement history</div>
+            </div>
+            <button class="btn" onclick="loadSettlements()">↺ Refresh</button>
+          </div>
+          <div class="content">
+            <div class="stats3">
+              <div class="sc green">
+                <div class="sc-icon green">🏦</div>
+                <div class="sc-label">Total Settled</div>
+                <div class="sc-val" id="st-total" style="font-size: 24px; color: var(--green)">—</div>
+                <div class="sc-sub" style="color: var(--green)">all time</div>
+              </div>
+              <div class="sc blue">
+                <div class="sc-icon blue">📦</div>
+                <div class="sc-label">Payouts</div>
+                <div class="sc-val" id="st-count" style="font-size: 24px; color: var(--blue)">—</div>
+                <div class="sc-sub">events received</div>
+              </div>
+              <div class="sc amber">
+                <div class="sc-icon amber">↩</div>
+                <div class="sc-label">Refunded</div>
+                <div class="sc-val" id="st-refund" style="font-size: 24px; color: var(--amber)">—</div>
+                <div class="sc-sub" style="color: var(--amber)">within payouts</div>
+              </div>
+            </div>
+            <div class="tbl-card">
+              <div class="tbl-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Payout ID</th>
+                      <th>Franchise</th>
+                      <th>Bank UTR</th>
+                      <th>Bank</th>
+                      <th>Payout Amount</th>
+                      <th>Refund</th>
+                      <th>Date</th>
+                      <th style="padding-right: 20px">Transactions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="st-tbody">
+                    <tr>
+                      <td colspan="8">
                         <div class="loading">
                           <div class="spinner"></div>
                           Loading...
@@ -2539,13 +2640,14 @@
                         <th>Name</th>
                         <th>Mobile</th>
                         <th>Server URL</th>
+                        <th>Username</th>
                         <th>Status</th>
                         <th>Devices</th>
                         <th style="padding-right:20px">Actions</th>
                       </tr>
                     </thead>
                     <tbody id="iptv-tbody">
-                      <tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>
+                      <tr><td colspan="8"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>
                     </tbody>
                   </table>
                 </div>
@@ -2557,6 +2659,20 @@
               <div class="card" style="max-width:600px">
                 <div class="card-hd">Franchise IPTV Plan</div>
                 <div class="dgrid" id="iptv-config-view" style="margin-bottom:18px"></div>
+                <div id="iptv-url-editable" style="display:none">
+                  <div class="sec-title">Your Xtream Server URL</div>
+                  <div style="margin:0 0 12px;font-size:11.5px;color:var(--txt3);line-height:1.5">This is your own IPTV provider's server URL. You can update it anytime — no need to contact NetFlow.</div>
+                  <div class="fgrid">
+                    <div class="ff full">
+                      <label>Default Server URL (Xtream)</label>
+                      <input id="iptv-url-input" placeholder="http://provider.example.com:8080" />
+                    </div>
+                  </div>
+                  <div class="errmsg" id="iptv-url-err"></div>
+                  <div class="mactions">
+                    <button class="btn bpri" id="iptv-url-btn" onclick="submitIptvUrl()">Save URL</button>
+                  </div>
+                </div>
                 <div id="iptv-config-editable" style="display:none">
                   <div class="sec-title">Edit Plan (SuperAdmin only)</div>
                   <div class="fgrid">
@@ -3155,11 +3271,33 @@
           <label>6-Digit Code (shown on customer's TV)</label>
           <input id="pair-code" placeholder="A7X9K2" style="text-transform:uppercase;font-family:var(--mono);font-size:18px;letter-spacing:3px;text-align:center" maxlength="6" />
         </div>
+        <div class="ff" style="margin-top:12px">
+          <label>Device Name (e.g. Living Room TV)</label>
+          <input id="pair-device-name" placeholder="Optional, helps you identify it later" />
+        </div>
         <div class="errmsg" id="pair-err"></div>
         <div class="mactions">
           <button class="btn" onclick="closeM('m-pair')">Cancel</button>
           <button class="btn bpri" id="pair-btn" onclick="submitPairDevice()">Pair Device</button>
         </div>
+      </div>
+    </div>
+
+    <!-- IPTV DEVICES -->
+    <div class="modal-bg" id="m-devices" style="display:none">
+      <div class="modal" style="max-width:460px">
+        <div class="modal-title" id="devices-modal-title">Devices</div>
+        <div id="devices-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+        <div class="mactions"><button class="btn" onclick="closeM('m-devices')">Close</button></div>
+      </div>
+    </div>
+
+    <!-- SETTLEMENT TRANSACTIONS -->
+    <div class="modal-bg" id="m-settlement-txns" style="display:none">
+      <div class="modal" style="max-width:560px">
+        <div class="modal-title" id="settlement-txns-title">Settled Transactions</div>
+        <div id="settlement-txns-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+        <div class="mactions"><button class="btn" onclick="closeM('m-settlement-txns')">Close</button></div>
       </div>
     </div>
 
@@ -3306,7 +3444,7 @@
 
     <script>
       const BASE = "https://isp-billing-api.netflowcloud.workers.dev";
-      const PAGES = ['dashboard','customers','activations','payments','notifications','plans','ott','paylinks','brands','whatsapp','billing','iptv'];
+      const PAGES = ['dashboard','customers','activations','payments','settlements','notifications','plans','ott','paylinks','brands','whatsapp','billing','iptv'];
       let custCache = [],
         plansCache = [],
         ottPlansCache = [],
@@ -3476,6 +3614,7 @@
         if (name === "customers") loadCustomers();
         if (name === "activations") loadActivations();
         if (name === "payments") loadPayments();
+        if (name === "settlements") loadSettlements();
         if (name === "notifications") {
           loadTpls();
           loadNHistory();
@@ -3996,6 +4135,86 @@
             .join("");
         } catch (e) {
           console.error(e);
+        }
+      }
+
+      // ── SETTLEMENTS ──────────────────────────────────────────────
+      let _settlementsCache = [];
+
+      async function loadSettlements() {
+        $("st-tbody").innerHTML =
+          '<tr><td colspan="8"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+        try {
+          const r = await apiFetch("GET", "/api/admin/settlements");
+          _settlementsCache = r.data?.settlements || [];
+
+          const tot = _settlementsCache.reduce((s, x) => s + (x.payout_amount || 0), 0);
+          const refund = _settlementsCache.reduce((s, x) => s + (x.refund_amount || 0), 0);
+          $("st-total").textContent = "₹" + tot.toLocaleString("en-IN");
+          $("st-count").textContent = _settlementsCache.length;
+          $("st-refund").textContent = "₹" + refund.toLocaleString("en-IN");
+
+          if (!_settlementsCache.length) {
+            $("st-tbody").innerHTML = '<tr><td colspan="8"><div class="empty">No settlements received yet</div></td></tr>';
+            return;
+          }
+          $("st-tbody").innerHTML = _settlementsCache
+            .map(
+              (s) =>
+                '<tr><td style="font-family:var(--mono);font-size:11.5px;color:var(--txt)">' +
+                (s.payout_id || "—") +
+                '</td><td style="color:var(--txt2)">' +
+                (s.franchise_name || "—") +
+                '</td><td style="font-family:var(--mono);font-size:11px;color:var(--txt3);max-width:160px;word-break:break-all;white-space:normal">' +
+                (s.bank_transaction_id || "—") +
+                '</td><td style="color:var(--txt2);font-size:12px">' +
+                (s.bank_name || "—") +
+                '</td><td style="font-family:var(--mono);font-weight:700;color:var(--green)">₹' +
+                (s.payout_amount || 0).toLocaleString("en-IN") +
+                '</td><td style="font-family:var(--mono);color:var(--txt3)">₹' +
+                (s.refund_amount || 0).toLocaleString("en-IN") +
+                '</td><td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' +
+                fmtDateTime(s.payout_date || s.created_at) +
+                '</td><td style="padding-right:20px"><button class="btn bsm" onclick="viewSettlementTxns(\'' +
+                (s.payout_id || "").replace(/'/g, "\\'") +
+                '\')">View</button></td></tr>',
+            )
+            .join("");
+        } catch (e) {
+          $("st-tbody").innerHTML = '<tr><td colspan="8"><div class="empty">Failed to load</div></td></tr>';
+        }
+      }
+
+      async function viewSettlementTxns(payoutId) {
+        $("settlement-txns-title").textContent = "Settled Transactions — " + payoutId;
+        $("settlement-txns-list").innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
+        $("m-settlement-txns").style.display = "flex";
+        try {
+          const r = await apiFetch("GET", "/api/admin/settlements/transactions?payout_id=" + encodeURIComponent(payoutId));
+          const txns = r.data?.transactions || [];
+          if (!txns.length) {
+            $("settlement-txns-list").innerHTML = '<div class="empty">No transactions found</div>';
+            return;
+          }
+          $("settlement-txns-list").innerHTML =
+            '<div class="tbl-wrap"><table><thead><tr><th>Txn ID</th><th>Type</th><th>Amount</th><th>Settled</th></tr></thead><tbody>' +
+            txns
+              .map(
+                (t) =>
+                  '<tr><td style="font-family:var(--mono);font-size:11px;color:var(--txt)">' +
+                  (t.txnid || "—") +
+                  '</td><td style="font-size:12px;color:var(--txt2)">' +
+                  (t.transaction_type || "—") +
+                  '</td><td style="font-family:var(--mono);color:var(--txt3)">₹' +
+                  (t.transaction_amount || 0) +
+                  '</td><td style="font-family:var(--mono);font-weight:700;color:var(--green)">₹' +
+                  (t.settlement_amount || 0) +
+                  "</td></tr>",
+              )
+              .join("") +
+            "</tbody></table></div>";
+        } catch (e) {
+          $("settlement-txns-list").innerHTML = '<div class="empty">Failed to load</div>';
         }
       }
 
@@ -4963,13 +5182,13 @@ function switchIptvTab(tab) {
 }
  
 async function loadIptvCustomers() {
-  $('iptv-tbody').innerHTML = '<tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+  $('iptv-tbody').innerHTML = '<tr><td colspan="8"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
   const search = $('iptv-search').value.trim();
   try {
     const r = await apiFetch('GET', '/api/admin/iptv/customers' + (search ? '?search=' + encodeURIComponent(search) : ''));
     iptvCustCache = r.data?.customers || [];
     if (!iptvCustCache.length) {
-      $('iptv-tbody').innerHTML = '<tr><td colspan="7"><div class="empty">No IPTV customers yet</div></td></tr>';
+      $('iptv-tbody').innerHTML = '<tr><td colspan="8"><div class="empty">No IPTV customers yet</div></td></tr>';
       return;
     }
     $('iptv-tbody').innerHTML = iptvCustCache.map(c =>
@@ -4978,15 +5197,17 @@ async function loadIptvCustomers() {
       '<td style="font-weight:600;color:var(--txt)">' + (c.name || '—') + '</td>' +
       '<td style="font-family:var(--mono);font-size:12px;color:var(--txt3)">' + (c.mobile || '—') + '</td>' +
       '<td style="font-size:11px;color:var(--txt3);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (c.server_url || '<span style="color:var(--txt3)">(franchise default)</span>') + '</td>' +
+      '<td style="font-family:var(--mono);font-size:12px;color:var(--txt2)">' + (c.iptv_username || '—') + '</td>' +
       '<td>' + sbadge(c.status) + '</td>' +
-      '<td style="font-family:var(--mono);font-size:12px">' + (c.device_count || 0) + '</td>' +
+      '<td><button class="device-link" onclick="openIptvDevices(' + c.id + ',\'' + (c.name || '').replace(/'/g,"\\'") + '\')">' + (c.device_count || 0) + ' device' + ((c.device_count||0)===1?'':'s') + '</button></td>' +
       '<td style="padding-right:20px"><div class="abtns">' +
       '<button class="btn bsm bedit" onclick="openEditIptv(' + c.id + ')">✏</button>' +
       '<button class="btn bsm bpurple-btn" onclick="openPairModal(' + c.id + ',\'' + (c.name || '').replace(/'/g,"\\'") + '\')">📺 Pair</button>' +
+      '<button class="btn bsm bdanger" onclick="deleteIptvCustomer(' + c.id + ',\'' + (c.name || '').replace(/'/g,"\\'") + '\')">🗑</button>' +
       '</div></td></tr>'
     ).join('');
   } catch(e) {
-    $('iptv-tbody').innerHTML = '<tr><td colspan="7"><div class="empty">Failed to load</div></td></tr>';
+    $('iptv-tbody').innerHTML = '<tr><td colspan="8"><div class="empty">Failed to load</div></td></tr>';
   }
 }
  
@@ -5049,6 +5270,7 @@ function openPairModal(custId, custName) {
   $('pair-cust-id').value = custId;
   $('pair-cust-label').textContent = 'Pairing device for: ' + custName;
   $('pair-code').value = '';
+  $('pair-device-name').value = '';
   $('pair-err').style.display = 'none';
   $('m-pair').style.display = 'flex';
 }
@@ -5058,10 +5280,11 @@ async function submitPairDevice() {
   err.style.display = 'none';
   const code = $('pair-code').value.trim().toUpperCase();
   const custId = parseInt($('pair-cust-id').value);
+  const deviceName = $('pair-device-name').value.trim();
   if (!code || code.length !== 6) { showErr(err, 'Enter the 6-character code shown on the TV'); return; }
   btn.disabled = true; btn.textContent = 'Pairing...';
   try {
-    const r = await apiFetch('POST', '/api/admin/iptv/pair', { code, iptv_customer_id: custId });
+    const r = await apiFetch('POST', '/api/admin/iptv/pair', { code, iptv_customer_id: custId, device_name: deviceName });
     if (r.success) {
       toast('✅ Device paired!');
       closeM('m-pair');
@@ -5069,6 +5292,58 @@ async function submitPairDevice() {
     } else showErr(err, r.error || 'Failed');
   } catch(e) { showErr(err, 'Network error'); }
   finally { btn.disabled = false; btn.textContent = 'Pair Device'; }
+}
+
+// ── IPTV Devices (rename/deactivate) ──────────────────────────
+let currentIptvDevicesCustId = null;
+
+async function openIptvDevices(custId, custName) {
+  currentIptvDevicesCustId = custId;
+  $('devices-modal-title').textContent = 'Devices — ' + custName;
+  $('devices-list').innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
+  $('m-devices').style.display = 'flex';
+  await renderIptvDevices(custId);
+}
+
+async function renderIptvDevices(custId) {
+  try {
+    const r = await apiFetch('GET', '/api/admin/iptv/customers/' + custId + '/devices');
+    const devices = r.data?.devices || [];
+    if (!devices.length) { $('devices-list').innerHTML = '<div class="empty">No devices paired yet</div>'; return; }
+    $('devices-list').innerHTML = devices.map(d =>
+      '<div class="device-row">' +
+      '<input value="' + (d.device_name || '').replace(/"/g,'&quot;') + '" placeholder="Unnamed device" ' + (d.is_active ? '' : 'disabled') + ' ' +
+      'onchange="renameIptvDevice(' + d.id + ',this.value)"/>' +
+      '<span class="device-meta">' + (d.is_active ? '🟢 Active' : '⚪ Inactive') + '</span>' +
+      (d.is_active ? '<button class="btn bsm bdanger" onclick="deactivateIptvDevice(' + d.id + ')">Deactivate</button>' : '') +
+      '</div>'
+    ).join('');
+  } catch(e) { $('devices-list').innerHTML = '<div class="empty">Failed to load</div>'; }
+}
+
+async function renameIptvDevice(deviceId, name) {
+  try {
+    const r = await apiFetch('PUT', '/api/admin/iptv/devices/' + deviceId, { device_name: name.trim() });
+    if (r.success) toast('Device renamed'); else toast(r.error || 'Failed', 'err');
+  } catch(e) { toast('Network error', 'err'); }
+}
+
+async function deactivateIptvDevice(deviceId) {
+  if (!confirm('Deactivate this device? It will stop working immediately and free up one slot.')) return;
+  try {
+    const r = await apiFetch('DELETE', '/api/admin/iptv/devices/' + deviceId);
+    if (r.success) { toast('Device deactivated'); await renderIptvDevices(currentIptvDevicesCustId); loadIptvCustomers(); }
+    else toast(r.error || 'Failed', 'err');
+  } catch(e) { toast('Network error', 'err'); }
+}
+
+async function deleteIptvCustomer(id, name) {
+  if (!confirm('Delete ' + name + '? This will also free up all their paired devices.\n\nThis cannot be undone.')) return;
+  try {
+    const r = await apiFetch('DELETE', '/api/admin/iptv/customers/' + id);
+    if (r.success) { toast('🗑 ' + name + ' deleted'); loadIptvCustomers(); }
+    else toast(r.error || 'Delete failed', 'err');
+  } catch(e) { toast('Network error', 'err'); }
 }
  
 async function loadIptvConfig() {
@@ -5086,6 +5361,7 @@ async function loadIptvConfig() {
       di('Grace Period', (c.grace_period_days || 3) + ' days');
  
     $('iptv-config-editable').style.display = isSuperAdmin ? 'block' : 'none';
+    $('iptv-url-editable').style.display = isSuperAdmin ? 'none' : 'block';
     if (isSuperAdmin) {
       $('iptv-cfg-url').value = c.default_server_url || '';
       $('iptv-cfg-slots').value = c.purchased_slots || 0;
@@ -5093,8 +5369,23 @@ async function loadIptvConfig() {
       $('iptv-cfg-start').value = c.subscription_start_date || '';
       $('iptv-cfg-expiry').value = c.subscription_expiry_date || '';
       $('iptv-cfg-status').value = c.subscription_status || 'active';
+    } else {
+      $('iptv-url-input').value = c.default_server_url || '';
     }
   } catch(e) { console.error(e); }
+}
+
+async function submitIptvUrl() {
+  const btn = $('iptv-url-btn'), err = $('iptv-url-err');
+  err.style.display = 'none';
+  const url = $('iptv-url-input').value.trim();
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const r = await apiFetch('PUT', '/api/admin/iptv/franchise-config/url', { default_server_url: url });
+    if (r.success) { toast('Server URL updated!'); loadIptvConfig(); }
+    else showErr(err, r.error || 'Failed');
+  } catch(e) { showErr(err, 'Network error'); }
+  finally { btn.disabled = false; btn.textContent = 'Save URL'; }
 }
  
 async function submitIptvConfig() {
@@ -5126,7 +5417,7 @@ async function submitIptvConfig() {
       if (e.key === "Enter") doLogin();
     });
     $("logout-btn").addEventListener("click", doLogout);
-    ["m-add", "m-view", "m-edit", "m-cash", "m-tpl", "m-plan", "m-ott", "m-brand", "m-suspend", "m-reactivate"].forEach(function (id) {
+    ["m-add", "m-view", "m-edit", "m-cash", "m-tpl", "m-plan", "m-ott", "m-brand", "m-suspend", "m-reactivate", "m-devices", "m-settlement-txns"].forEach(function (id) {
       $(id).addEventListener("click", function (e) {
         if (e.target === this) closeM(id);
       });
