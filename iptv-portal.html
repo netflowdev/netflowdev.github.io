@@ -246,8 +246,12 @@
       <div class="content">
         <div class="tbl-card" style="padding:24px;max-width:600px">
           <div class="sec-title">Current Plan</div>
+          <div id="plan-recharge-banner" style="display:none;margin-bottom:14px"></div>
           <div class="dgrid" id="plan-view" style="margin-bottom:8px"></div>
-          <div class="hint">Device slots and subscription are managed by NetFlow. Contact them to top up.</div>
+          <div class="hint" style="margin-bottom:14px">Device slots and subscription are managed by NetFlow. Recharge below to top up slots or extend validity.</div>
+          <div class="mactions" style="justify-content:flex-start;margin-top:0;margin-bottom:8px">
+            <button class="btn bpri" onclick="openRcModal()">⚡ Recharge Now</button>
+          </div>
 
           <div class="sec-title">Your Xtream Server URL</div>
           <div class="hint" style="margin-top:0;margin-bottom:12px">This is your own IPTV provider's server URL. You can update it anytime — no need to contact NetFlow.</div>
@@ -305,6 +309,15 @@
     <div class="modal-title" id="devices-modal-title">Devices</div>
     <div id="devices-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
     <div class="mactions"><button class="btn" onclick="closeM('m-devices')">Close</button></div>
+  </div>
+</div>
+
+<!-- RECHARGE PLANS -->
+<div class="modal-bg" id="m-recharge" style="display:none">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">Recharge IPTV Slots</div>
+    <div id="rc-body"><div class="loading"><div class="spinner"></div>Loading plans...</div></div>
+    <div class="mactions"><button class="btn" onclick="closeM('m-recharge')">Close</button></div>
   </div>
 </div>
 
@@ -548,8 +561,64 @@ async function loadPlan(){
       di('Subscription Expiry', fmtDate(c.subscription_expiry_date))+
       di('Grace Period', (c.grace_period_days||3)+' days','full');
     $('plan-url').value = c.default_server_url || '';
+
+    const expiry = c.subscription_expiry_date ? new Date(c.subscription_expiry_date) : null;
+    const daysLeft = expiry ? Math.ceil((expiry-new Date())/86400000) : null;
+    const lowSlots = (c.purchased_slots||0) <= 2;
+    const banner = $('plan-recharge-banner');
+    if(banner){
+      if((daysLeft!==null && daysLeft<=7) || lowSlots){
+        banner.style.display='block';
+        banner.innerHTML =
+          '<div class="tbl-card" style="background:var(--warn-l);border-color:rgba(180,83,9,0.3);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'+
+          '<div style="font-size:13px;color:var(--warn)">'+
+            (daysLeft!==null && daysLeft<=7 ? '⏰ Subscription expires in '+daysLeft+' day(s). ' : '')+
+            (lowSlots ? '📺 Only '+(c.purchased_slots||0)+' slot(s) left.' : '')+
+          '</div>'+
+          '<button class="btn bpri bsm" onclick="openRcModal()">⚡ Recharge Now</button>'+
+          '</div>';
+      } else {
+        banner.style.display='none';
+      }
+    }
   }catch(e){ console.error(e); }
 }
+
+// ── RECHARGE ──────────────────────────────────────────
+async function openRcModal(){
+  $('rc-body').innerHTML='<div class="loading"><div class="spinner"></div>Loading plans...</div>';
+  $('m-recharge').style.display='flex';
+  try{
+    const r=await apiFetch('GET','/api/admin/platform-topup-plans?type=iptv_slots');
+    const plans=r.data?.plans||[];
+    if(!plans.length){ $('rc-body').innerHTML='<div class="empty">No plans available. Contact NetFlow.</div>'; return; }
+    $('rc-body').innerHTML = plans.map(p=>
+      '<div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px">'+
+        '<div>'+
+          '<div style="font-weight:700;font-size:14px">'+p.label+'</div>'+
+          '<div style="font-size:11px;color:var(--text3)">Qty: '+p.quantity+(p.validity_days?' &nbsp;•&nbsp; Validity '+p.validity_days+' days':'')+'</div>'+
+          '<div style="font-weight:900;color:var(--accent);font-size:16px;margin-top:4px">₹'+p.price+'</div>'+
+        '</div>'+
+        '<button class="btn bpri bsm" style="white-space:nowrap" onclick="buyRcPlan('+p.id+')">Buy Now</button>'+
+      '</div>'
+    ).join('') + '<div class="errmsg" id="rc-err"></div>';
+  }catch(e){ $('rc-body').innerHTML='<div class="empty">Failed to load plans</div>'; }
+}
+
+async function buyRcPlan(planId){
+  try{
+    const r=await apiFetch('POST','/api/super/platform-orders',{order_type:'iptv_slots',plan_id:planId});
+    if(r.success){ window.open(r.data.pay_url,'_blank'); closeM('m-recharge'); toast('Redirecting to payment...'); }
+    else{ const e=$('rc-err'); if(e){ e.textContent=r.error||'Failed'; e.style.display='block'; } }
+  }catch(e){ const el=$('rc-err'); if(el){ el.textContent='Network error'; el.style.display='block'; } }
+}
+
+window.addEventListener('message', function(e){
+  if(e.data && e.data.type==='platform-topup-result'){
+    if(e.data.success){ toast('Recharge successful!'); loadPlan(); if($('page-customers').style.display!=='none') loadCustomers(); }
+    else{ toast('Payment failed or cancelled','err'); }
+  }
+});
 
 async function submitPlanUrl(){
   const btn=$('plan-btn'), err=$('plan-err');
