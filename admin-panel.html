@@ -2036,10 +2036,10 @@
                       <th>Franchise</th>
                       <th>Bank UTR</th>
                       <th>Bank</th>
-                      <th>Payout Amount</th>
-                      <th>Refund</th>
+                      <th style="text-align:center">Payout Amount</th>
+                      <th style="text-align:center">Refund</th>
                       <th>Date</th>
-                      <th style="padding-right: 20px">Transactions</th>
+                      <th style="padding-right: 20px; text-align:center">Transactions</th>
                     </tr>
                   </thead>
                   <tbody id="st-tbody">
@@ -2629,19 +2629,16 @@
             <div id="iptv-panel-customers">
               <div class="stats3" style="margin-bottom:20px">
                 <div class="sc blue">
-                  <div class="sc-icon blue">👥</div>
                   <div class="sc-label">Customers</div>
                   <div class="sc-val" id="iptv-s-total" style="font-size:28px">—</div>
                   <div class="sc-sub">IPTV subscriber list</div>
                 </div>
                 <div class="sc green">
-                  <div class="sc-icon green">✓</div>
                   <div class="sc-label">Active</div>
                   <div class="sc-val" id="iptv-s-active" style="color:var(--green);font-size:28px">—</div>
                   <div class="sc-sub" style="color:var(--green)">active</div>
                 </div>
                 <div class="sc amber">
-                  <div class="sc-icon amber">📺</div>
                   <div class="sc-label">Device Slots Used</div>
                   <div class="sc-val" id="iptv-s-slots" style="color:var(--amber);font-size:28px">—</div>
                   <div class="sc-sub" style="color:var(--amber)">of purchased plan</div>
@@ -3325,7 +3322,7 @@
 
     <!-- SETTLEMENT TRANSACTIONS -->
     <div class="modal-bg" id="m-settlement-txns" style="display:none">
-      <div class="modal" style="max-width:560px">
+      <div class="modal" style="max-width:1080px">
         <div class="modal-title" id="settlement-txns-title">Settled Transactions</div>
         <div id="settlement-txns-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
         <div class="mactions"><button class="btn" onclick="closeM('m-settlement-txns')">Close</button></div>
@@ -4200,13 +4197,13 @@
                 (s.bank_transaction_id || "—") +
                 '</td><td style="color:var(--txt2);font-size:12px">' +
                 (s.bank_name || "—") +
-                '</td><td style="font-family:var(--mono);font-weight:700;color:var(--green)">₹' +
+                '</td><td style="font-family:var(--mono);font-weight:700;color:var(--green);text-align:center">₹' +
                 (s.payout_amount || 0).toLocaleString("en-IN") +
-                '</td><td style="font-family:var(--mono);color:var(--txt3)">₹' +
+                '</td><td style="font-family:var(--mono);color:var(--txt3);text-align:center">₹' +
                 (s.refund_amount || 0).toLocaleString("en-IN") +
                 '</td><td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' +
                 fmtDateTime(s.payout_date || s.created_at) +
-                '</td><td style="padding-right:20px"><button class="btn bsm" onclick="viewSettlementTxns(\'' +
+                '</td><td style="padding-right:20px;text-align:center"><button class="btn bsm" onclick="viewSettlementTxns(\'' +
                 (s.payout_id || "").replace(/'/g, "\\'") +
                 '\')">View</button></td></tr>',
             )
@@ -4228,22 +4225,30 @@
             return;
           }
           $("settlement-txns-list").innerHTML =
-            '<div class="tbl-wrap"><table><thead><tr><th>Txn ID</th><th>Type</th><th>Amount</th><th>Settled</th></tr></thead><tbody>' +
-            txns
-              .map(
-                (t) =>
-                  '<tr><td style="font-family:var(--mono);font-size:11px;color:var(--txt)">' +
-                  (t.txnid || "—") +
-                  '</td><td style="font-size:12px;color:var(--txt2)">' +
-                  (t.transaction_type || "—") +
-                  '</td><td style="font-family:var(--mono);color:var(--txt3)">₹' +
-                  (t.transaction_amount || 0) +
-                  '</td><td style="font-family:var(--mono);font-weight:700;color:var(--green)">₹' +
-                  (t.settlement_amount || 0) +
-                  "</td></tr>",
-              )
-              .join("") +
-            "</tbody></table></div>";
+          '<div class="tbl-wrap"><table><thead><tr><th>Customer Name</th><th>Mobile No</th><th>App Ref</th><th>Bank Ref </th><th>Type</th><th>Transaction Date</th><th>Amount Paid</th><th>Settled</th></tr></thead><tbody>' +
+          txns
+            .map(
+              (t) =>
+                '<tr><td style="font-weight:600;color:var(--txt)">' +
+                (t.customer_name || "—") +
+                '</td><td style="font-family:var(--mono);font-size:12px;color:var(--txt2)">' +
+                (t.customer_phone || "—") +
+                '</td><td style="font-family:var(--mono);font-size:10px;color:var(--txt3)">' +
+                (t.txnid || "—") +
+                '</td><td style="font-family:var(--mono);font-size:10px;color:var(--txt3)">' +
+                (t.easepayid || "—") +
+                '</td><td style="font-size:12px;color:var(--txt2)">' +
+                (t.transaction_type || "—") +
+                '</td><td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' +
+                fmtDateTime(t.txn_date) +
+                '</td><td style="font-family:var(--mono);color:var(--txt3)">₹' +
+                (t.transaction_amount || 0) +
+                '</td><td style="font-family:var(--mono);font-weight:700;color:var(--green)">₹' +
+                (t.settlement_amount || 0) +
+                "</td></tr>",
+            )
+            .join("") +
+          "</tbody></table></div>";
         } catch (e) {
           $("settlement-txns-list").innerHTML = '<div class="empty">Failed to load</div>';
         }
