@@ -151,6 +151,8 @@ tr:hover td{background:rgba(124,109,250,.04);}
       <div class="nav-item" id="nav-activations" onclick="showPage('activations')"><div class="nav-dot"></div>All Activations</div>
       <div class="nav-section">App</div>
       <div class="nav-item" id="nav-appversion" onclick="showPage('appversion')"><div class="nav-dot"></div>App Updates</div>
+      <div class="nav-section">Revenue</div>
+      <div class="nav-item" id="nav-platformbilling" onclick="showPage('platformbilling')"><div class="nav-dot"></div>Platform Billing</div>
     </nav>
     <div class="sidebar-footer">
       <div class="user-row">
@@ -354,6 +356,115 @@ tr:hover td{background:rgba(124,109,250,.04);}
         </div>
       </div>
     </div>
+
+    <!-- PLATFORM BILLING -->
+    <div id="page-platformbilling" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">Platform Billing</div><div class="page-sub">// NetFlow's own revenue account</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Easebuzz Credentials</div>
+        <div class="warn-box">⚠️ This is NetFlow's own merchant account — separate from any franchise's payment gateway. Used to bill franchises for IPTV slots and WhatsApp credits.</div>
+        <div class="fgrid">
+          <div class="ff"><label>Easebuzz Key</label><input id="pb-key" placeholder="Key"/></div>
+          <div class="ff"><label>Easebuzz Salt</label><input id="pb-salt" type="password" placeholder="Salt"/></div>
+          <div class="ff full">
+            <label>Environment</label>
+            <select id="pb-env">
+              <option value="test">🧪 Test (Sandbox)</option>
+              <option value="production">🚀 Production (Live)</option>
+            </select>
+          </div>
+        </div>
+        <div class="errmsg" id="pb-err"></div>
+        <div class="mactions"><button class="btn bpu" id="pb-btn" onclick="submitPlatformConfig()">Save Credentials</button></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Recharge Plans</div>
+        <div class="warn-box">💡 Ye plans franchise admins ko unke IPTV/WhatsApp panel me "Recharge Now" click karne par dikhenge.</div>
+        <div class="fgrid">
+          <div class="ff">
+            <label>Type</label>
+            <select id="rp-type">
+              <option value="iptv_slots">📺 IPTV Device Slots</option>
+              <option value="whatsapp_credits">💬 WhatsApp Credits</option>
+            </select>
+          </div>
+          <div class="ff"><label>Label</label><input id="rp-label" placeholder="e.g. 1000 Messages"/></div>
+          <div class="ff"><label>Quantity</label><input id="rp-qty" type="number" placeholder="e.g. 1000 (msgs) or 10 (slots)"/></div>
+          <div class="ff"><label>Validity Days (IPTV only)</label><input id="rp-validity" type="number" placeholder="e.g. 30, leave 0 for WhatsApp"/></div>
+          <div class="ff"><label>Price (₹)</label><input id="rp-price" type="number" placeholder="e.g. 200"/></div>
+        </div>
+        <div class="errmsg" id="rp-err"></div>
+        <div class="mactions"><button class="btn bpu" id="rp-btn" onclick="submitRechargePlan()">+ Add Plan</button></div>
+
+        <div class="tbl-wrap" style="margin-top:16px">
+          <table>
+            <thead><tr>
+              <th style="padding-left:16px">#</th><th>Type</th><th>Label</th><th>Qty</th><th>Price</th><th>Status</th><th style="padding-right:16px">Actions</th>
+            </tr></thead>
+            <tbody id="rp-tbody"><tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Create Top-Up</div>
+        <div class="fgrid">
+          <div class="ff full">
+            <label>Franchise</label>
+            <select id="pto-franchise"><option value="">— Select Franchise —</option></select>
+          </div>
+          <div class="ff">
+            <label>Top-Up Type</label>
+            <select id="pto-type">
+              <option value="iptv_slots">📺 IPTV Device Slots</option>
+              <option value="whatsapp_credits">💬 WhatsApp Credits</option>
+            </select>
+          </div>
+          <div class="ff">
+            <label>Quantity</label>
+            <input id="pto-qty" type="number" placeholder="e.g. 10"/>
+          </div>
+          <div class="ff full">
+            <label>Amount to Charge (₹)</label>
+            <input id="pto-amount" type="number" placeholder="e.g. 500"/>
+          </div>
+        </div>
+        <div class="errmsg" id="pto-err"></div>
+        <div class="mactions"><button class="btn bpu" id="pto-btn" onclick="submitPlatformOrder()">Generate Payment Link</button></div>
+        <div id="pto-result" style="display:none;margin-top:14px;background:rgba(0,168,131,.06);border:1px solid rgba(0,168,131,.25);border-radius:8px;padding:14px">
+          <div style="font-size:12px;color:var(--accent2);font-weight:600;margin-bottom:8px">✅ Payment link ready</div>
+          <div id="pto-link" style="font-size:12px;font-family:var(--mono);word-break:break-all;color:var(--muted)"></div>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button class="btn bsm" onclick="copyPtoLink()">📋 Copy Link</button>
+            <button class="btn bsm" onclick="window.open(document.getElementById('pto-link').textContent,'_blank')">🔗 Open</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="card-title" style="padding:20px 20px 0">Order History</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th style="padding-left:16px">#</th>
+              <th>Franchise</th>
+              <th>Type</th>
+              <th>Qty</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th style="padding-right:16px">Date</th>
+            </tr></thead>
+            <tbody id="pto-tbody"><tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
 
   </div>
 </div>
@@ -647,7 +758,7 @@ tr:hover td{background:rgba(124,109,250,.04);}
 
 <script>
 const BASE='https://isp-billing-api.netflowcloud.workers.dev';
-const PAGES=['dashboard','franchises','admins','customers','payments','activations','appversion'];
+const PAGES=['dashboard','franchises','admins','customers','payments','activations','appversion','platformbilling'];
 let franchisesCache=[];
 
 function $(id){return document.getElementById(id);}
@@ -710,6 +821,7 @@ function showPage(name){
   if(name==='payments')loadAllPayments();
   if(name==='activations')loadAllActivations();
   if(name==='appversion')loadAppVersion();
+  if(name==='platformbilling'){loadPlatformConfig();loadPlatformOrders();loadFranchiseOptionsForBilling();loadRechargePlans();}
 }
 
 async function loadDash(){
@@ -1119,6 +1231,172 @@ async function submitTopUp(amount){
       toast(r.error || 'Failed to add balance', 'err');
     }
   }catch(e){ toast('Network error', 'err'); }
+}
+
+async function loadPlatformConfig(){
+  try{
+    const r = await apiFetch('GET', '/api/super/platform-billing-config');
+    const c = r.data || {};
+    $('pb-key').value = c.easebuzz_key || '';
+    $('pb-salt').value = c.easebuzz_salt || '';
+    $('pb-env').value = c.easebuzz_env || 'test';
+  }catch(e){}
+}
+
+async function submitPlatformConfig(){
+  const btn=$('pb-btn'), err=$('pb-err');
+  err.style.display='none';
+  const d = { easebuzz_key: $('pb-key').value.trim(), easebuzz_salt: $('pb-salt').value.trim(), easebuzz_env: $('pb-env').value };
+  btn.disabled=true; btn.textContent='Saving...';
+  try{
+    const r = await apiFetch('PUT', '/api/super/platform-billing-config', d);
+    if(r.success){ toast('Credentials saved!'); }
+    else { err.textContent = r.error||'Failed'; err.style.display='block'; }
+  }catch(e){ err.textContent='Network error'; err.style.display='block'; }
+  finally{ btn.disabled=false; btn.textContent='Save Credentials'; }
+}
+
+async function loadFranchiseOptionsForBilling(){
+  const sel = $('pto-franchise');
+  sel.innerHTML = '<option value="">— Select Franchise —</option>';
+  try{
+    const r = await apiFetch('GET','/api/super/franchises');
+    (r.data?.franchises||[]).forEach(f=>{
+      const o = document.createElement('option');
+      o.value = f.id; o.textContent = '#'+f.id+' — '+f.name;
+      sel.appendChild(o);
+    });
+  }catch(e){}
+}
+
+async function submitPlatformOrder(){
+  const btn=$('pto-btn'), err=$('pto-err');
+  err.style.display='none';
+  $('pto-result').style.display='none';
+  const d = {
+    franchise_id: $('pto-franchise').value ? parseInt($('pto-franchise').value) : null,
+    order_type: $('pto-type').value,
+    quantity: parseInt($('pto-qty').value),
+    amount: parseFloat($('pto-amount').value),
+  };
+  if(!d.franchise_id){ err.textContent='Select a franchise'; err.style.display='block'; return; }
+  if(!d.quantity || !d.amount){ err.textContent='Quantity and amount required'; err.style.display='block'; return; }
+  btn.disabled=true; btn.textContent='Generating...';
+  try{
+    const r = await apiFetch('POST', '/api/super/platform-orders', d);
+    if(r.success){
+      toast('Payment link generated!');
+      $('pto-link').textContent = r.data.pay_url;
+      $('pto-result').style.display='block';
+      loadPlatformOrders();
+    } else { err.textContent = r.error||'Failed'; err.style.display='block'; }
+  }catch(e){ err.textContent='Network error'; err.style.display='block'; }
+  finally{ btn.disabled=false; btn.textContent='Generate Payment Link'; }
+}
+
+
+window.addEventListener('message', function(e){
+  if (e.data && e.data.type === 'platform-topup-result') {
+    loadPlatformOrders();
+    toast(e.data.success ? 'Payment completed!' : 'Payment failed', e.data.success ? undefined : 'err');
+  }
+});
+
+function copyPtoLink(){
+  navigator.clipboard.writeText($('pto-link').textContent).then(()=>toast('Link copied!'));
+}
+
+function ptobadge(t){
+  const m={iptv_slots:'📺 IPTV Slots', whatsapp_credits:'💬 WhatsApp Credits', direct_iptv_subscription:'📺 Direct IPTV'};
+  return m[t] || t;
+}
+
+async function loadPlatformOrders(){
+  $('pto-tbody').innerHTML = '<tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+  try{
+    const r = await apiFetch('GET', '/api/super/platform-orders');
+    const orders = r.data?.orders || [];
+    if(!orders.length){ $('pto-tbody').innerHTML = '<tr><td colspan="7"><div class="empty">No orders yet</div></td></tr>'; return; }
+    $('pto-tbody').innerHTML = orders.map(o =>
+      '<tr>'+
+      '<td style="padding-left:16px;font-family:var(--mono);color:var(--muted)">#'+o.id+'</td>'+
+      '<td>'+(o.franchise_name || '—')+'</td>'+
+      '<td>'+ptobadge(o.order_type)+'</td>'+
+      '<td style="font-family:var(--mono)">'+o.quantity+'</td>'+
+      '<td style="font-family:var(--mono);font-weight:600;color:var(--accent2)">₹'+o.amount+'</td>'+
+      '<td>'+sbadge(o.status)+'</td>'+
+      '<td style="padding-right:16px;font-family:var(--mono);font-size:11px;color:var(--muted)">'+(o.created_at||'').slice(0,16)+'</td>'+
+      '</tr>'
+    ).join('');
+  }catch(e){ $('pto-tbody').innerHTML = '<tr><td colspan="7"><div class="empty">Failed to load</div></td></tr>'; }
+}
+
+// ── Recharge Plans CRUD ───────────────────────────────────────
+let rpEditId = null;
+function rpTypeBadge(t){ return t==='iptv_slots' ? '📺 IPTV Slots' : '💬 WhatsApp Credits'; }
+
+async function loadRechargePlans(){
+  $('rp-tbody').innerHTML = '<tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+  try{
+    const r = await apiFetch('GET', '/api/super/platform-topup-plans');
+    const plans = r.data?.plans || [];
+    if(!plans.length){ $('rp-tbody').innerHTML = '<tr><td colspan="7"><div class="empty">No plans yet</div></td></tr>'; return; }
+    $('rp-tbody').innerHTML = plans.map(p =>
+      '<tr>'+
+      '<td style="padding-left:16px;font-family:var(--mono);color:var(--muted)">#'+p.id+'</td>'+
+      '<td>'+rpTypeBadge(p.type)+'</td>'+
+      '<td>'+p.label+'</td>'+
+      '<td style="font-family:var(--mono)">'+p.quantity+'</td>'+
+      '<td style="font-family:var(--mono);font-weight:600;color:var(--accent2)">₹'+p.price+'</td>'+
+      '<td>'+(p.is_active ? sbadge('active') : sbadge('inactive'))+'</td>'+
+      '<td style="padding-right:16px;display:flex;gap:6px">'+
+        '<button class="btn bsm" onclick="editRechargePlan('+p.id+',\''+p.type+'\',\''+p.label.replace(/'/g,"\\'")+'\','+p.quantity+','+p.price+','+(p.validity_days||0)+')">✏️</button>'+
+        (p.is_active ? '<button class="btn bsm" onclick="deleteRechargePlan('+p.id+')">🗑</button>' : '')+
+      '</td>'+
+      '</tr>'
+    ).join('');
+  }catch(e){ $('rp-tbody').innerHTML = '<tr><td colspan="7"><div class="empty">Failed to load</div></td></tr>'; }
+}
+
+function editRechargePlan(id, type, label, qty, price, validity){
+  rpEditId = id;
+  $('rp-type').value = type; $('rp-label').value = label;
+  $('rp-qty').value = qty; $('rp-price').value = price;
+  $('rp-validity').value = validity || 0;
+  $('rp-btn').textContent = 'Update Plan';
+}
+
+async function submitRechargePlan(){
+  const btn = $('rp-btn'), err = $('rp-err');
+  err.style.display = 'none';
+  const d = {
+    type: $('rp-type').value, label: $('rp-label').value.trim(),
+    quantity: parseInt($('rp-qty').value), price: parseFloat($('rp-price').value),
+    validity_days: parseInt($('rp-validity').value) || 0,
+  };
+  if(!d.label || !d.quantity || !d.price){ err.textContent='Sab fields required'; err.style.display='block'; return; }
+  btn.disabled = true; btn.textContent = rpEditId ? 'Updating...' : 'Adding...';
+  try{
+    const r = rpEditId
+      ? await apiFetch('PUT', '/api/super/platform-topup-plans/'+rpEditId, { ...d, is_active: 1 })
+      : await apiFetch('POST', '/api/super/platform-topup-plans', d);
+    if(r.success){
+      toast(rpEditId ? 'Plan updated!' : 'Plan added!');
+      $('rp-label').value=''; $('rp-qty').value=''; $('rp-price').value='';
+      rpEditId = null; btn.textContent = '+ Add Plan';
+      loadRechargePlans();
+    } else { err.textContent = r.error||'Failed'; err.style.display='block'; }
+  }catch(e){ err.textContent='Network error'; err.style.display='block'; }
+  finally{ btn.disabled=false; if(!rpEditId) btn.textContent='+ Add Plan'; }
+}
+
+async function deleteRechargePlan(id){
+  if(!confirm("Deactivate this plan? Franchise admins won't see it anymore.")) return;
+  try{
+    const r = await apiFetch('DELETE', '/api/super/platform-topup-plans/'+id);
+    if(r.success){ toast('Plan deactivated'); loadRechargePlans(); }
+    else toast(r.error||'Failed','err');
+  }catch(e){ toast('Network error','err'); }
 }
 
 </script>
