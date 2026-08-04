@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sign Up — NetFlow</title>
+<style>
+  :root {
+    --bg: #f5f6fa; --panel: #fff; --border: #e3e5ec; --text: #1a1a2e;
+    --text2: #6b6b85; --pri: #5b4fe0; --pri-d: #4a3fcf; --danger: #dc2626; --danger-l: #fef2f2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text);
+    display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px;
+  }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 36px 32px; width: 100%; max-width: 460px; box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+  }
+  .logo { font-size: 22px; font-weight: 700; }
+  .sub { font-size: 13px; color: var(--text2); margin: 4px 0 24px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 11px; letter-spacing: .03em; text-transform: uppercase;
+    color: var(--text2); margin-bottom: 6px; font-weight: 600; }
+  .field input, .field select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 14px; background: #fafafa; outline: none;
+  }
+  .field input:focus, .field select:focus { border-color: var(--pri); background: #fff; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .type-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
+  .type-opt {
+    border: 1.5px solid var(--border); border-radius: 10px; padding: 12px; cursor: pointer;
+    font-size: 13px; text-align: center; font-weight: 600; color: var(--text2);
+  }
+  .type-opt.active { border-color: var(--pri); color: var(--pri); background: #f4f2ff; }
+  .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; background: var(--pri);
+    color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+  .btn:hover { background: var(--pri-d); }
+  .btn:disabled { opacity: .6; cursor: default; }
+  .err { background: var(--danger-l); border: 1px solid rgba(220,38,38,.2); color: var(--danger);
+    border-radius: 8px; padding: 10px 12px; font-size: 13px; margin-bottom: 14px; display: none; }
+  .login-link { text-align: center; margin-top: 18px; font-size: 13px; color: var(--text2); }
+  .login-link a { color: var(--pri); text-decoration: none; font-weight: 600; }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="logo">NetFlow</div>
+    <div class="sub">Create your franchise account</div>
+    <div class="err" id="err"></div>
+
+    <div class="field">
+      <label>Franchise / Business Name</label>
+      <input id="franchise_name" placeholder="e.g. NetFlow Cloud" />
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Owner Name</label>
+        <input id="owner_name" placeholder="Your full name" />
+      </div>
+      <div class="field">
+        <label>Mobile Number</label>
+        <input id="mobile" placeholder="9876543210" />
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Username (for login)</label>
+        <input id="username" placeholder="Choose a username" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="password" type="password" placeholder="••••••••" />
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Email (optional)</label>
+        <input id="email" placeholder="you@example.com" />
+      </div>
+      <div class="field">
+        <label>City (optional)</label>
+        <input id="city" placeholder="City" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>State (optional)</label>
+      <input id="state" placeholder="State" />
+    </div>
+
+    <div class="field">
+      <label>What do you want to sign up for?</label>
+      <div class="type-options">
+        <div class="type-opt" id="opt-full" onclick="selectType('full')">Full ISP<br><span style="font-weight:400;font-size:11px">Broadband + everything</span></div>
+        <div class="type-opt" id="opt-iptv" onclick="selectType('iptv_only')">IPTV Only</div>
+      </div>
+    </div>
+
+    <button class="btn" id="submit-btn" onclick="doSignup()">Create Account →</button>
+
+    <div class="login-link">
+      Already have an account? <a href="admin_panel.html">Log in</a>
+    </div>
+  </div>
+
+<script>
+  // Change these two if your deployed filenames differ
+  const REDIRECT_FULL = 'admin_panel.html';
+  const REDIRECT_IPTV = 'iptv-portal.html';
+  const API_BASE = 'https://isp-billing-api.netflowcloud.workers.dev';
+
+  let franchiseType = null;
+
+  // Pre-select type based on query param, e.g. signup.html?type=iptv_only
+  (function initType() {
+    const qp = new URLSearchParams(location.search).get('type');
+    selectType(qp === 'iptv_only' ? 'iptv_only' : 'full');
+  })();
+
+  function selectType(type) {
+    franchiseType = type;
+    document.getElementById('opt-full').classList.toggle('active', type === 'full');
+    document.getElementById('opt-iptv').classList.toggle('active', type === 'iptv_only');
+  }
+
+  function $(id) { return document.getElementById(id); }
+
+  async function doSignup() {
+    const err = $('err'), btn = $('submit-btn');
+    err.style.display = 'none';
+
+    const body = {
+      franchise_name: $('franchise_name').value.trim(),
+      owner_name:     $('owner_name').value.trim(),
+      mobile:         $('mobile').value.trim(),
+      username:       $('username').value.trim(),
+      password:       $('password').value,
+      email:          $('email').value.trim() || null,
+      city:           $('city').value.trim() || null,
+      state:          $('state').value.trim() || null,
+      franchise_type: franchiseType
+    };
+
+    if (!body.franchise_name || !body.owner_name || !body.mobile || !body.username || !body.password) {
+      err.textContent = 'Please fill in all required fields.';
+      err.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Creating account...';
+
+    try {
+      const res = await fetch(API_BASE + '/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        const target = franchiseType === 'iptv_only' ? REDIRECT_IPTV : REDIRECT_FULL;
+        window.location.href = target;
+      } else {
+        err.textContent = data.error || 'Signup failed. Please try again.';
+        err.style.display = 'block';
+      }
+    } catch (e) {
+      err.textContent = 'Network error. Please try again.';
+      err.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Create Account →';
+    }
+  }
+</script>
+
+</body>
+</html>
