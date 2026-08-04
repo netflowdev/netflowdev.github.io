@@ -390,6 +390,7 @@ tr:hover td{background:rgba(124,109,250,.04);}
             <select id="rp-type">
               <option value="iptv_slots">📺 IPTV Device Slots</option>
               <option value="whatsapp_credits">💬 WhatsApp Credits</option>
+              <option value="isp_customer_slots">👥 ISP Customer Slots</option>
             </select>
           </div>
           <div class="ff"><label>Label</label><input id="rp-label" placeholder="e.g. 1000 Messages"/></div>
@@ -673,6 +674,21 @@ tr:hover td{background:rgba(124,109,250,.04);}
 
 </div>
 
+<!-- ISP SUBSCRIPTION SECTION -->
+<div class="sec-title">ISP Subscription &amp; Customer Slots</div>
+<div class="warn-box">💡 Total Customer Limit - 0 means unlimited.</div>
+<div class="fgrid">
+  <div class="ff"><label>Total Customer Limit</label><input id="f-isp-limit" type="number" placeholder="e.g. 100 (blank = unlimited)"/></div>
+  <div class="ff"><label>Subscription Status</label>
+    <select id="f-isp-status">
+      <option value="active">Active</option>
+      <option value="inactive">Inactive</option>
+      <option value="suspended">Suspended</option>
+    </select>
+  </div>
+  <div class="ff"><label>Subscription Expiry Date</label><input id="f-isp-expiry" type="date"/></div>
+</div>
+
 <!-- IPTV PLAN SECTION -->
   <div class="sec-title">📺 IPTV Plan</div>
   <div id="iptv-plan-locked" style="background:var(--bg);border-radius:8px;padding:14px;font-size:12px;color:var(--muted)">
@@ -898,6 +914,7 @@ function openAddFranchise(){
   ].forEach(i=>$(i).value='');
   $('f-gateway').value='easebuzz';$('f-active').value='1';$('f-err').style.display='none';
   $('f-type').value='full';
+  $('f-isp-limit').value='';$('f-isp-status').value='active';$('f-isp-expiry').value='';
   $('iptv-plan-locked').style.display='block';
   $('iptv-plan-fields').style.display='none';
   $('f-ebz-env').value='production';$('f-wifi-method').value='none';
@@ -947,6 +964,9 @@ async function openEditFranchise(id){
   $('f-wa-remaining-display').textContent = ((f.whatsapp_balance||0) - (f.whatsapp_used||0)) + ' remaining (' + (f.whatsapp_used||0) + '/' + (f.whatsapp_balance||0) + ' used)';
   $('f-wa-owner-number').value = f.owner_whatsapp_number || '';
   $('f-type').value = f.franchise_type || 'full';
+  $('f-isp-limit').value = f.total_customer_limit || '';
+  $('f-isp-status').value = f.subscription_status || 'active';
+  $('f-isp-expiry').value = f.subscription_expiry_date || '';
   updateGWFields();
 
   $('iptv-plan-locked').style.display='none';
@@ -989,6 +1009,9 @@ async function submitFranchise(){
     tr069_password:$('f-tr069-pass').value.trim(),
     ssid_prefix:$('f-ssid-prefix').value.trim(),
     wifi_method:$('f-wifi-method').value,
+    total_customer_limit: $('f-isp-limit').value.trim() || null,
+    subscription_status: $('f-isp-status').value,
+    subscription_expiry_date: $('f-isp-expiry').value || null,
     is_active:parseInt($('f-active').value),
     whatsapp_enabled: parseInt($('f-wa-enabled').value),
     owner_whatsapp_number: $('f-wa-owner-number').value.trim() || null,
@@ -1333,7 +1356,11 @@ async function loadPlatformOrders(){
 
 // ── Recharge Plans CRUD ───────────────────────────────────────
 let rpEditId = null;
-function rpTypeBadge(t){ return t==='iptv_slots' ? '📺 IPTV Slots' : '💬 WhatsApp Credits'; }
+function rpTypeBadge(t){
+  if(t==='iptv_slots') return '📺 IPTV Slots';
+  if(t==='isp_customer_slots') return '👥 ISP Customer Slots';
+  return '💬 WhatsApp Credits';
+}
 
 async function loadRechargePlans(){
   $('rp-tbody').innerHTML = '<tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
