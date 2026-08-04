@@ -41,7 +41,11 @@
   .btn-pri{width:100%;padding:13px;background:var(--accent);border:none;border-radius:var(--r-sm);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;transition:.15s}
   .btn-pri:hover{background:#c26905;box-shadow:0 4px 20px var(--accent-g)}
   .btn-pri:disabled{opacity:.4;cursor:not-allowed}
-  .login-err{background:var(--danger-l);border:1px solid rgba(220,38,38,0.2);border-radius:var(--r-sm);padding:11px 14px;color:var(--danger);font-size:12.5px;margin-bottom:16px;display:none}
+  .sub-lock-overlay{position:fixed;inset:0;z-index:9000;display:none;background:rgba(20,18,40,0.55);backdrop-filter:blur(2px);align-items:center;justify-content:center}
+  .sub-lock-card{position:relative;background:var(--panel);border-radius:var(--r-lg);padding:32px 28px;max-width:380px;text-align:center;box-shadow:var(--sh)}
+  .sub-lock-card h3{margin:0 0 8px;font-size:18px}
+  .sub-lock-card p{margin:0 0 18px;font-size:13px;color:var(--text3)}
+  .sub-lock-close{position:absolute;top:10px;right:12px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--text3);line-height:1;padding:4px}
 
   /* ── SHELL ── */
   .shell{display:flex;height:100vh;overflow:hidden}
@@ -119,7 +123,7 @@
   .toast.ok{border-color:rgba(15,157,130,0.5)}
   .toast.err{border-color:rgba(220,38,38,0.5)}
 
-  .modal-bg{position:fixed;inset:0;background:rgba(20,20,15,0.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;backdrop-filter:blur(3px)}
+  .modal-bg{position:fixed;inset:0;background:rgba(20,20,15,0.45);display:flex;align-items:center;justify-content:center;z-index:9500;padding:20px;backdrop-filter:blur(3px)}
   .modal{background:var(--panel);border:1px solid var(--border);border-radius:var(--r-lg);padding:30px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh);animation:mIn .2s cubic-bezier(.34,1.56,.64,1)}
   @keyframes mIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
   .modal-title{font-family:var(--disp);font-size:19px;font-weight:600;margin-bottom:22px}
@@ -145,6 +149,13 @@
   .code-input::placeholder{color:#3a3f4a;text-shadow:none}
 
   .sec-title{font-size:10px;font-weight:700;color:var(--accent);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.09em;margin:20px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+  .install-tab{padding:14px 20px;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent}
+  .install-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .install-tab:hover{color:var(--text)}
+  .install-steps{padding:22px 24px}
+  .install-steps ol{padding-left:20px;display:flex;flex-direction:column;gap:12px}
+  .install-steps li{font-size:13.5px;line-height:1.5;color:var(--text2)}
+  .install-steps li b{color:var(--text)}
   .hint{font-size:11.5px;color:var(--text3);margin-top:8px;line-height:1.5}
 
   .device-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
@@ -175,6 +186,16 @@
 <button class="mob-menu-btn" id="mob-menu-btn" onclick="toggleSidebar()">☰</button>
 <div class="mob-overlay" id="mob-overlay" onclick="closeSidebar()"></div>
 
+<!-- SUBSCRIPTION LOCK -->
+<div class="sub-lock-overlay" id="sub-lock-overlay">
+  <div class="sub-lock-card">
+    <button class="sub-lock-close" onclick="dismissSubLockBanner()" title="Close">✕</button>
+    <h3>Subscription Inactive</h3>
+    <p>Your IPTV subscription isn't active. Renew to unlock devices and everything else.</p>
+    <button class="btn-pri" onclick="openRcModal()">Renew Now →</button>
+  </div>
+</div>
+
 <!-- LOGIN -->
 <div class="login-wrap" id="login-page">
   <div class="login-card">
@@ -185,6 +206,9 @@
     <div class="field"><label>Username</label><input id="login-phone" placeholder="admin" autocomplete="username" /></div>
     <div class="field"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" /></div>
     <button class="btn-pri" id="login-btn">Sign in →</button>
+    <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--text3)">
+      New here? <a href="signup.html?type=iptv_only" style="color:var(--pri,#5b4fe0);font-weight:600;text-decoration:none">Create an account</a>
+    </div>
   </div>
 </div>
 
@@ -199,6 +223,7 @@
     <nav class="nav">
       <div class="nav-item active" id="nav-customers" onclick="showPage('customers')">📺 Customers</div>
       <div class="nav-item" id="nav-plan" onclick="showPage('plan')">📡 Franchise Setting</div>
+      <div class="nav-item" id="nav-app" onclick="showPage('app')">📲 App & Setup</div>
     </nav>
     <div class="sidebar-ft">
       <div class="user-row">
@@ -217,6 +242,7 @@
         <button class="btn bpri" onclick="openAddCust()">+ Add Customer</button>
       </div>
       <div class="content">
+        <div id="cust-recharge-banner" style="display:none;margin-bottom:14px"></div>
         <div class="stats">
           <div class="sc"><div class="sc-label">Customers</div><div class="sc-val" id="s-total">—</div></div>
           <div class="sc"><div class="sc-label">Active</div><div class="sc-val" style="color:var(--live)" id="s-active">—</div></div>
@@ -224,13 +250,13 @@
         </div>
         <div class="hint" style="margin-bottom:14px">Billing is based on <strong>active devices</strong>, not customer count — one customer can hold multiple paired devices, each counted separately against your plan.</div>
         <div class="toolbar">
-          <input class="sbox" id="c-search" placeholder="Search name or mobile..." oninput="loadCustomers()" />
+          <input class="sbox" id="c-search" placeholder="Search name, mobile or username..." oninput="loadCustomers()" />
           <button class="btn" onclick="loadCustomers()">↺ Refresh</button>
         </div>
         <div class="tbl-card">
           <div class="tbl-wrap">
             <table>
-              <thead><tr><th>#</th><th>Name</th><th>Mobile</th><th>Server URL</th><th>Username</th><th>Status</th><th>Devices</th><th style="padding-right:20px">Actions</th></tr></thead>
+              <thead><tr><th>#</th><th>Name</th><th>Mobile</th><th>Username</th><th>Server URL</th><th>Status</th><th>Devices</th><th style="padding-right:20px">Actions</th></tr></thead>
               <tbody id="c-tbody"><tr><td colspan="8"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr></tbody>
             </table>
           </div>
@@ -261,6 +287,61 @@
           </div>
           <div class="errmsg" id="plan-err"></div>
           <div class="mactions"><button class="btn bpri" id="plan-btn" onclick="submitPlanUrl()">Save URL</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APP & SETUP -->
+    <div id="page-app" style="display:none">
+      <div class="topbar">
+        <div><div class="pg-title">App & Setup</div><div class="pg-sub">// give this page to your customers when installing the app</div></div>
+      </div>
+      <div class="content">
+        <div class="tbl-card" style="padding:24px;margin-bottom:16px;display:flex;gap:24px;flex-wrap:wrap;align-items:center">
+          <img id="app-qr" src="" alt="Scan to download" style="width:130px;height:130px;border:1px solid var(--border);border-radius:10px;background:#fff;padding:6px" />
+          <div style="flex:1;min-width:220px">
+            <div class="sec-title" style="margin-top:0">Download NetFlow IPTV App</div>
+            <div class="hint" style="margin:0 0 12px">Scan the QR code on the TV/mobile, or use the button below. Works on Firestick, Android TV and Android Mobile.</div>
+            <a class="btn bpri" id="app-dl-btn" href="#" target="_blank" style="display:inline-block;text-decoration:none">⬇ Download APK</a>
+            <div class="hint" style="margin:12px 0 0">Downloader app code: <b id="app-aftv-code">—</b> &nbsp;•&nbsp; Short URL: <b id="app-aftv-url">—</b></div>
+          </div>
+        </div>
+
+        <div class="tbl-card" style="padding:0;overflow:hidden">
+          <div style="display:flex;border-bottom:1px solid var(--border)">
+            <div class="install-tab active" id="itab-firestick" onclick="showInstallTab('firestick')">Firestick / Fire TV</div>
+            <div class="install-tab" id="itab-androidtv" onclick="showInstallTab('androidtv')">Android TV</div>
+            <div class="install-tab" id="itab-mobile" onclick="showInstallTab('mobile')">Mobile</div>
+          </div>
+
+          <div class="install-steps" id="isteps-firestick">
+            <ol>
+              <li>On your Firestick home screen, search for and install the <b>Downloader</b> app (free, from the Amazon App Store).</li>
+              <li>Go to <b>Settings → My Fire TV → Developer Options</b> and turn <b>ON</b> "Apps from Unknown Sources".</li>
+              <li>Open Downloader and enter this code: <b id="isteps-code-1">—</b> &nbsp;(or type the URL <b id="isteps-url-1">—</b> directly).</li>
+              <li>Let it download, then tap <b>Install</b>.</li>
+              <li>Open the app and enter the 6-digit pairing code shown on your screen, or your login details.</li>
+            </ol>
+          </div>
+
+          <div class="install-steps" id="isteps-androidtv" style="display:none">
+            <ol>
+              <li>Install the <b>Downloader</b> app from the Google Play Store (or sideload it).</li>
+              <li>Go to <b>Settings → Security & Restrictions</b> and allow installs from unknown sources.</li>
+              <li>Open Downloader and enter this code: <b id="isteps-code-2">—</b> &nbsp;(or type the URL <b id="isteps-url-2">—</b> directly).</li>
+              <li>Let it download, then tap <b>Install</b>.</li>
+              <li>Open the app and enter the 6-digit pairing code shown on your screen, or your login details.</li>
+            </ol>
+          </div>
+
+          <div class="install-steps" id="isteps-mobile" style="display:none">
+            <ol>
+              <li>Open this page in your phone's browser and tap <b>Download APK</b> above.</li>
+              <li>If prompted, allow "Install from unknown sources" for your browser.</li>
+              <li>Open the downloaded file and tap <b>Install</b>.</li>
+              <li>Open the app and enter the 6-digit pairing code shown on your screen, or your login details.</li>
+            </ol>
+          </div>
         </div>
       </div>
     </div>
@@ -362,10 +443,22 @@ async function doLogin(){
   finally{ btn.disabled=false; btn.textContent='Sign in →'; }
 }
 
+function dismissSubLockBanner(){
+  $('sub-lock-overlay').style.display='none';
+  try{ sessionStorage.setItem('sub_lock_dismissed','1'); }catch(e){}
+}
+
 function startApp(){
   $('login-page').style.display='none';
   $('app-shell').style.display='flex';
   const u=getUser();
+  let dismissed=false;
+  try{ dismissed = sessionStorage.getItem('sub_lock_dismissed')==='1'; }catch(e){}
+  if (u && u.iptv_subscription_locked && u.role !== 'super_admin' && !dismissed) {
+    $('sub-lock-overlay').style.display='flex';
+  } else {
+    $('sub-lock-overlay').style.display='none';
+  }
   const ini=(u.name||'A').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   $('sb-avatar').textContent=ini;
   $('sb-name').textContent=u.name||'Admin';
@@ -374,13 +467,37 @@ function startApp(){
   showPage('customers');
 }
 
+// ── APP & SETUP ────────────────────────────────
+// Update these two values whenever you release a new APK build —
+// everything on this page (button, QR, step text) updates from them.
+const APK_LINK  = 'https://github.com/netflowcloud/NetFlowIPTV-releases/releases/download/v1.6.6%2B6/NetFlowIPTV.apk';
+const AFTV_CODE = '8735707';
+const AFTV_URL  = 'aftv.news/8735707';
+
+function loadAppPage(){
+  $('app-dl-btn').href = APK_LINK;
+  $('app-qr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent('https://' + AFTV_URL);
+  $('app-aftv-code').textContent = AFTV_CODE;
+  $('app-aftv-url').textContent = AFTV_URL;
+  ['isteps-code-1','isteps-code-2'].forEach(id => $(id).textContent = AFTV_CODE);
+  ['isteps-url-1','isteps-url-2'].forEach(id => $(id).textContent = AFTV_URL);
+}
+
+function showInstallTab(name){
+  ['firestick','androidtv','mobile'].forEach(t=>{
+    $('itab-'+t).classList.toggle('active', t===name);
+    $('isteps-'+t).style.display = t===name ? 'block':'none';
+  });
+}
+
 function showPage(name){
-  ['customers','plan'].forEach(p=>{
+  ['customers','plan','app'].forEach(p=>{
     $('page-'+p).style.display = p===name ? 'block':'none';
     const nav=$('nav-'+p); if(nav) nav.classList.toggle('active', p===name);
   });
   if(name==='customers') loadCustomers();
   if(name==='plan') loadPlan();
+  if(name==='app') loadAppPage();
 }
 
 // ── CUSTOMERS ──────────────────────────────────────
@@ -397,6 +514,7 @@ async function loadCustomers(){
       const pr=await apiFetch('GET','/api/admin/iptv/franchise-config');
       const slots = pr.data?.purchased_slots || 0;
       $('s-slots').textContent = activeDevices + ' / ' + slots;
+      renderExpiryBanner('cust-recharge-banner', pr.data || {});
     }catch(e){ $('s-slots').textContent = activeDevices; }
 
     if(!custCache.length){
@@ -408,8 +526,8 @@ async function loadCustomers(){
       '<td style="font-family:var(--mono);color:var(--text3);font-size:12px">#'+c.id+'</td>'+
       '<td style="font-weight:600">'+(c.name||'—')+'</td>'+
       '<td style="font-family:var(--mono);font-size:12px;color:var(--text2)">'+(c.mobile||'—')+'</td>'+
-      '<td style="font-size:11px;color:var(--text3);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(c.server_url||'<span style="color:var(--text3)">(franchise default)</span>')+'</td>'+
       '<td style="font-family:var(--mono);font-size:12px;color:var(--text2)">'+(c.iptv_username||'—')+'</td>'+
+      '<td style="font-size:11px;color:var(--text3);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(c.server_url||'<span style="color:var(--text3)">(franchise default)</span>')+'</td>'+
       '<td>'+sbadge(c.status)+'</td>'+
       '<td><button class="device-link" onclick="openDevices('+c.id+',\''+(c.name||'').replace(/'/g,"\\'")+'\')">'+(c.device_count||0)+' device'+((c.device_count||0)===1?'':'s')+'</button></td>'+
       '<td style="padding-right:20px"><div style="display:flex;gap:6px;flex-wrap:wrap">'+
@@ -550,6 +668,39 @@ async function deactivateDevice(deviceId){
 function di(l,v,c){ return '<div class="ditem'+(c?' '+c:'')+'"><div class="dlabel">'+l+'</div><div class="dval">'+(v||'—')+'</div></div>'; }
 function fmtDate(d){ if(!d) return '—'; const [y,m,day]=d.split('-'); return day+'-'+m+'-'+y; }
 
+// Shared by the Customers homepage and the Franchise Plan page — one
+// franchise-config fetch, same banner logic, so both stay in sync.
+function renderExpiryBanner(elId, c){
+  const el = $(elId);
+  if(!el || !c) return;
+  const expiry = c.subscription_expiry_date ? new Date(c.subscription_expiry_date) : null;
+  const daysLeft = expiry ? Math.ceil((expiry-new Date())/86400000) : null;
+  const lowSlots = (c.purchased_slots||0) <= 2;
+  const expired = c.subscription_status === 'suspended' || (daysLeft!==null && daysLeft < 0);
+  const expiringSoon = !expired && daysLeft!==null && daysLeft<=7;
+
+  if(expired){
+    el.style.display='block';
+    el.innerHTML =
+      '<div class="tbl-card" style="background:var(--danger-l);border-color:rgba(220,38,38,0.3);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'+
+      '<div style="font-size:13px;color:var(--danger)">🚫 Your IPTV subscription has expired. Customers may lose access. Recharge now to restore service.</div>'+
+      '<button class="btn bdanger bsm" onclick="showPage(\'plan\');openRcModal()">⚡ Recharge Now</button>'+
+      '</div>';
+  } else if(expiringSoon || lowSlots){
+    el.style.display='block';
+    el.innerHTML =
+      '<div class="tbl-card" style="background:var(--warn-l);border-color:rgba(180,83,9,0.3);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'+
+      '<div style="font-size:13px;color:var(--warn)">'+
+        (expiringSoon ? '⏰ Subscription expires in '+daysLeft+' day(s). ' : '')+
+        (lowSlots ? '📺 Only '+(c.purchased_slots||0)+' slot(s) left.' : '')+
+      '</div>'+
+      '<button class="btn bedit bsm" onclick="showPage(\'plan\');openRcModal()">⚡ Extend Now</button>'+
+      '</div>';
+  } else {
+    el.style.display='none';
+  }
+}
+
 async function loadPlan(){
   try{
     const r=await apiFetch('GET','/api/admin/iptv/franchise-config');
@@ -561,26 +712,7 @@ async function loadPlan(){
       di('Subscription Expiry', fmtDate(c.subscription_expiry_date))+
       di('Grace Period', (c.grace_period_days||3)+' days','full');
     $('plan-url').value = c.default_server_url || '';
-
-    const expiry = c.subscription_expiry_date ? new Date(c.subscription_expiry_date) : null;
-    const daysLeft = expiry ? Math.ceil((expiry-new Date())/86400000) : null;
-    const lowSlots = (c.purchased_slots||0) <= 2;
-    const banner = $('plan-recharge-banner');
-    if(banner){
-      if((daysLeft!==null && daysLeft<=7) || lowSlots){
-        banner.style.display='block';
-        banner.innerHTML =
-          '<div class="tbl-card" style="background:var(--warn-l);border-color:rgba(180,83,9,0.3);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'+
-          '<div style="font-size:13px;color:var(--warn)">'+
-            (daysLeft!==null && daysLeft<=7 ? '⏰ Subscription expires in '+daysLeft+' day(s). ' : '')+
-            (lowSlots ? '📺 Only '+(c.purchased_slots||0)+' slot(s) left.' : '')+
-          '</div>'+
-          '<button class="btn bpri bsm" onclick="openRcModal()">⚡ Recharge Now</button>'+
-          '</div>';
-      } else {
-        banner.style.display='none';
-      }
-    }
+    renderExpiryBanner('plan-recharge-banner', c);
   }catch(e){ console.error(e); }
 }
 
