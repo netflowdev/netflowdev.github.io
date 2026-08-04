@@ -5,49 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NetAdmin ISP Management</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
     <style>
       :root {
-        --sb-bg: #24385d;
-        --sb-surface: rgba(255, 255, 255, 0.03);
-        --sb-border: rgba(255, 255, 255, 0.06);
-        --sb-hover: rgba(255, 255, 255, 0.05);
-        --sb-active-bg: rgba(249, 250, 250, 0.15);
-        --sb-active-border: #38bdf8;
-        --bg: #f0f2f7;
+        --sb-bg: #ffffff;
+        --sb-surface: rgba(0, 0, 0, 0.02);
+        --sb-border: #e7e3d9;
+        --sb-hover: rgba(0, 0, 0, 0.035);
+        --sb-active-bg: rgba(217, 119, 6, 0.08);
+        --sb-active-border: #d97706;
+        --bg: #f6f5f1;
         --surface: #ffffff;
-        --surface-2: #f8f9fc;
-        --border: #e4e8f1;
-        --border-s: #cbd2e0;
-        --blue: #2563eb;
-        --blue-l: rgba(37, 99, 235, 0.08);
-        --blue-g: rgba(37, 99, 235, 0.18);
-        --cyan: #06b6d4;
-        --green: #059669;
-        --green-l: rgba(5, 150, 105, 0.08);
+        --surface-2: #fafaf7;
+        --border: #e7e3d9;
+        --border-s: #d3ccbb;
+        --blue: #d97706;
+        --blue-l: rgba(217, 119, 6, 0.08);
+        --blue-g: rgba(217, 119, 6, 0.2);
+        --cyan: #0f9d82;
+        --green: #0f9d82;
+        --green-l: rgba(15, 157, 130, 0.08);
         --red: #dc2626;
         --red-l: rgba(220, 38, 38, 0.07);
-        --amber: #d97706;
-        --amber-l: rgba(217, 119, 6, 0.08);
+        --amber: #b45309;
+        --amber-l: rgba(180, 83, 9, 0.08);
         --purple: #7c3aed;
         --purple-l: rgba(124, 58, 237, 0.08);
-        --txt: #0c1222;
-        --txt2: #2d3238;
-        --txt3: #2f343b;
+        --txt: #1b1e24;
+        --txt2: #5b6270;
+        --txt3: #8e93a0;
         --txt-inv: #f1f5f9;
-        --font: "Outfit", sans-serif;
-        --mono: "Space Mono", monospace;
+        --disp: "Oswald", sans-serif;
+        --font: "Inter", sans-serif;
+        --mono: "JetBrains Mono", monospace;
         --r-sm: 10px;
         --r: 14px;
         --r-lg: 18px;
         --r-xl: 22px;
-        --sh-xs: 0 1px 2px rgba(12, 18, 34, 0.04);
-        --sh-sm: 0 1px 3px rgba(12, 18, 34, 0.06), 0 1px 2px rgba(12, 18, 34, 0.03);
-        --sh: 0 4px 16px rgba(12, 18, 34, 0.06), 0 1px 4px rgba(12, 18, 34, 0.04);
-        --sh-md: 0 8px 30px rgba(12, 18, 34, 0.08), 0 2px 8px rgba(12, 18, 34, 0.04);
-        --sh-lg: 0 20px 60px rgba(12, 18, 34, 0.12), 0 4px 16px rgba(12, 18, 34, 0.06);
+        --sh-xs: 0 1px 2px rgba(20, 20, 10, 0.04);
+        --sh-sm: 0 1px 3px rgba(20, 20, 10, 0.06), 0 1px 2px rgba(20, 20, 10, 0.03);
+        --sh: 0 4px 16px rgba(20, 20, 10, 0.06), 0 1px 4px rgba(20, 20, 10, 0.04);
+        --sh-md: 0 8px 30px rgba(20, 20, 10, 0.08), 0 2px 8px rgba(20, 20, 10, 0.04);
+        --sh-lg: 0 20px 60px rgba(20, 20, 10, 0.12), 0 4px 16px rgba(20, 20, 10, 0.06);
       }
       *,
       *::before,
@@ -92,7 +93,7 @@
         flex-shrink: 0;
         position: relative;
         overflow: hidden;
-        border-right: 1px solid rgba(255, 255, 255, 0.04);
+        border-right: 1px solid var(--sb-border);
       }
       .sidebar::after {
         content: "";
@@ -101,7 +102,7 @@
         left: -40px;
         width: 200px;
         height: 200px;
-        background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(217, 119, 6, 0.12) 0%, transparent 70%);
         pointer-events: none;
         z-index: 0;
       }
@@ -121,7 +122,7 @@
       .logo-icon {
         width: 32px;
         height: 32px;
-        background: linear-gradient(135deg, #2563eb, #38bdf8);
+        background: linear-gradient(135deg, #D97706, #F0A94A);
         border-radius: 9px;
         display: flex;
         align-items: center;
@@ -130,17 +131,18 @@
         font-weight: 900;
         color: #fff;
         letter-spacing: -0.5px;
-        box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+        box-shadow: 0 4px 16px rgba(217, 119, 6, 0.35);
       }
       .logo-name {
         font-size: 18px;
-        font-weight: 800;
-        color: #fff;
-        letter-spacing: -0.4px;
+        font-weight: 700;
+        font-family: var(--disp);
+        color: var(--txt);
+        letter-spacing: -0.2px;
       }
       .logo-sub {
         font-size: 9.5px;
-        color: #3b5998;
+        color: var(--txt3);
         margin-top: 3px;
         font-family: var(--mono);
         letter-spacing: 0.06em;
@@ -156,20 +158,27 @@
       }
       .nav-sec {
         font-size: 9px;
-        color: rgba(255, 255, 255, 0.2);
+        color: var(--txt3);
         padding: 18px 22px 6px;
         letter-spacing: 0.14em;
         text-transform: uppercase;
         font-family: var(--mono);
         font-weight: 700;
       }
+
+      .addon-tag{
+        font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
+        background:var(--blue-l,#FEF3E8);color:var(--blue,#d97706);
+        padding:2px 6px;border-radius:20px;margin-left:6px;
+      }
+
       .nav-item {
         display: flex;
         align-items: center;
         gap: 11px;
         padding: 10px 18px 10px 22px;
         cursor: pointer;
-        color: rgba(255, 255, 255, 0.95);
+        color: var(--txt2);
         font-size: 13.5px;
         font-weight: 500;
         transition: all 0.18s;
@@ -178,11 +187,11 @@
         position: relative;
       }
       .nav-item:hover {
-        color: rgba(255, 255, 255, 0.75);
+        color: var(--txt);
         background: var(--sb-hover);
       }
       .nav-item.active {
-        color: #fff;
+        color: var(--blue);
         background: var(--sb-active-bg);
         border-left-color: var(--sb-active-border);
       }
@@ -213,7 +222,7 @@
         width: 36px;
         height: 36px;
         border-radius: 10px;
-        background: linear-gradient(135deg, #2563eb, #38bdf8);
+        background: linear-gradient(135deg, #D97706, #F0A94A);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -221,16 +230,16 @@
         font-weight: 800;
         color: #fff;
         flex-shrink: 0;
-        box-shadow: 0 3px 12px rgba(37, 99, 235, 0.3);
+        box-shadow: 0 3px 12px rgba(217, 119, 6, 0.3);
       }
       .user-name {
         font-size: 13px;
         font-weight: 600;
-        color: #fefefe;
+        color: var(--txt);
       }
       .user-role {
         font-size: 9.5px;
-        color: #3b5998;
+        color: var(--txt3);
         font-family: var(--mono);
         margin-top: 1px;
       }
@@ -333,7 +342,7 @@
         opacity: 1;
       }
       .sc.blue {
-        --sc-bar: linear-gradient(90deg, #2563eb, #38bdf8);
+        --sc-bar: linear-gradient(90deg, #D97706, #F0A94A);
       }
       .sc.green {
         --sc-bar: linear-gradient(90deg, #059669, #34d399);
@@ -459,7 +468,7 @@
         transition: background 0.12s;
       }
       tbody tr:hover td {
-        background: rgba(37, 99, 235, 0.02);
+        background: rgba(217, 119, 6, 0.02);
       }
       .badge {
         display: inline-flex;
@@ -534,8 +543,8 @@
         box-shadow: 0 2px 10px var(--blue-g);
       }
       .bpri:hover {
-        background: #1d4ed8;
-        border-color: #1d4ed8;
+        background: #B45309;
+        border-color: #B45309;
         color: #fff;
         box-shadow: 0 4px 16px var(--blue-g);
         transform: translateY(-1px);
@@ -547,7 +556,7 @@
       }
       .bview {
         background: var(--blue-l);
-        border-color: rgba(37, 99, 235, 0.2);
+        border-color: rgba(217, 119, 6, 0.2);
         color: var(--blue);
       }
       .bview:hover {
@@ -695,7 +704,7 @@
       }
       .qa-btn:hover {
         background: var(--blue-l);
-        border-color: rgba(37, 99, 235, 0.25);
+        border-color: rgba(217, 119, 6, 0.25);
         color: var(--blue);
         transform: translateX(4px);
       }
@@ -774,7 +783,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 100;
+        z-index: 9500;
         padding: 20px;
         backdrop-filter: blur(6px);
         -webkit-backdrop-filter: blur(6px);
@@ -890,6 +899,13 @@
         padding-bottom: 8px;
         border-bottom: 1px solid var(--border);
       }
+      .install-tab { padding:14px 20px; font-size:13px; font-weight:600; color:var(--txt3); cursor:pointer; border-bottom:2px solid transparent; }
+      .install-tab.active { color:var(--blue); border-bottom-color:var(--blue); }
+      .install-tab:hover { color:var(--txt); }
+      .install-steps { padding:22px 24px; }
+      .install-steps ol { padding-left:20px; display:flex; flex-direction:column; gap:12px; }
+      .install-steps li { font-size:13.5px; line-height:1.5; color:var(--txt2); }
+      .install-steps li b { color:var(--txt); }
       .dgrid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -953,8 +969,8 @@
         position: fixed;
         bottom: 24px;
         right: 24px;
-        background: var(--sb-bg);
-        border: 1px solid var(--sb-border);
+        background: var(--surface);
+        border: 1px solid var(--border);
         border-radius: var(--r);
         padding: 14px 22px;
         font-size: 13px;
@@ -965,25 +981,25 @@
         transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
         max-width: 340px;
         box-shadow: var(--sh-lg);
-        color: #e2e8f0;
+        color: var(--txt);
       }
       .toast.show {
         transform: translateY(0);
         opacity: 1;
       }
       .toast.ok {
-        border-color: rgba(5, 150, 105, 0.4);
+        border-color: rgba(15, 157, 130, 0.35);
       }
       .toast.err {
-        border-color: rgba(220, 38, 38, 0.4);
-        color: #fca5a5;
+        border-color: rgba(220, 38, 38, 0.35);
+        color: var(--red);
       }
       .login-wrap {
         display: flex;
         align-items: center;
         justify-content: center;
         height: 100vh;
-        background: #080c16;
+        background: var(--bg);
         position: relative;
         overflow: hidden;
       }
@@ -992,7 +1008,7 @@
         position: absolute;
         width: 700px;
         height: 700px;
-        background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 60%);
+        background: radial-gradient(circle, rgba(217, 119, 6, 0.08) 0%, transparent 60%);
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
@@ -1002,30 +1018,28 @@
         content: "";
         position: absolute;
         inset: 0;
-        background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-        background-size: 32px 32px;
+        background-image: repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0, 0, 0, 0.015) 39px, rgba(0, 0, 0, 0.015) 40px);
         pointer-events: none;
       }
       .login-card {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--surface);
+        border: 1px solid var(--border);
         border-radius: var(--r-xl);
         padding: 48px;
         width: 400px;
-        box-shadow: 0 32px 100px rgba(0, 0, 0, 0.5);
+        box-shadow: var(--sh-lg);
         position: relative;
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
       }
       .login-logo {
         font-size: 28px;
-        font-weight: 900;
-        color: #fff;
-        letter-spacing: -0.6px;
+        font-weight: 600;
+        font-family: var(--disp);
+        color: var(--txt);
+        letter-spacing: -0.2px;
       }
       .login-sub {
         font-size: 11px;
-        color: #3b5998;
+        color: var(--txt3);
         margin-bottom: 40px;
         font-family: var(--mono);
       }
@@ -1035,7 +1049,7 @@
       .login-card .field label {
         display: block;
         font-size: 10px;
-        color: #3b5998;
+        color: var(--txt3);
         margin-bottom: 8px;
         font-family: var(--mono);
         text-transform: uppercase;
@@ -1045,10 +1059,10 @@
       .login-card .field input {
         width: 100%;
         padding: 12px 16px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--surface-2);
+        border: 1px solid var(--border);
         border-radius: var(--r-sm);
-        color: #e2e8f0;
+        color: var(--txt);
         font-family: var(--font);
         font-size: 14px;
         outline: none;
@@ -1056,10 +1070,10 @@
       }
       .login-card .field input:focus {
         border-color: var(--blue);
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        box-shadow: 0 0 0 3px var(--blue-l);
       }
       .login-card .field input::placeholder {
-        color: rgba(255, 255, 255, 0.15);
+        color: var(--txt3);
       }
       .login-card .btn-pri {
         width: 100%;
@@ -1073,26 +1087,42 @@
         font-weight: 700;
         cursor: pointer;
         transition: all 0.15s;
-        box-shadow: 0 4px 20px rgba(37, 99, 235, 0.35);
+        box-shadow: 0 4px 20px var(--blue-g);
         letter-spacing: 0.01em;
         margin-top: 8px;
       }
       .login-card .btn-pri:hover {
-        background: #1d4ed8;
+        background: #b45309;
         transform: translateY(-1px);
-        box-shadow: 0 6px 24px rgba(37, 99, 235, 0.45);
+        box-shadow: 0 6px 24px var(--blue-g);
       }
       .login-card .btn-pri:disabled {
         opacity: 0.4;
         cursor: not-allowed;
         transform: none;
       }
+      .sub-lock-overlay {
+        position: fixed; inset: 0; z-index: 9000; display: none;
+        background: rgba(20,18,40,0.55); backdrop-filter: blur(2px);
+        align-items: center; justify-content: center;
+      }
+      .sub-lock-card {
+        position: relative; background: #fff; border-radius: 14px; padding: 32px 28px; max-width: 380px;
+        text-align: center; box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      }
+     .sub-lock-card h3 { margin: 0 0 8px; font-size: 18px; color: var(--txt); }
+      .sub-lock-card p { margin: 0 0 18px; font-size: 13px; color: var(--txt2); }
+      .sub-lock-close {
+        position: absolute; top: 10px; right: 12px; background: none; border: none;
+        font-size: 18px; cursor: pointer; color: var(--txt2); line-height: 1; padding: 4px;
+      }
+      
       .login-err {
-        background: rgba(220, 38, 38, 0.1);
+        background: var(--red-l);
         border: 1px solid rgba(220, 38, 38, 0.25);
         border-radius: var(--r-sm);
         padding: 11px 15px;
-        color: #fca5a5;
+        color: var(--red);
         font-size: 13px;
         margin-bottom: 18px;
         display: none;
@@ -1132,7 +1162,7 @@
         transition: all 0.15s;
       }
       .tpl-item:hover {
-        border-color: rgba(37, 99, 235, 0.25);
+        border-color: rgba(217, 119, 6, 0.25);
         background: var(--blue-l);
         transform: translateX(3px);
       }
@@ -1361,7 +1391,7 @@
         border-radius: 8px;
         border: 1px solid var(--sb-border);
         background: var(--sb-surface);
-        color: rgba(255, 255, 255, 0.5);
+        color: rgba(15, 14, 14, 0.5);
         font-family: var(--font);
         cursor: pointer;
         outline: none;
@@ -1516,6 +1546,19 @@
           <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" />
         </div>
         <button class="btn-pri" id="login-btn">Sign in →</button>
+        <div style="text-align:center;margin-top:16px;font-size:13px;color:#6B63A8">
+          New here? <a href="signup.html?type=full" style="color:#5b4fe0;font-weight:600;text-decoration:none">Create an account</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBSCRIPTION LOCK -->
+    <div class="sub-lock-overlay" id="sub-lock-overlay">
+      <div class="sub-lock-card">
+        <button class="sub-lock-close" onclick="dismissSubLockBanner()" title="Close">✕</button>
+        <h3>Subscription Inactive</h3>
+        <p>Your ISP subscription isn't active. Renew to unlock customers, billing, and all other features.</p>
+        <button class="btn bpri" onclick="openRcModal('isp_customer_slots','Renew ISP Subscription')">Renew Now →</button>
       </div>
     </div>
 
@@ -1525,7 +1568,7 @@
         <div class="logo">
           <div class="logo-badge">
             <div class="logo-icon">NA</div>
-            <div class="logo-name">NetAdmin</div>
+            <div class="logo-name">NetFlow Admin</div>
           </div>
           <div class="logo-sub">// ISP Management</div>
         </div>
@@ -1588,12 +1631,13 @@
             <div class="nav-icon">⚡</div>
             Activations
           </div>
+          <div class="nav-sec">Add-ons</div>
           <div class="nav-item" id="nav-iptv" onclick="showPage('iptv')">
             <div class="nav-icon">📺</div>
-            IPTV
+            IPTV <span class="addon-tag">Add-on</span>
           </div>
           <div class="nav-item" id="nav-whatsapp" onclick="showPage('whatsapp')">
-            <div class="nav-icon">💬</div>WhatsApp
+            <div class="nav-icon">💬</div>WhatsApp <span class="addon-tag">Add-on</span>
           </div>
           <div class="nav-item" id="nav-notifications" onclick="showPage('notifications')">
             <div class="nav-icon">🔔</div>
@@ -1640,15 +1684,25 @@
                 <span id="dash-date"></span>
               </div>
             </div>
-            <button
-              class="btn bpri"
-              onclick="
-                showPage('customers');
-                openAdd();
-              "
-            >
-              + Add Customer
-            </button>
+            <div style="display:flex;gap:10px;align-items:center">
+              <button
+                class="btn bpri"
+                id="dash-renew-btn"
+                style="display:none;background:#DC2626;border-color:#DC2626"
+                onclick="openRcModal('isp_customer_slots','Renew ISP Subscription')"
+              >
+                ⚠️ Renew Subscription
+              </button>
+              <button
+                class="btn bpri"
+                onclick="
+                  showPage('customers');
+                  openAdd();
+                "
+              >
+                + Add Customer
+              </button>
+            </div>
           </div>
           <div class="content">
             <div class="stats">
@@ -1863,7 +1917,7 @@
           <div class="topbar">
             <div>
               <div class="pg-title">Activations</div>
-              <div class="pg-sub">// ISP activation log</div>
+              <div class="pg-sub">ISP activation logs</div>
             </div>
             <button class="btn" onclick="loadActivations()">↺ Refresh</button>
           </div>
@@ -1939,7 +1993,7 @@
           <div class="topbar">
             <div>
               <div class="pg-title">Payments</div>
-              <div class="pg-sub">// billing history</div>
+              <div class="pg-sub">Billing history</div>
             </div>
             <button class="btn bpri" onclick="openCash()">+ Cash Payment</button>
           </div>
@@ -2002,7 +2056,7 @@
           <div class="topbar">
             <div>
               <div class="pg-title">Settlements</div>
-              <div class="pg-sub">// Easebuzz payout / bank settlement history</div>
+              <div class="pg-sub">NetFlow Payout / Bank settlement history</div>
             </div>
             <button class="btn" onclick="loadSettlements()">↺ Refresh</button>
           </div>
@@ -2328,7 +2382,7 @@
           <div class="topbar">
             <div>
               <div class="pg-title">Billing History</div>
-              <div class="pg-sub">// postpaid bill-by-bill breakdown</div>
+              <div class="pg-sub">Postpaid bill-by-bill breakdown</div>
             </div>
             <button class="btn" onclick="loadBillingHistory()">↺ Refresh</button>
           </div>
@@ -2392,7 +2446,7 @@
         <!-- PAYMENT LINKS PAGE -->
         <div id="page-paylinks" style="display:none">
           <div class="topbar">
-            <div><div class="pg-title">Payment Links</div><div class="pg-sub">// shareable links per customer</div></div>
+            <div><div class="pg-title">Payment Links</div><div class="pg-sub">Shareable links per customer</div></div>
           </div>
           <div class="content">
             <div class="card" style="margin-bottom:16px;background:#F0EEFF;border-color:#EDE9FF">
@@ -2424,7 +2478,7 @@
         <div class="topbar">
           <div>
             <div class="pg-title">WhatsApp</div>
-            <div class="pg-sub">// messages & manual send</div>
+            <div class="pg-sub">Messages & manual send</div>
           </div>
           <button class="btn" onclick="loadWhatsAppPage()">↺ Refresh</button>
         </div>
@@ -2571,7 +2625,7 @@
           <div class="topbar">
             <div>
               <div class="pg-title">Router Brands</div>
-              <div class="pg-sub">// manage ONT/router brands and WiFi band settings</div>
+              <div class="pg-sub">Manage ONT/router brands and WiFi band settings</div>
             </div>
             <button class="btn bpri" onclick="openAddBrand()">+ Add Brand</button>
           </div>
@@ -2614,19 +2668,24 @@
           <div class="topbar">
             <div>
               <div class="pg-title">IPTV</div>
-              <div class="pg-sub">// customers, device pairing & franchise plan</div>
+              <div class="pg-sub">Customers, device pairing & franchise plan</div>
             </div>
             <button class="btn bpri" onclick="openAddIptv()">+ Add IPTV Customer</button>
           </div>
           <div class="content">
+            <div class="warn-box" style="margin-bottom:16px">
+              📺 IPTV is a separate add-on subscription — it's billed independently from your ISP plan. Manage its renewal under "Franchise Plan" tab below.
+            </div>
  
             <div class="tabs" style="margin-bottom:20px;max-width:420px">
               <div class="tab active" id="iptv-tab-customers" onclick="switchIptvTab('customers')">Customers</div>
               <div class="tab" id="iptv-tab-config" onclick="switchIptvTab('config')">Franchise Plan</div>
+              <div class="tab" id="iptv-tab-app" onclick="switchIptvTab('app')">App & Setup</div>
             </div>
  
             <!-- CUSTOMERS TAB -->
             <div id="iptv-panel-customers">
+              <div id="iptv-cust-recharge-banner" style="display:none;margin-bottom:14px"></div>
               <div class="stats3" style="margin-bottom:20px">
                 <div class="sc blue">
                   <div class="sc-label">Customers</div>
@@ -2646,7 +2705,7 @@
               </div>
               <div style="margin:-10px 0 16px;font-size:11.5px;color:var(--txt3);line-height:1.5">Billing is based on <b>active devices</b>, not customer count — one customer can hold multiple paired devices, each counted separately against your plan.</div>
               <div class="toolbar">
-                <input class="sbox" id="iptv-search" placeholder="Search name or mobile..." oninput="loadIptvCustomers()" />
+                <input class="sbox" id="iptv-search" placeholder="Search name, mobile or username..." oninput="loadIptvCustomers()" />
                 <button class="btn" onclick="loadIptvCustomers()">↺ Refresh</button>
               </div>
               <div class="tbl-card">
@@ -2657,8 +2716,8 @@
                         <th>#</th>
                         <th>Name</th>
                         <th>Mobile</th>
-                        <th>Server URL</th>
                         <th>Username</th>
+                        <th>Server URL</th>
                         <th>Status</th>
                         <th>Devices</th>
                         <th style="padding-right:20px">Actions</th>
@@ -2731,7 +2790,57 @@
                 </div>
               </div>
             </div>
- 
+
+<!-- APP & SETUP TAB -->
+            <div id="iptv-panel-app" style="display:none">
+              <div class="card" style="max-width:640px;display:flex;gap:24px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
+                <img id="app-qr" src="" alt="Scan to download" style="width:130px;height:130px;border:1px solid var(--border);border-radius:10px;background:#fff;padding:6px" />
+                <div style="flex:1;min-width:220px">
+                  <div class="sec-title" style="margin-top:0">Download NetFlow IPTV App</div>
+                  <div style="font-size:11.5px;color:var(--txt3);line-height:1.5;margin-bottom:12px">Scan the QR code on the TV/mobile, or use the button below. Works on Firestick, Android TV and Android Mobile. Share this tab with your customers when they need to install.</div>
+                  <a class="btn bpri" id="app-dl-btn" href="#" target="_blank" style="display:inline-block;text-decoration:none">⬇ Download APK</a>
+                  <div style="font-size:11.5px;color:var(--txt3);margin:12px 0 0">Downloader app code: <b id="app-aftv-code">—</b> &nbsp;•&nbsp; Short URL: <b id="app-aftv-url">—</b></div>
+                </div>
+              </div>
+
+              <div class="card" style="max-width:640px;padding:0;overflow:hidden">
+                <div style="display:flex;border-bottom:1px solid var(--border)">
+                  <div class="install-tab active" id="itab-firestick" onclick="showInstallTab('firestick')">Firestick / Fire TV</div>
+                  <div class="install-tab" id="itab-androidtv" onclick="showInstallTab('androidtv')">Android TV</div>
+                  <div class="install-tab" id="itab-mobile" onclick="showInstallTab('mobile')">Mobile</div>
+                </div>
+
+                <div class="install-steps" id="isteps-firestick">
+                  <ol>
+                    <li>On the Firestick home screen, search for and install the <b>Downloader</b> app (free, from the Amazon App Store).</li>
+                    <li>Go to <b>Settings → My Fire TV → Developer Options</b> and turn <b>ON</b> "Apps from Unknown Sources".</li>
+                    <li>Open Downloader and enter this code: <b id="isteps-code-1">—</b> &nbsp;(or type the URL <b id="isteps-url-1">—</b> directly).</li>
+                    <li>Let it download, then tap <b>Install</b>.</li>
+                    <li>Open the app and enter the 6-digit pairing code shown on screen, or the customer's login details.</li>
+                  </ol>
+                </div>
+
+                <div class="install-steps" id="isteps-androidtv" style="display:none">
+                  <ol>
+                    <li>Install the <b>Downloader</b> app from the Google Play Store (or sideload it).</li>
+                    <li>Go to <b>Settings → Security & Restrictions</b> and allow installs from unknown sources.</li>
+                    <li>Open Downloader and enter this code: <b id="isteps-code-2">—</b> &nbsp;(or type the URL <b id="isteps-url-2">—</b> directly).</li>
+                    <li>Let it download, then tap <b>Install</b>.</li>
+                    <li>Open the app and enter the 6-digit pairing code shown on screen, or the customer's login details.</li>
+                  </ol>
+                </div>
+
+                <div class="install-steps" id="isteps-mobile" style="display:none">
+                  <ol>
+                    <li>Open this page in the phone's browser and tap <b>Download APK</b> above.</li>
+                    <li>If prompted, allow "Install from unknown sources" for the browser.</li>
+                    <li>Open the downloaded file and tap <b>Install</b>.</li>
+                    <li>Open the app and enter the 6-digit pairing code shown on screen, or the customer's login details.</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
         
@@ -3571,6 +3680,7 @@
       function doLogout() {
         localStorage.removeItem("ngn_token");
         localStorage.removeItem("ngn_user");
+        try { sessionStorage.removeItem("sub_lock_dismissed"); } catch (e) {}
         $("app-shell").style.display = "none";
         $("login-page").style.display = "flex";
       }
@@ -3608,16 +3718,29 @@
         }
       }
 
+      function dismissSubLockBanner() {
+        $("sub-lock-overlay").style.display = "none";
+        try { sessionStorage.setItem("sub_lock_dismissed", "1"); } catch (e) {}
+      }
+
       function startApp() {
         $("login-page").style.display = "none";
         $("app-shell").style.display = "flex";
-        const u = getUser(),
-          ini = (u.name || "A")
-            .split(" ")
-            .map((w) => w[0])
-            .join("")
-            .toUpperCase()
-            .slice(0, 2);
+        const u = getUser();
+        let dismissed = false;
+        try { dismissed = sessionStorage.getItem("sub_lock_dismissed") === "1"; } catch (e) {}
+         if (u && u.subscription_locked && u.role !== 'super_admin' && !dismissed) {
+          $("sub-lock-overlay").style.display = "flex";
+        } else {
+          $("sub-lock-overlay").style.display = "none";
+        }
+        $("dash-renew-btn").style.display = (u && u.subscription_locked && u.role !== 'super_admin') ? "inline-flex" : "none";
+        const ini = (u.name || "A")
+          .split(" ")
+          .map((w) => w[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2);
         $("sb-avatar").textContent = ini;
         $("sb-name").textContent = u.name || "Admin";
         $("sb-role").textContent = u.role || "admin";
@@ -5222,11 +5345,69 @@ function updateIptvStatCards() {
   slotsEl.textContent = used + (iptvPurchasedSlots !== null ? ' / ' + iptvPurchasedSlots : '');
 }
 
+// Shared by the IPTV Customers tab and the Franchise Plan tab — same
+// franchise-config, same banner logic, so both stay in sync.
+function renderIptvExpiryBanner(elId, c) {
+  const el = $(elId);
+  if (!el || !c) return;
+  const expiry = c.subscription_expiry_date ? new Date(c.subscription_expiry_date) : null;
+  const daysLeft = expiry ? Math.ceil((expiry - new Date()) / 86400000) : null;
+  const lowSlots = (c.purchased_slots || 0) <= 2;
+  const expired = c.subscription_status === 'suspended' || (daysLeft !== null && daysLeft < 0);
+  const expiringSoon = !expired && daysLeft !== null && daysLeft <= 7;
+
+  if (expired) {
+    el.style.display = 'block';
+    el.innerHTML =
+      '<div class="card" style="background:var(--red-l);border-color:rgba(220,38,38,0.3);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">' +
+      '<div style="font-size:13px;color:var(--red)">🚫 Your IPTV subscription has expired. Customers may lose access. Recharge now to restore service.</div>' +
+      '<button class="btn bdanger bsm" onclick="switchIptvTab(\'config\');openRcModal(\'iptv_slots\',\'Recharge IPTV Slots\')">⚡ Recharge Now</button>' +
+      '</div>';
+  } else if (expiringSoon || lowSlots) {
+    el.style.display = 'block';
+    el.innerHTML =
+      '<div class="card" style="background:var(--amber-l);border-color:rgba(217,119,6,0.3);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">' +
+      '<div style="font-size:13px;color:var(--amber)">' +
+        (expiringSoon ? '⏰ Subscription expires in ' + daysLeft + ' day(s). ' : '') +
+        (lowSlots ? '📺 Only ' + (c.purchased_slots || 0) + ' slot(s) left.' : '') +
+      '</div>' +
+      '<button class="btn bedit bsm" onclick="switchIptvTab(\'config\');openRcModal(\'iptv_slots\',\'Recharge IPTV Slots\')">⚡ Extend Now</button>' +
+      '</div>';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
 function switchIptvTab(tab) {
   $('iptv-tab-customers').classList.toggle('active', tab === 'customers');
   $('iptv-tab-config').classList.toggle('active', tab === 'config');
+  $('iptv-tab-app').classList.toggle('active', tab === 'app');
   $('iptv-panel-customers').style.display = tab === 'customers' ? 'block' : 'none';
   $('iptv-panel-config').style.display = tab === 'config' ? 'block' : 'none';
+  $('iptv-panel-app').style.display = tab === 'app' ? 'block' : 'none';
+  if (tab === 'app') loadAppPage();
+}
+
+// Update these two values whenever a new APK build is released —
+// everything on the App & Setup tab (button, QR, step text) updates from them.
+const APK_LINK  = 'https://github.com/netflowcloud/NetFlowIPTV-releases/releases/download/v1.6.6%2B6/NetFlowIPTV.apk';
+const AFTV_CODE = '8735707';
+const AFTV_URL  = 'aftv.news/8735707';
+
+function loadAppPage() {
+  $('app-dl-btn').href = APK_LINK;
+  $('app-qr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent('https://' + AFTV_URL);
+  $('app-aftv-code').textContent = AFTV_CODE;
+  $('app-aftv-url').textContent = AFTV_URL;
+  ['isteps-code-1', 'isteps-code-2'].forEach(id => $(id).textContent = AFTV_CODE);
+  ['isteps-url-1', 'isteps-url-2'].forEach(id => $(id).textContent = AFTV_URL);
+}
+
+function showInstallTab(name) {
+  ['firestick', 'androidtv', 'mobile'].forEach(t => {
+    $('itab-' + t).classList.toggle('active', t === name);
+    $('isteps-' + t).style.display = t === name ? 'block' : 'none';
+  });
 }
  
 async function loadIptvCustomers() {
@@ -5245,8 +5426,8 @@ async function loadIptvCustomers() {
       '<td style="font-family:var(--mono);color:var(--txt3);font-size:12px;padding-left:20px">#' + c.id + '</td>' +
       '<td style="font-weight:600;color:var(--txt)">' + (c.name || '—') + '</td>' +
       '<td style="font-family:var(--mono);font-size:12px;color:var(--txt3)">' + (c.mobile || '—') + '</td>' +
-      '<td style="font-size:11px;color:var(--txt3);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (c.server_url || '<span style="color:var(--txt3)">(franchise default)</span>') + '</td>' +
       '<td style="font-family:var(--mono);font-size:12px;color:var(--txt2)">' + (c.iptv_username || '—') + '</td>' +
+      '<td style="font-size:11px;color:var(--txt3);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (c.server_url || '<span style="color:var(--txt3)">(franchise default)</span>') + '</td>' +
       '<td>' + sbadge(c.status) + '</td>' +
       '<td><button class="device-link" onclick="openIptvDevices(' + c.id + ',\'' + (c.name || '').replace(/'/g,"\\'") + '\')">' + (c.device_count || 0) + ' device' + ((c.device_count||0)===1?'':'s') + '</button></td>' +
       '<td style="padding-right:20px"><div class="abtns">' +
@@ -5412,25 +5593,8 @@ async function loadIptvConfig() {
       di('Grace Period', (c.grace_period_days || 3) + ' days');
 
     if (!isSuperAdmin) {
-      const expiry = c.subscription_expiry_date ? new Date(c.subscription_expiry_date) : null;
-      const daysLeft = expiry ? Math.ceil((expiry - new Date()) / 86400000) : null;
-      const lowSlots = (c.purchased_slots || 0) <= 2;
-      const banner = $('iptv-recharge-banner');
-      if (banner) {
-        if ((daysLeft !== null && daysLeft <= 7) || lowSlots) {
-          banner.style.display = 'block';
-          banner.innerHTML =
-            '<div class="card" style="background:#fff7ed;border-color:#fdba74;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">' +
-            '<div style="font-size:13px;color:#c2410c">' +
-              (daysLeft !== null && daysLeft <= 7 ? '⏰ Subscription expires in ' + daysLeft + ' day(s). ' : '') +
-              (lowSlots ? '📺 Only ' + (c.purchased_slots||0) + ' slot(s) left.' : '') +
-            '</div>' +
-            '<button class="btn bpri bsm" onclick="openRcModal(\'iptv_slots\',\'Recharge IPTV Slots\')">⚡ Recharge Now</button>' +
-            '</div>';
-        } else {
-          banner.style.display = 'none';
-        }
-      }
+      renderIptvExpiryBanner('iptv-recharge-banner', c);
+      renderIptvExpiryBanner('iptv-cust-recharge-banner', c);
     }
 
     $('iptv-config-editable').style.display = isSuperAdmin ? 'block' : 'none';
