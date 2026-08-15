@@ -967,6 +967,36 @@
         word-break: break-all;
         font-weight: 500;
       }
+      .mtabs {
+        display: flex;
+        gap: 4px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 18px;
+      }
+      .mtab {
+        padding: 10px 16px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--txt3);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        font-family: var(--mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .mtab.active {
+        color: var(--blue);
+        border-bottom-color: var(--blue);
+      }
+      .mtab:hover {
+        color: var(--txt);
+      }
+      .mtab-panel {
+        display: none;
+      }
+      .mtab-panel.active {
+        display: block;
+      }
       .loading {
         display: flex;
         align-items: center;
@@ -3091,10 +3121,6 @@
               <option value="2">NetAdmin Server</option>
             </select>
           </div>
-          <div class="ff">
-            <label>ISP Customer ID</label>
-            <input id="a-cid" placeholder="Optional" />
-          </div>
           <div class="ff full">
             <label>ISP Username (PPPoE)</label>
             <input id="a-iuser" placeholder="ramesh.ncn" />
@@ -3139,20 +3165,6 @@
           <div class="ff">
             <label>IPTV Details</label>
             <input id="a-iptv" />
-          </div>
-          <div class="ff">
-            <label>PON Port</label>
-            <select id="a-pon-port">
-              <option value="">— Select —</option>
-              <option value="0/1">PON 0/1</option>
-              <option value="0/2">PON 0/2</option>
-              <option value="0/3">PON 0/3</option>
-              <option value="0/4">PON 0/4</option>
-            </select>
-          </div>
-          <div class="ff">
-            <label>ONU ID</label>
-            <input id="a-onu-id" type="number" placeholder="22" />
           </div>
           <div class="ff">
             <label>Current WiFi SSID</label>
@@ -3215,14 +3227,24 @@
             <button class="btn bsm" onclick="closeM('m-view')">✕ Close</button>
           </div>
         </div>
-        <div class="sec-title">Customer Details</div>
-        <div class="dgrid" id="v-cust"></div>
-        <div class="sec-title">ISP Details</div>
-        <div class="dgrid" id="v-isp"></div>
-        <div class="sec-title">Hardware Details</div>
-        <div class="dgrid" id="v-hw"></div>
-        <div class="sec-title">Billing</div>
-        <div class="dgrid" id="v-bill"></div>
+        <div class="mtabs" id="v-tabs">
+          <div class="mtab active" data-tab="cust" onclick="switchMTab('v',this,'cust')">Details</div>
+          <div class="mtab" data-tab="isp" onclick="switchMTab('v',this,'isp')">ISP</div>
+          <div class="mtab" data-tab="hw" onclick="switchMTab('v',this,'hw')">Hardware</div>
+          <div class="mtab" data-tab="bill" onclick="switchMTab('v',this,'bill')">Billing</div>
+        </div>
+        <div class="mtab-panel active" data-panel="cust">
+          <div class="dgrid" id="v-cust"></div>
+        </div>
+        <div class="mtab-panel" data-panel="isp">
+          <div class="dgrid" id="v-isp"></div>
+        </div>
+        <div class="mtab-panel" data-panel="hw">
+          <div class="dgrid" id="v-hw"></div>
+        </div>
+        <div class="mtab-panel" data-panel="bill">
+          <div class="dgrid" id="v-bill"></div>
+        </div>
       </div>
     </div>
 
@@ -3233,7 +3255,13 @@
           Edit customer
           <span id="e-label" style="font-size: 12px; color: var(--txt3); font-family: var(--mono)"></span>
         </div>
-        <div class="sec-title">Customer Details</div>
+        <div class="mtabs" id="e-tabs">
+          <div class="mtab active" data-tab="cust" onclick="switchMTab('e',this,'cust')">Details</div>
+          <div class="mtab" data-tab="isp" onclick="switchMTab('e',this,'isp')">ISP</div>
+          <div class="mtab" data-tab="hw" onclick="switchMTab('e',this,'hw')">Hardware</div>
+          <div class="mtab" data-tab="bill" onclick="switchMTab('e',this,'bill')">Billing</div>
+        </div>
+        <div class="mtab-panel active" data-panel="cust">
         <div class="fgrid">
           <input type="hidden" id="e-id" />
           <div class="ff">
@@ -3275,7 +3303,8 @@
             <textarea id="e-comments"></textarea>
           </div>
         </div>
-        <div class="sec-title">ISP Details</div>
+        </div>
+        <div class="mtab-panel" data-panel="isp">
         <div class="fgrid">
           <div class="ff">
             <label>ISP Server *</label>
@@ -3283,10 +3312,6 @@
               <option value="1">Jaze ISP Server</option>
               <option value="2">NetAdmin Server</option>
             </select>
-          </div>
-          <div class="ff">
-            <label>ISP Customer ID</label>
-            <input id="e-cid" />
           </div>
           <div class="ff full">
             <label>ISP Username (PPPoE)</label>
@@ -3303,7 +3328,8 @@
             </select>
           </div>
         </div>
-        <div class="sec-title">Hardware Details</div>
+        </div>
+        <div class="mtab-panel" data-panel="hw">
         <div class="fgrid">
           <div class="ff">
             <label>Router brand</label>
@@ -3334,20 +3360,6 @@
             <input id="e-iptv" />
           </div>
           <div class="ff">
-            <label>PON Port</label>
-            <select id="e-pon-port">
-              <option value="">— Select —</option>
-              <option value="0/1">PON 0/1</option>
-              <option value="0/2">PON 0/2</option>
-              <option value="0/3">PON 0/3</option>
-              <option value="0/4">PON 0/4</option>
-            </select>
-          </div>
-          <div class="ff">
-            <label>ONU ID</label>
-            <input id="e-onu-id" type="number" />
-          </div>
-          <div class="ff">
             <label>Current WiFi SSID</label>
             <input id="e-wifi-ssid" />
           </div>
@@ -3359,18 +3371,12 @@
             </select>
           </div>
         </div>
-        <div class="sec-title">Billing</div>
+        </div>
+        <div class="mtab-panel" data-panel="bill">
           <div class="fgrid">
             <div class="ff">
               <label>Balance Due (₹)</label>
               <input id="e-due" type="number" placeholder="0" min="0" />
-            </div>
-            <div class="ff">
-              <label>Due Payment Mode</label>
-              <select id="e-due-mode">
-                <option value="normal">Normal ( Due + Renew plan)</option>
-                <option value="due_only">Due Only (clear due only)</option>
-              </select>
             </div>
             <div class="ff">
               <label>Billing Type</label>
@@ -3379,7 +3385,13 @@
                 <option value="postpaid">Postpaid</option>
               </select>
             </div>
-            <div class="ff"></div>
+            <div class="ff" id="e-duemode-field">
+              <label>Due Payment Mode</label>
+              <select id="e-due-mode">
+                <option value="normal">Normal ( Due + Renew plan)</option>
+                <option value="due_only">Due Only (clear due only)</option>
+              </select>
+            </div>
             <div class="ff" id="e-postpaid-fields" style="display:none">
               <label>Grace Period (days)</label>
               <select id="e-grace-days">
@@ -3405,7 +3417,7 @@
             <input id="e-next-bill-date" type="date" />
           </div>
           </div>
-
+        </div>
 
         <div class="errmsg" id="e-err"></div>
         <div class="mactions">
@@ -4022,7 +4034,6 @@
           di("Comments", c.comments, "full");
         $("v-isp").innerHTML =
           di("ISP Server", c.isp_server) +
-          di("ISP Customer ID", c.isp_customer_id, "", "mono") +
           di("ISP Username", c.isp_username, "full", "mono") +
           di("Plan", c.plan_name) +
           di("Plan ID", c.plan_id);
@@ -4049,6 +4060,7 @@
               di("Grace Period", (c.grace_period_days || 10) + " days") +
               di("Auto-Suspend", c.auto_suspend_enabled ? "ON" : "OFF")
             : "");
+        resetMTabs('v');
         $("m-view").style.display = "flex";
       }
 
@@ -4076,7 +4088,6 @@
           "a-addr",
           "a-mem",
           "a-comments",
-          "a-cid",
           "a-iuser",
           "a-rip",
           "a-ruser",
@@ -4093,8 +4104,6 @@
         $("a-isp").value = "1";
         $("a-brand").value = "";
         $("a-plan").value = "";
-        $("a-pon-port").value = "";
-        $("a-onu-id").value = "";
         $("a-wifi-band").value = "single";
         $("a-billing-type").value = "prepaid";
         $("a-grace-days").value = "10";
@@ -4118,7 +4127,6 @@
         $("e-pass").value = "";
         $("e-addr").value = c.address || "";
         $("e-isp").value = c.isp_server_id || "2";
-        $("e-cid").value = c.isp_customer_id || "";
         $("e-iuser").value = c.isp_username || "";
         $("e-brand").value = c.router_brand_id || "";
         $("e-rip").value = c.router_ip || "192.168.1.1";
@@ -4132,8 +4140,6 @@
         $("e-iptv").value = c.iptv || "";
         $("e-err").style.display = "none";
         $("e-plan").value = c.plan_id ? String(c.plan_id) : "";
-        if ($("e-pon-port")) $("e-pon-port").value = c.pon_port || "";
-        if ($("e-onu-id")) $("e-onu-id").value = c.onu_id || "";
         if ($("e-wifi-ssid")) $("e-wifi-ssid").value = c.wifi_ssid || "";
         if ($("e-wifi-band")) $("e-wifi-band").value = c.wifi_band || "single";
         $("e-due").value = c.balance_due || 0;
@@ -4144,6 +4150,7 @@
         $("e-next-bill-date").value = c.next_bill_date || "";
         togglePostpaidFieldsEdit();
         if ($("e-due-mode")) $("e-due-mode").value = c.due_payment_mode || "normal";
+        resetMTabs('e');
         $("m-edit").style.display = "flex";
       }
 
@@ -4158,7 +4165,6 @@
           password: $("a-pass").value.trim(),
           address: $("a-addr").value.trim(),
           isp_server_id: parseInt($("a-isp").value),
-          isp_customer_id: $("a-cid").value.trim(),
           isp_username: $("a-iuser").value.trim(),
           router_brand_id: $("a-brand").value || null,
           router_ip: $("a-rip").value.trim() || "192.168.1.1",
@@ -4170,8 +4176,6 @@
           comments: $("a-comments").value.trim(),
           mac_address: $("a-mac").value.trim(),
           iptv: $("a-iptv").value.trim(),
-          pon_port: $("a-pon-port").value || null,
-          onu_id: $("a-onu-id").value ? parseInt($("a-onu-id").value) : null,
           wifi_ssid: $("a-wifi-ssid").value.trim() || null,
           wifi_band: $("a-wifi-band").value || "single",
           balance_due: parseFloat($("a-due").value) || 0,
@@ -4212,7 +4216,6 @@
           email: $("e-email").value.trim(),
           address: $("e-addr").value.trim(),
           isp_server_id: parseInt($("e-isp").value),
-          isp_customer_id: $("e-cid").value.trim(),
           isp_username: $("e-iuser").value.trim(),
           router_brand_id: $("e-brand").value || null,
           router_ip: $("e-rip").value.trim(),
@@ -4225,8 +4228,6 @@
           comments: $("e-comments").value.trim(),
           mac_address: $("e-mac").value.trim(),
           iptv: $("e-iptv").value.trim(),
-          pon_port: $("e-pon-port") ? $("e-pon-port").value || null : null,
-          onu_id: $("e-onu-id") && $("e-onu-id").value ? parseInt($("e-onu-id").value) : null,
           wifi_ssid: $("e-wifi-ssid") ? $("e-wifi-ssid").value.trim() || null : null,
           wifi_band: $("e-wifi-band") ? $("e-wifi-band").value || "single" : "single",
           balance_due: parseFloat($("e-due").value) || 0,
@@ -6150,6 +6151,24 @@ async function loadWaHistory() {
   }
 }
 
+// ── Modal tab switcher (View / Edit) ──────────────────────────
+function switchMTab(prefix, el, tabName) {
+  const tabs = document.querySelectorAll('#' + prefix + '-tabs .mtab');
+  tabs.forEach((t) => t.classList.remove('active'));
+  el.classList.add('active');
+  const modalRoot = el.closest('.modal');
+  modalRoot.querySelectorAll('.mtab-panel').forEach((p) => p.classList.remove('active'));
+  modalRoot.querySelector('.mtab-panel[data-panel="' + tabName + '"]').classList.add('active');
+}
+function resetMTabs(prefix) {
+  const tabs = document.querySelectorAll('#' + prefix + '-tabs .mtab');
+  tabs.forEach((t, i) => t.classList.toggle('active', i === 0));
+  const modalId = prefix === 'v' ? 'm-view' : 'm-edit';
+  const modalRoot = $(modalId);
+  const panels = modalRoot.querySelectorAll('.mtab-panel');
+  panels.forEach((p, i) => p.classList.toggle('active', i === 0));
+}
+
 // ── Postpaid field toggles ──────────────────────────────────
 function togglePostpaidFieldsAdd() {
   const isPost = $('a-billing-type').value === 'postpaid';
@@ -6162,6 +6181,7 @@ function togglePostpaidFieldsEdit() {
   $('e-autosuspend-field').style.display = isPost ? 'block' : 'none';
   $('e-currentduedate-field').style.display = isPost ? 'block' : 'none';
   $('e-nextbilldate-field').style.display = isPost ? 'block' : 'none';
+  $('e-duemode-field').style.display = isPost ? 'none' : 'block';
 }
 
 // ── Suspend modal ────────────────────────────────────────────
