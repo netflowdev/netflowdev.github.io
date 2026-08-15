@@ -111,7 +111,7 @@
         z-index: 1;
       }
       .logo {
-        padding: 26px 22px 22px;
+        padding: 26px 22px 16px;
         border-bottom: 1px solid var(--sb-border);
       }
       .logo-badge {
@@ -149,7 +149,7 @@
         opacity: 0.8;
       }
       .nav {
-        padding: 8px 0;
+        padding: 2px 0;
         flex: 1;
         overflow-y: auto;
       }
@@ -217,6 +217,19 @@
         display: flex;
         align-items: center;
         gap: 11px;
+        padding: 6px 8px;
+        margin: -6px -8px 0;
+        border-radius: 10px;
+        transition: background 0.15s;
+      }
+      .user-row:hover {
+        background: var(--sb-hover);
+      }
+      .user-row .chevron {
+        margin-left: auto;
+        font-size: 15px;
+        color: var(--txt3, rgba(255,255,255,0.3));
+        flex-shrink: 0;
       }
       .avatar {
         width: 36px;
@@ -407,6 +420,25 @@
         color: var(--txt3);
         margin-top: 7px;
         font-weight: 400;
+      }
+      .stats .sc {
+        padding: 18px 20px 16px;
+      }
+      .sc-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .sc-row .sc-icon {
+        margin-bottom: 0;
+        flex-shrink: 0;
+      }
+      .sc-row .sc-text {
+        text-align: right;
+      }
+      .sc-row .sc-label {
+        margin-bottom: 4px;
       }
       .card {
         background: var(--surface);
@@ -1356,17 +1388,22 @@
       }
       .voice-lbl {
         font-size: 9px;
-        color: rgba(255, 255, 255, 0.2);
+        color: var(--txt3);
         letter-spacing: 0.14em;
         text-transform: uppercase;
         font-family: var(--mono);
         font-weight: 700;
       }
+      .voice-row {
+        display: flex;
+        gap: 6px;
+      }
       .voice-btn {
-        width: 100%;
+        flex: 1;
+        min-width: 0;
         text-align: left;
-        font-size: 11px;
-        padding: 7px 10px;
+        font-size: 10.5px;
+        padding: 7px 8px;
         border-radius: 8px;
         border: 1px solid var(--sb-border);
         background: var(--sb-surface);
@@ -1374,6 +1411,9 @@
         cursor: pointer;
         font-family: var(--font);
         transition: all 0.15s;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .voice-btn:hover {
         background: var(--sb-hover);
@@ -1385,9 +1425,10 @@
         color: #34d399;
       }
       .voice-sel {
-        width: 100%;
-        font-size: 11px;
-        padding: 7px 10px;
+        flex: 1;
+        min-width: 0;
+        font-size: 10.5px;
+        padding: 7px 6px;
         border-radius: 8px;
         border: 1px solid var(--sb-border);
         background: var(--sb-surface);
@@ -1579,7 +1620,7 @@
               display: none;
               flex-direction: column;
               gap: 6px;
-              padding: 12px 18px;
+              padding: 6px 18px 10px;
               border-bottom: 1px solid var(--sb-border);
             "
           >
@@ -1603,11 +1644,13 @@
             >
               🔊 Click to activate voice
             </button>
-            <button class="voice-btn" id="voice-toggle" onclick="toggleVoice()">🔇 Voice OFF</button>
-            <select class="voice-sel" id="voice-lang-sel" onchange="changeLanguage(this.value)">
-              <option value="hi-IN">🇮🇳 हिंदी</option>
-              <option value="en-IN">🇬🇧 English</option>
-            </select>
+            <div class="voice-row">
+              <button class="voice-btn" id="voice-toggle" onclick="toggleVoice()">🔇 Voice OFF</button>
+              <select class="voice-sel" id="voice-lang-sel" onchange="changeLanguage(this.value)">
+                <option value="hi-IN">🇮🇳 हिंदी</option>
+                <option value="en-IN">🇬🇧 English</option>
+              </select>
+            </div>
           </div>
           <div class="nav-sec">Overview</div>
           <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
@@ -1663,12 +1706,13 @@
         </nav>
         
         <div class="sidebar-ft">
-          <div class="user-row">
+          <div class="user-row" id="sb-profile-row" style="cursor:pointer" onclick="showPage('isp-plan')" title="View plan & subscription">
             <div class="avatar" id="sb-avatar">A</div>
             <div>
               <div class="user-name" id="sb-name">Admin</div>
-              <div class="user-role" id="sb-role">admin</div>
+              <div class="user-role" id="sb-role">Plan &amp; Subscription →</div>
             </div>
+            <div class="chevron">›</div>
           </div>
           <button class="logout-btn" id="logout-btn">Sign out</button>
         </div>
@@ -1707,9 +1751,13 @@
           <div class="content">
             <div class="stats">
               <div class="sc blue fade-up" onclick="showPage('customers')">
-                <div class="sc-icon blue">👥</div>
-                <div class="sc-label">Total</div>
-                <div class="sc-val" id="s-total">—</div>
+                <div class="sc-row">
+                  <div class="sc-icon blue">👥</div>
+                  <div class="sc-text">
+                    <div class="sc-label">Total</div>
+                    <div class="sc-val" id="s-total">—</div>
+                  </div>
+                </div>
                 <div class="sc-sub">customers</div>
               </div>
               <div
@@ -1719,9 +1767,13 @@
                   filterSt('active');
                 "
               >
-                <div class="sc-icon green">✓</div>
-                <div class="sc-label">Active</div>
-                <div class="sc-val" id="s-active" style="color: var(--green)">—</div>
+                <div class="sc-row">
+                  <div class="sc-icon green">✓</div>
+                  <div class="sc-text">
+                    <div class="sc-label">Active</div>
+                    <div class="sc-val" id="s-active" style="color: var(--green)">—</div>
+                  </div>
+                </div>
                 <div class="sc-sub" style="color: var(--green)">online</div>
               </div>
               <div
@@ -1731,15 +1783,23 @@
                   filterSt('expired');
                 "
               >
-                <div class="sc-icon red">⚠</div>
-                <div class="sc-label">Expired</div>
-                <div class="sc-val" id="s-expired" style="color: var(--red)">—</div>
+                <div class="sc-row">
+                  <div class="sc-icon red">⚠</div>
+                  <div class="sc-text">
+                    <div class="sc-label">Expired</div>
+                    <div class="sc-val" id="s-expired" style="color: var(--red)">—</div>
+                  </div>
+                </div>
                 <div class="sc-sub" style="color: var(--red)">renewal needed</div>
               </div>
               <div class="sc amber fade-up fade-up-d3" onclick="showPage('activations')">
-                <div class="sc-icon amber">⏳</div>
-                <div class="sc-label">Pending</div>
-                <div class="sc-val" id="s-pending" style="color: var(--amber)">—</div>
+                <div class="sc-row">
+                  <div class="sc-icon amber">⏳</div>
+                  <div class="sc-text">
+                    <div class="sc-label">Pending</div>
+                    <div class="sc-val" id="s-pending" style="color: var(--amber)">—</div>
+                  </div>
+                </div>
                 <div class="sc-sub" style="color: var(--amber)">activations</div>
               </div>
             </div>
@@ -2845,6 +2905,23 @@
         </div>
         
 
+      <div id="page-isp-plan" style="display:none">
+        <div class="topbar">
+          <div>
+            <div class="pg-title">ISP Plan &amp; Subscription</div>
+            <div class="pg-sub">Your NetFlow ISP customer-slot subscription</div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="card" style="max-width:600px">
+            <div class="card-hd">Your ISP Subscription</div>
+            <div id="isp-plan-view" class="dgrid" style="margin-bottom:18px"></div>
+            <div class="mactions">
+              <button class="btn bpri" onclick="openRcModal('isp_customer_slots','Renew ISP Subscription')">Renew / Buy Slots →</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
 
 
@@ -3581,7 +3658,7 @@
 
     <script>
       const BASE = "https://isp-billing-api.netflowcloud.workers.dev";
-      const PAGES = ['dashboard','customers','activations','payments','settlements','notifications','plans','ott','paylinks','brands','whatsapp','billing','iptv'];
+      const PAGES = ['dashboard','customers','activations','payments','settlements','notifications','plans','ott','paylinks','brands','whatsapp','billing','iptv','isp-plan'];
       let custCache = [],
         plansCache = [],
         ottPlansCache = [],
@@ -3669,10 +3746,10 @@
         return '<span class="badge bgray">' + (m || "—") + "</span>";
       }
       function abadge(a) {
-        if (a === "jaze_renew") return '<span class="badge binfo">Jaze</span>';
+        if (a === "jaze_renew") return '<span class="badge bok">Jaze</span>';
         if (a === "suspend") return '<span class="badge bwarn">⏸ Suspend</span>';
         if (a === "reactivate") return '<span class="badge bok">▶ Reactivate</span>';
-        return '<span class="badge bwarn">NetAdmin</span>';
+        return '<span class="badge binfo">NetAdmin</span>';
       }
       function esc(s) {
         return (s || "").replace(/'/g, "&#39;").replace(/\\/g, "\\\\");
@@ -3779,6 +3856,7 @@
         if (name === "paylinks") loadPaymentLinks();
         if (name === 'brands') loadBrands();
         if (name === 'iptv') { loadIptvCustomers(); loadIptvConfig(); }
+        if (name === 'isp-plan') loadIspPlan();
         if (name === 'whatsapp') loadWhatsAppPage();
         if (name === 'billing') loadBillingHistory();
       }
@@ -4699,6 +4777,16 @@
           toast("OTT plan deactivated");
           loadOttPlans();
         } else toast(r.error || "Failed", "err");
+      }
+
+      function loadIspPlan() {
+        const u = getUser() || {};
+        const used = (custCache && custCache.length) ? custCache.length : ($('s-total') ? $('s-total').textContent : '—');
+        const limit = u.total_customer_limit;
+        $('isp-plan-view').innerHTML =
+          di('Customer Slots', limit ? (used + ' / ' + limit) : (used + ' / Unlimited')) +
+          di('Status', sbadge(u.subscription_status || 'inactive'), true) +
+          di('Subscription Expiry', fmtDate(u.subscription_expiry_date));
       }
 
       // ── NOTIFICATIONS ─────────────────────────────────────────────
