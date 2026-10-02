@@ -5532,10 +5532,12 @@ function buildPayRemMsg(d, lang, withApp) {
 
   let msg = head + dueNote + '\n' + (hi ? 'धन्यवाद' : 'Thank you') + (sig ? ' - ' + sig : '') + '\n\n' + ask + '\n\n💳 Pay Now: ' + d.url;
 
-  if (withApp) {
+    if (withApp) {
+    const ph10 = String(d.customer_phone || '').replace(/\D/g, '').slice(-10);
+    const loginLine = '\nLogin:\nUsername: *' + ph10 + '*\nPassword: *' + ph10 + '*';
     msg += hi
-      ? '\n\n📱 *NetFlow MyWiFi App* से करें — रिचार्ज • WiFi पासवर्ड बदलें • OTT Add-ons • Plan देखें\n⬇️ Download: ' + PR_APP_LINK + '\nLogin: Username & Password दोनों अपना WhatsApp नंबर डालें'
-      : '\n\n📱 *NetFlow MyWiFi App* — Recharge • Change WiFi Password • OTT Add-ons • View Plan\n⬇️ Download: ' + PR_APP_LINK + '\nLogin: Use your WhatsApp number as both Username & Password';
+      ? '\n\n📱 *NetFlow MyWiFi App* से करें — रिचार्ज • WiFi पासवर्ड बदलें • OTT Add-ons • Plan देखें\n⬇️ Download: ' + PR_APP_LINK + loginLine
+      : '\n\n📱 *NetFlow MyWiFi App* — Recharge • Change WiFi Password • OTT Add-ons • View Plan\n⬇️ Download: ' + PR_APP_LINK + loginLine;
   }
   return msg;
 }
