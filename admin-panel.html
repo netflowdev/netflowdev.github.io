@@ -836,6 +836,38 @@
       .modal-lg {
         max-width: 780px;
       }
+      .modal-xwrap {
+        position: sticky;
+        top: 0;
+        height: 0;
+        z-index: 20;
+      }
+      .modal-bg .modal-title {
+        padding-right: 40px;
+      }
+      .modal-x {
+        position: absolute;
+        top: 10px;
+        right: -8px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        color: var(--txt2);
+        font-size: 15px;
+        line-height: 1;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(20, 20, 10, 0.18);
+      }
+      .modal-x:hover {
+        background: var(--red-l);
+        color: var(--red);
+        border-color: rgba(220, 38, 38, 0.2);
+      }
       @keyframes mIn {
         from {
           opacity: 0;
@@ -1550,9 +1582,14 @@
         #ctbody td:last-child::before { display: none; }
         #ctbody td:last-child { justify-content: flex-start; padding-top: 10px !important; }
 
+
+        /* Modal action buttons wrap instead of overflowing */
+        .mactions { flex-wrap: wrap; justify-content: stretch; }
+        .mactions .btn { flex: 1 1 auto; justify-content: center; }
+
         /* Action buttons */
         .abtns { gap: 3px; }
-        .bsm { padding: 4px 7px; font-size: 10px; }
+        .bsm { padding: 7px 10px; font-size: 11px; }
 
         /* Pagination */
         #cpagination {
@@ -3627,7 +3664,6 @@
     </div>
     <div class="errmsg" id="pr-err"></div>
     <div class="mactions">
-      <button class="btn" onclick="closeM('m-payrem')">Close</button>
       <button class="btn" id="pr-copy-link" onclick="copyPayRemLink()" disabled>📋 Copy Link</button>
       <button class="btn" id="pr-copy-msg" onclick="copyPayRemMsg()" disabled>📋 Copy Message</button>
       <button class="btn bpri" id="pr-send" onclick="sendPayRemWhatsApp()" style="background:#25D366;border-color:#25D366" disabled>📲 Send on WhatsApp</button>
@@ -3747,6 +3783,28 @@
       }
       function closeM(id) {
         $(id).style.display = "none";
+      }
+      function addModalCloseButtons() {
+        document.querySelectorAll(".modal-bg[id]").forEach(function (bg) {
+          var m = bg.querySelector(".modal");
+          if (!m || m.querySelector(".modal-x")) return;
+          var x = document.createElement("button");
+          x.type = "button";
+          x.className = "modal-x";
+          x.setAttribute("aria-label", "Close");
+          x.title = "Close";
+          x.textContent = "✕";
+          x.onclick = function () { closeM(bg.id); };
+          var wrap = document.createElement("div");
+          wrap.className = "modal-xwrap";
+          wrap.appendChild(x);
+          m.insertBefore(wrap, m.firstChild);
+        });
+      }
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", addModalCloseButtons);
+      } else {
+        addModalCloseButtons();
       }
       function showErr(el, msg) {
         el.textContent = msg;
