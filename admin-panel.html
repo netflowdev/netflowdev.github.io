@@ -3576,6 +3576,41 @@
   </div>
 </div>
 
+<!-- PAYMENT REMINDER MODAL -->
+<div class="modal-bg" id="m-payrem" style="display:none" onclick="if(event.target===this)closeM('m-payrem')">
+  <div class="modal modal-lg">
+    <div class="modal-title" id="pr-title">Send Payment Reminder</div>
+    <div class="dgrid" id="pr-info" style="margin-bottom:16px"></div>
+    <div class="fgrid">
+      <div class="ff">
+        <label>Message Language</label>
+        <select id="pr-lang" onchange="refreshPayRemMsg()">
+          <option value="hi">Hindi</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <div class="ff">
+        <label>App Download Line</label>
+        <select id="pr-app" onchange="refreshPayRemMsg()">
+          <option value="0">Don't include</option>
+          <option value="1">Include</option>
+        </select>
+      </div>
+      <div class="ff full">
+        <label>Message (you can edit before sending)</label>
+        <textarea id="pr-msg" rows="12"></textarea>
+      </div>
+    </div>
+    <div class="errmsg" id="pr-err"></div>
+    <div class="mactions">
+      <button class="btn" onclick="closeM('m-payrem')">Close</button>
+      <button class="btn" id="pr-copy-link" onclick="copyPayRemLink()" disabled>📋 Copy Link</button>
+      <button class="btn" id="pr-copy-msg" onclick="copyPayRemMsg()" disabled>📋 Copy Message</button>
+      <button class="btn bpri" id="pr-send" onclick="sendPayRemWhatsApp()" style="background:#25D366;border-color:#25D366" disabled>📲 Send on WhatsApp</button>
+    </div>
+  </div>
+</div>
+
 <!-- REACTIVATE MODAL -->
 <div class="modal-bg" id="m-reactivate" style="display:none">
   <div class="modal" style="max-width:420px">
@@ -3958,7 +3993,7 @@
             '<button class="btn bsm bedit" onclick="openEdit(' + c.id + ')">✏</button>' +
             generateBillBtn +
             postpaidBtn +
-            '<button class="btn bsm bpurple-btn" onclick="generateLink(' + c.id + ",'" + n + "')" + '" title="Payment Link">🔗</button>' +
+            '<button class="btn bsm bpurple-btn" onclick="openPayReminder(' + c.id + ')" title="Send payment reminder">🔗</button>' +
             '<button class="btn bsm bdanger" onclick="deleteCustomer(' + c.id + ',' + "'" + n + "'" + ')">🗑</button>' +
             '</div></td></tr>';
         }).join("");
@@ -5401,23 +5436,152 @@
         else toast(r.error || 'Failed', 'err');
       }
 
-      /* ── MOBILE SIDEBAR ── */
-      function toggleSidebar() {
-        document.querySelector('.sidebar').classList.toggle('open');
-        $('mob-overlay').classList.toggle('show');
-      }
-      function closeSidebar() {
-        document.querySelector('.sidebar').classList.remove('open');
-        $('mob-overlay').classList.remove('show');
-      }
-      document.querySelectorAll('.nav-item').forEach(function(el) {
-        el.addEventListener('click', function() {
-          if (window.innerWidth <= 768) closeSidebar();
-        });
-      });
+// ── PAYMENT REMINDER (customer list 🔗 button) ───────────────
+let _prData = null;
+const PR_APP_LINK = 'https://pub-34318815f8fc477d8f35e094f9e2a42d.r2.dev/app-release.apk';
+
+async function openPayReminder(customerId) {
+  _prData = null;
+  const c = custCache.find((x) => x.id === customerId);
+  $('pr-title').textContent = 'Send Payment Reminder' + (c ? ' — ' + c.name : '');
+  $('pr-info').innerHTML = '<div class="loading" style="grid-column:1/-1"><div class="spinner"></div>Preparing link...</div>';
+  $('pr-msg').value = '';
+  $('pr-err').style.display = 'none';
+  ['pr-send', 'pr-copy-msg', 'pr-copy-link'].forEach((i) => ($(i).disabled = true));
+  $('m-payrem').style.display = 'flex';
+  try {
+    const r = await apiFetch('POST', '/api/admin/payment-links/generate', { customer_id: customerId });
+    if (!r.success) {
+      $('pr-info').innerHTML = '';
+      showErr($('pr-err'), r.error || 'Could not prepare payment link');
+      return;
+    }
+    _prData = r.data;
+    const d = _prData;
+    $('pr-info').innerHTML =
+      di('Customer', d.customer_name) +
+      di('Phone', d.customer_phone, '', 'mono') +
+      di('Plan', d.plan_name) +
+      di('Pay Amount', '<span style="color:var(--green);font-weight:700">₹' + (d.amount || 0) + '</span>', true) +
+      di(
+        'Balance Due',
+        d.balance_due > 0
+          ? '<span style="color:var(--red);font-weight:700">₹' + d.balance_due + '</span>'
+          : '<span style="color:var(--green);font-weight:600">₹0</span>',
+        true,
+      ) +
+      di('Expiry Date', fmtDate(d.expiry_date), '', 'mono') +
+      di('Payment Link', d.url, 'full', 'mono');
+    refreshPayRemMsg();
+    ['pr-send', 'pr-copy-msg', 'pr-copy-link'].forEach((i) => ($(i).disabled = false));
+  } catch (e) {
+    $('pr-info').innerHTML = '';
+    showErr($('pr-err'), 'Network error');
+  }
+}
+
+function buildPayRemMsg(d, lang, withApp) {
+  const u = getUser();
+  const sig = ((u.name || '') + ' ' + (u.phone || '')).trim();
+  const name = d.customer_name || '';
+  const amount = d.amount || 0;
+  const due = d.balance_due || 0;
+  const plan = d.plan_name ? ' (' + d.plan_name + ')' : '';
+  const expiry = d.expiry_date ? fmtDate(d.expiry_date) : '';
+  const td = today();
+  const isDueOnly = d.recharge_type === 'due_only';
+  const isExpired = !!d.expiry_date && d.expiry_date < td;
+  const daysLeft = d.expiry_date && !isExpired ? Math.ceil((new Date(d.expiry_date) - new Date(td)) / 86400000) : null;
+  const soon = daysLeft !== null && daysLeft <= 5;
+  const hi = lang === 'hi';
+
+  let head, ask;
+  if (hi) {
+    if (isDueOnly) {
+      head = name + ' जी, ' + (expiry ? 'दि. ' + expiry + ' तक का ' : '') + 'आपका ब्रॉडबैंड रिचार्ज भुगतान ₹' + due + ' बाकी है।';
+      ask = 'प्रिय ग्राहक, आपके रिचार्ज की भुगतान राशि अभी तक प्राप्त नहीं हुई है। कृपया नीचे दिए गए लिंक से भुगतान करें।';
+    } else if (isExpired) {
+      head = name + ' जी, आपका ब्रॉडबैंड प्लान' + plan + ' दि. ' + expiry + ' को समाप्त हो गया है। रिचार्ज की कुल राशि ₹' + amount + ' है।';
+      ask = 'प्रिय ग्राहक, सेवा जारी रखने हेतु कृपया नीचे दिए गए लिंक से तुरंत रिचार्ज करें।';
+    } else if (soon) {
+      head = name + ' जी, आपका ब्रॉडबैंड प्लान' + plan + ' दि. ' + expiry + ' को समाप्त हो रहा है (' + daysLeft + ' दिन बाकी)। रिचार्ज की राशि ₹' + amount + ' है।';
+      ask = 'प्रिय ग्राहक, कृपया समय पर रिचार्ज करने हेतु नीचे दिए गए लिंक का उपयोग करें।';
+    } else {
+      head = name + ' जी, आपके ब्रॉडबैंड प्लान' + plan + ' की रिचार्ज राशि ₹' + amount + ' है।' + (expiry ? ' आपका प्लान दि. ' + expiry + ' तक वैध है।' : '');
+      ask = 'प्रिय ग्राहक, रिचार्ज करने हेतु कृपया नीचे दिए गए लिंक का उपयोग करें।';
+    }
+  } else {
+    if (isDueOnly) {
+      head = 'Dear ' + name + ', your broadband payment of ₹' + due + (expiry ? ' till ' + expiry : '') + ' is still pending.';
+      ask = 'Please make the payment using the link below at the earliest.';
+    } else if (isExpired) {
+      head = 'Dear ' + name + ', your broadband plan' + plan + ' expired on ' + expiry + '. Total recharge amount: ₹' + amount + '.';
+      ask = 'Please recharge immediately using the link below to continue your service.';
+    } else if (soon) {
+      head = 'Dear ' + name + ', your broadband plan' + plan + ' is expiring on ' + expiry + ' (' + daysLeft + ' day(s) left). Recharge amount: ₹' + amount + '.';
+      ask = 'Please recharge on time using the link below.';
+    } else {
+      head = 'Dear ' + name + ', your broadband recharge amount' + plan + ' is ₹' + amount + '.' + (expiry ? ' Your plan is valid till ' + expiry + '.' : '');
+      ask = 'Please use the link below to recharge.';
+    }
+  }
+
+  const dueNote = !isDueOnly && due > 0
+    ? (hi ? '\nइसमें पिछला बकाया ₹' + due + ' शामिल है।' : '\nThis includes your previous due of ₹' + due + '.')
+    : '';
+
+  let msg = head + dueNote + '\n' + (hi ? 'धन्यवाद' : 'Thank you') + (sig ? ' - ' + sig : '') + '\n\n' + ask + '\n\n💳 Pay Now: ' + d.url;
+
+  if (withApp) {
+    msg += hi
+      ? '\n\n📱 *NetFlow MyWiFi App* से करें — रिचार्ज • WiFi पासवर्ड बदलें • OTT Add-ons • Plan देखें\n⬇️ Download: ' + PR_APP_LINK + '\nLogin: Username & Password दोनों अपना WhatsApp नंबर डालें'
+      : '\n\n📱 *NetFlow MyWiFi App* — Recharge • Change WiFi Password • OTT Add-ons • View Plan\n⬇️ Download: ' + PR_APP_LINK + '\nLogin: Use your WhatsApp number as both Username & Password';
+  }
+  return msg;
+}
+
+function refreshPayRemMsg() {
+  if (!_prData) return;
+  $('pr-msg').value = buildPayRemMsg(_prData, $('pr-lang').value, $('pr-app').value === '1');
+}
+
+function sendPayRemWhatsApp() {
+  if (!_prData) return;
+  const msg = $('pr-msg').value.trim();
+  if (!msg) { showErr($('pr-err'), 'Message is empty'); return; }
+  const ph = String(_prData.customer_phone || '').replace(/\D/g, '');
+  const wa = ph.length === 10 ? '91' + ph : ph;
+  window.open('https://wa.me/' + wa + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function copyPayRemLink() {
+  if (!_prData) return;
+  navigator.clipboard.writeText(_prData.url).then(() => toast('Link copied!'));
+}
+
+function copyPayRemMsg() {
+  navigator.clipboard.writeText($('pr-msg').value).then(() => toast('Message copied!'));
+}
+
+      
+
+/* ── MOBILE SIDEBAR ── */
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  $('mob-overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.querySelector('.sidebar').classList.remove('open');
+  $('mob-overlay').classList.remove('show');
+}
+document.querySelectorAll('.nav-item').forEach(function(el) {
+  el.addEventListener('click', function() {
+    if (window.innerWidth <= 768) closeSidebar();
+  });
+});
 
 
-      // ── IPTV ─────────────────────────────────────────────────────
+// ── IPTV ─────────────────────────────────────────────────────
 let iptvCustCache = [];
 let iptvPurchasedSlots = null; // filled in by loadIptvConfig()
 
