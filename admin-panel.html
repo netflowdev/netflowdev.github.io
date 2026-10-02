@@ -1626,7 +1626,14 @@
 
         .abtns .btn.mob-only { display: none !important; }
         #ctbody td:last-child .abtns { flex-wrap: wrap; row-gap: 8px; }
-        .isp-inline { display: inline-flex; margin-right: 8px; vertical-align: middle; }
+        .isp-inline { display: none !important; }
+
+        /* Layout B: status alone top-right; billing + ISP tags on the username line */
+        #ctbody td:nth-child(10):not(:only-child) { grid-column: 2 / 4; grid-row: 1; justify-content: flex-end; }
+        #ctbody td:nth-child(9):not(:only-child) { grid-column: 2; grid-row: 2; padding: 0 0 8px !important; }
+        #ctbody td:nth-child(4):not(:only-child) { display: flex; grid-column: 3; grid-row: 2; justify-content: flex-end; padding: 0 0 8px !important; }
+        #ctbody td:nth-child(4)::before { display: none; }
+        #ctbody td:nth-child(4) .badge { font-size: 9px; padding: 2px 8px; }
 
 
         /* Modal action buttons wrap instead of overflowing */
