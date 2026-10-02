@@ -1594,7 +1594,7 @@
         #page-customers table { min-width: 0; }
         #page-customers thead { display: none; }
         #ctbody td:last-child::before { display: none; }
-        #ctbody td:last-child { justify-content: flex-start; padding-top: 10px !important; }
+        #ctbody td:last-child { justify-content: flex-end; padding-top: 10px !important; }
 
         /* Compact card: name + status header, main rows, rest behind "More" */
         #ctbody tr { display: grid; grid-template-columns: 1fr auto auto; column-gap: 8px; align-items: center; }
@@ -1625,7 +1625,7 @@
         #ctbody td:nth-child(11) { grid-row: 7; }
 
         .abtns .btn.mob-only { display: none !important; }
-        #ctbody td:last-child .abtns { flex-wrap: wrap; row-gap: 8px; }
+        #ctbody td:last-child .abtns { flex-wrap: wrap; row-gap: 8px; justify-content: flex-end; }
         .isp-inline { display: none !important; }
 
         /* Layout B: status alone top-right; billing + ISP tags on the username line */
@@ -1634,6 +1634,10 @@
         #ctbody td:nth-child(4):not(:only-child) { display: flex; grid-column: 3; grid-row: 2; justify-content: flex-end; padding: 0 0 8px !important; }
         #ctbody td:nth-child(4)::before { display: none; }
         #ctbody td:nth-child(4) .badge { font-size: 9px; padding: 2px 8px; }
+        #ctbody td:nth-child(9):not(:only-child),
+        #ctbody td:nth-child(4):not(:only-child) { padding-top: 8px !important; }
+        #ctbody td:nth-child(4):not(:only-child) { grid-column: 2; }
+        #ctbody td:nth-child(9):not(:only-child) { grid-column: 3; }
 
 
         /* Modal action buttons wrap instead of overflowing */
