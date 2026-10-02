@@ -1682,6 +1682,25 @@
         .topbar { padding: 12px 12px 12px 56px; }
         .pg-title { font-size: 16px; }
       }
+      
+      /* ── Add/Edit customer: tabbed modal ── */
+      .cm-modal { display: flex; flex-direction: column; overflow: hidden; height: min(700px, 90vh); }
+      .cm-modal .modal-title { margin-bottom: 14px; }
+      .cm-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; overflow-x: auto; flex-shrink: 0; -webkit-overflow-scrolling: touch; }
+      .cm-tab { background: none; border: none; border-bottom: 2px solid transparent; padding: 10px 14px; font-size: 13px; font-weight: 600; color: var(--txt3); cursor: pointer; white-space: nowrap; font-family: inherit; }
+      .cm-tab:hover { color: var(--txt); }
+      .cm-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+      .cm-dot { display: none; width: 7px; height: 7px; border-radius: 50%; background: var(--red); margin-left: 6px; vertical-align: middle; }
+      .cm-body { flex: 1; min-height: 0; overflow-y: auto; padding: 2px 4px 8px 2px; }
+      .cm-pane { display: none; }
+      .cm-pane.active { display: block; }
+      .cm-foot { flex-shrink: 0; margin-top: 0; padding-top: 14px; border-top: 1px solid var(--border); }
+      .cm-modal .errmsg { margin-top: 10px; flex-shrink: 0; }
+      .cm-sub { grid-column: 1 / -1; font-size: 10px; font-weight: 700; color: var(--txt3); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+      .cm-badge { font-size: 9px; font-weight: 700; color: var(--blue); background: var(--blue-l); padding: 1px 6px; border-radius: 99px; margin-left: 6px; font-family: var(--mono); }
+      .cm-hint { font-size: 11px; color: var(--amber); display: none; }
+      @media (max-width: 768px) { .cm-modal { height: 92vh; } }
+
     </style>
   </head>
   <body>
@@ -3165,158 +3184,180 @@
       </div>
     </div>
 
-    <!-- ADD CUSTOMER -->
+<!-- ADD CUSTOMER -->
     <div class="modal-bg" id="m-add" style="display: none">
-      <div class="modal modal-lg">
+      <div class="modal modal-lg cm-modal">
         <div class="modal-title">Add new customer</div>
-        <div class="sec-title">Customer Details</div>
-        <div class="fgrid">
-          <div class="ff">
-            <label>Full name *</label>
-            <input id="a-name" placeholder="Ramesh Kumar" />
+        <div class="cm-tabs">
+          <button type="button" class="cm-tab active" data-tab="details" onclick="cmTab('m-add','details')">Details<span class="cm-dot"></span></button>
+          <button type="button" class="cm-tab" data-tab="hardware" onclick="cmTab('m-add','hardware')">Hardware<span class="cm-dot"></span></button>
+          <button type="button" class="cm-tab" data-tab="isp" onclick="cmTab('m-add','isp')">ISP<span class="cm-dot"></span></button>
+          <button type="button" class="cm-tab" data-tab="billing" onclick="cmTab('m-add','billing')">Billing<span class="cm-dot"></span></button>
+        </div>
+        <div class="cm-body">
+          <!-- TAB 1: DETAILS -->
+          <div class="cm-pane active" data-pane="details">
+            <div class="fgrid">
+              <div class="ff">
+                <label>Full name *</label>
+                <input id="a-name" placeholder="Ramesh Kumar" />
+              </div>
+              <div class="ff">
+                <label>Phone *</label>
+                <input id="a-phone" type="tel" placeholder="9876543210" />
+              </div>
+              <div class="ff">
+                <label>Email</label>
+                <input id="a-email" type="email" placeholder="email@example.com" />
+              </div>
+              <div class="ff">
+                <label>Password</label>
+                <input id="a-pass" placeholder="blank = phone number" />
+                
+              </div>
+              <div class="ff full">
+                <label>Address</label>
+                <input id="a-addr" placeholder="House, Street, Area" />
+              </div>
+              <div class="ff">
+                <label>Membership No.</label>
+                <input id="a-mem" placeholder="MEM-001" />
+              </div>
+              <div class="ff full">
+                <label>Comments</label>
+                <textarea id="a-comments" placeholder="Notes about customer" ></textarea>
+              </div>
+            </div>
           </div>
-          <div class="ff">
-            <label>Phone *</label>
-            <input id="a-phone" type="tel" placeholder="9876543210" />
+
+          <!-- TAB 2: HARDWARE -->
+          <div class="cm-pane" data-pane="hardware">
+            <div class="fgrid">
+              <div class="ff">
+                <label>Router brand<span class="cm-badge">TR-069</span></label>
+                <select id="a-brand">
+                  <option value="">— Select —</option>
+                  <option value="1">Syrotech</option>
+                  <option value="2">Ubiquiti</option>
+                </select>
+              </div>
+              <div class="ff">
+                <label>WiFi Band<span class="cm-badge">TR-069</span></label>
+                <select id="a-wifi-band">
+                  <option value="single">Single Band</option>
+                  <option value="dual">Dual Band</option>
+                </select>
+              </div>
+              <div class="ff">
+                <label>MAC Address<span class="cm-badge">TR-069</span></label>
+                <input id="a-mac" placeholder="AA:BB:CC:DD:EE:FF" />
+              </div>
+              <div class="ff">
+                <label>Current WiFi SSID</label>
+                <input id="a-wifi-ssid" />
+              </div>
+              <div class="cm-sub">Manual / extra</div>
+              <div class="ff">
+                <label>PON Port</label>
+                <select id="a-pon-port">
+                  <option value="">— Select —</option>
+                  <option value="0/1">PON 0/1</option>
+                  <option value="0/2">PON 0/2</option>
+                  <option value="0/3">PON 0/3</option>
+                  <option value="0/4">PON 0/4</option>
+                </select>
+              </div>
+              <div class="ff">
+                <label>ONU ID</label>
+                <input id="a-onu-id" type="number" placeholder="22" />
+              </div>
+              <div class="ff">
+                <label>Router IP</label>
+                <input id="a-rip" placeholder="192.168.1.1" />
+              </div>
+              <div class="ff">
+                <label>Router username</label>
+                <input id="a-ruser" placeholder="admin" />
+              </div>
+              <div class="ff">
+                <label>Router password</label>
+                <input id="a-rpass" />
+              </div>
+              <div class="ff">
+                <label>IPTV Details</label>
+                <input id="a-iptv" />
+              </div>
+            </div>
           </div>
-          <div class="ff">
-            <label>Email</label>
-            <input id="a-email" type="email" placeholder="email@example.com" />
+
+          <!-- TAB 3: ISP -->
+          <div class="cm-pane" data-pane="isp">
+            <div class="fgrid">
+              <div class="ff">
+                <label>ISP Server *</label>
+                <select id="a-isp">
+                  <option value="1">Jaze ISP Server</option>
+                  <option value="2">NetAdmin Server</option>
+                </select>
+              </div>
+              <div class="ff">
+                <label>ISP Username (PPPoE)</label>
+                <input id="a-iuser" placeholder="ramesh.ncn" />
+              </div>
+              <div class="ff">
+                <label>Internet Plan *</label>
+                <select id="a-plan">
+                  <option value="">— Select Plan —</option>
+                </select>
+                
+              </div>
+              <div class="ff">
+                <label>ISP Customer ID</label>
+                <input id="a-cid" placeholder="Optional" />
+              </div>
+            </div>
           </div>
-          <div class="ff">
-            <label>Password (default: phone)</label>
-            <input id="a-pass" placeholder="blank = phone number" />
-          </div>
-          <div class="ff full">
-            <label>Address</label>
-            <input id="a-addr" placeholder="House, Street, Area" />
-          </div>
-          <div class="ff">
-            <label>Membership No.</label>
-            <input id="a-mem" placeholder="MEM-001" />
-          </div>
-          <div class="ff">
-            <label>Comments</label>
-            <input id="a-comments" placeholder="Notes about customer" />
+
+          <!-- TAB 4: BILLING -->
+          <div class="cm-pane" data-pane="billing">
+            <div class="fgrid">
+              <div class="ff">
+                <label>Balance Due (₹)</label>
+                <input id="a-due" type="number" placeholder="0" min="0" value="0" />
+              </div>
+              <div class="ff">
+                <label>Billing Type</label>
+                <select id="a-billing-type" onchange="togglePostpaidFieldsAdd()">
+                  <option value="prepaid">Prepaid</option>
+                  <option value="postpaid">Postpaid</option>
+                </select>
+              </div>
+              <div class="ff">
+                <label>Expiry date</label>
+                <input id="a-expiry" type="date" />
+              </div>
+              <div class="ff" id="a-postpaid-fields" style="display:none">
+                <label>Grace Period (days)</label>
+                <select id="a-grace-days">
+                  <option value="7">7 days</option>
+                  <option value="10" selected>10 days</option>
+                  <option value="15">15 days</option>
+                  <option value="20">20 days</option>
+                </select>
+              </div>
+              <div class="ff" id="a-autosuspend-field" style="display:none">
+                <label>Auto-Suspend on Overdue</label>
+                <select id="a-auto-suspend">
+                  <option value="1" selected>ON — auto suspend after grace period</option>
+                  <option value="0">OFF — only remind, don't suspend</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="sec-title">ISP Details</div>
-        <div class="fgrid">
-          <div class="ff">
-            <label>ISP Server *</label>
-            <select id="a-isp">
-              <option value="1">Jaze ISP Server</option>
-              <option value="2">NetAdmin Server</option>
-            </select>
-          </div>
-          <div class="ff">
-            <label>ISP Customer ID</label>
-            <input id="a-cid" placeholder="Optional" />
-          </div>
-          <div class="ff full">
-            <label>ISP Username (PPPoE)</label>
-            <input id="a-iuser" placeholder="ramesh.ncn" />
-          </div>
-          <div class="ff">
-            <label>Expiry date</label>
-            <input id="a-expiry" type="date" />
-          </div>
-          <div class="ff">
-            <label>Plan</label>
-            <select id="a-plan">
-              <option value="">— Select Plan —</option>
-            </select>
-          </div>
-        </div>
-        <div class="sec-title">Hardware Details</div>
-        <div class="fgrid">
-          <div class="ff">
-            <label>Router brand</label>
-            <select id="a-brand">
-              <option value="">— Select —</option>
-              <option value="1">Syrotech</option>
-              <option value="2">Ubiquiti</option>
-            </select>
-          </div>
-          <div class="ff">
-            <label>Router IP</label>
-            <input id="a-rip" placeholder="192.168.1.1" />
-          </div>
-          <div class="ff">
-            <label>Router username</label>
-            <input id="a-ruser" placeholder="admin" />
-          </div>
-          <div class="ff">
-            <label>Router password</label>
-            <input id="a-rpass" />
-          </div>
-          <div class="ff">
-            <label>MAC Address</label>
-            <input id="a-mac" placeholder="AA:BB:CC:DD:EE:FF" />
-          </div>
-          <div class="ff">
-            <label>IPTV Details</label>
-            <input id="a-iptv" />
-          </div>
-          <div class="ff">
-            <label>PON Port</label>
-            <select id="a-pon-port">
-              <option value="">— Select —</option>
-              <option value="0/1">PON 0/1</option>
-              <option value="0/2">PON 0/2</option>
-              <option value="0/3">PON 0/3</option>
-              <option value="0/4">PON 0/4</option>
-            </select>
-          </div>
-          <div class="ff">
-            <label>ONU ID</label>
-            <input id="a-onu-id" type="number" placeholder="22" />
-          </div>
-          <div class="ff">
-            <label>Current WiFi SSID</label>
-            <input id="a-wifi-ssid" />
-          </div>
-          <div class="ff">
-            <label>WiFi Band</label>
-            <select id="a-wifi-band">
-              <option value="single">Single Band</option>
-              <option value="dual">Dual Band</option>
-            </select>
-          </div>
-          <div class="ff">
-            <label>Balance Due (₹)</label>
-            <input id="a-due" type="number" placeholder="0" min="0" value="0" />
-          </div>
-        </div>
-        <div class="sec-title">Billing Type</div>
-        <div class="fgrid">
-          <div class="ff">
-            <label>Billing Type</label>
-            <select id="a-billing-type" onchange="togglePostpaidFieldsAdd()">
-              <option value="prepaid">Prepaid</option>
-              <option value="postpaid">Postpaid</option>
-            </select>
-          </div>
-          <div class="ff"></div>
-          <div class="ff" id="a-postpaid-fields" style="display:none">
-            <label>Grace Period (days)</label>
-            <select id="a-grace-days">
-              <option value="7">7 days</option>
-              <option value="10" selected>10 days</option>
-              <option value="15">15 days</option>
-              <option value="20">20 days</option>
-            </select>
-          </div>
-          <div class="ff" id="a-autosuspend-field" style="display:none">
-            <label>Auto-Suspend on Overdue</label>
-            <select id="a-auto-suspend">
-              <option value="1" selected>ON — auto suspend after grace period</option>
-              <option value="0">OFF — only remind, don't suspend</option>
-            </select>
-          </div>
-        </div>
+
         <div class="errmsg" id="a-err"></div>
-        <div class="mactions">
+        <div class="mactions cm-foot">
           <button class="btn" onclick="closeM('m-add')">Cancel</button>
           <button class="btn bpri" id="a-btn" onclick="submitAdd()">Add Customer</button>
         </div>
@@ -3344,188 +3385,210 @@
       </div>
     </div>
 
-    <!-- EDIT CUSTOMER -->
+<!-- EDIT CUSTOMER -->
     <div class="modal-bg" id="m-edit" style="display: none">
-      <div class="modal modal-lg">
+      <div class="modal modal-lg cm-modal">
         <div class="modal-title">
           Edit customer
           <span id="e-label" style="font-size: 12px; color: var(--txt3); font-family: var(--mono)"></span>
         </div>
-        <div class="sec-title">Customer Details</div>
-        <div class="fgrid">
-          <input type="hidden" id="e-id" />
-          <div class="ff">
-            <label>Full name *</label>
-            <input id="e-name" />
-          </div>
-          <div class="ff">
-            <label>Phone *</label>
-            <input id="e-phone" type="tel" />
-          </div>
-          <div class="ff">
-            <label>Email</label>
-            <input id="e-email" type="email" />
-          </div>
-          <div class="ff">
-            <label>New password (blank = keep)</label>
-            <input id="e-pass" placeholder="Leave blank" />
-          </div>
-          <div class="ff full">
-            <label>Address</label>
-            <input id="e-addr" />
-          </div>
-          <div class="ff">
-            <label>Membership No.</label>
-            <input id="e-mem" />
-          </div>
-          <div class="ff">
-            <label>Status</label>
-            <select id="e-status">
-              <option value="active">Active</option>
-              <option value="expired">Expired</option>
-              <option value="suspended">Suspended</option>
-              <option value="lead">Lead</option>
-              <option value="disconnected">Disconnected</option>
-            </select>
-          </div>
-          <div class="ff full">
-            <label>Comments</label>
-            <textarea id="e-comments"></textarea>
-          </div>
+        <input type="hidden" id="e-id" />
+        <input type="hidden" id="e-orig-phone" />
+        <div class="cm-tabs">
+          <button type="button" class="cm-tab active" data-tab="details" onclick="cmTab('m-edit','details')">Details<span class="cm-dot"></span></button>
+          <button type="button" class="cm-tab" data-tab="hardware" onclick="cmTab('m-edit','hardware')">Hardware<span class="cm-dot"></span></button>
+          <button type="button" class="cm-tab" data-tab="isp" onclick="cmTab('m-edit','isp')">ISP<span class="cm-dot"></span></button>
+          <button type="button" class="cm-tab" data-tab="billing" onclick="cmTab('m-edit','billing')">Billing<span class="cm-dot"></span></button>
         </div>
-        <div class="sec-title">ISP Details</div>
-        <div class="fgrid">
-          <div class="ff">
-            <label>ISP Server *</label>
-            <select id="e-isp">
-              <option value="1">Jaze ISP Server</option>
-              <option value="2">NetAdmin Server</option>
-            </select>
-          </div>
-          <div class="ff">
-            <label>ISP Customer ID</label>
-            <input id="e-cid" />
-          </div>
-          <div class="ff full">
-            <label>ISP Username (PPPoE)</label>
-            <input id="e-iuser" />
-          </div>
-          <div class="ff">
-            <label>Expiry date</label>
-            <input id="e-expiry" type="date" />
-          </div>
-          <div class="ff">
-            <label>Plan</label>
-            <select id="e-plan">
-              <option value="">— Select Plan —</option>
-            </select>
-          </div>
-        </div>
-        <div class="sec-title">Hardware Details</div>
-        <div class="fgrid">
-          <div class="ff">
-            <label>Router brand</label>
-            <select id="e-brand">
-              <option value="">— Select —</option>
-              <option value="1">Syrotech</option>
-              <option value="2">Ubiquiti</option>
-            </select>
-          </div>
-          <div class="ff">
-            <label>Router IP</label>
-            <input id="e-rip" />
-          </div>
-          <div class="ff">
-            <label>Router username</label>
-            <input id="e-ruser" />
-          </div>
-          <div class="ff">
-            <label>Router password</label>
-            <input id="e-rpass" />
-          </div>
-          <div class="ff">
-            <label>MAC Address</label>
-            <input id="e-mac" />
-          </div>
-          <div class="ff">
-            <label>IPTV Details</label>
-            <input id="e-iptv" />
-          </div>
-          <div class="ff">
-            <label>PON Port</label>
-            <select id="e-pon-port">
-              <option value="">— Select —</option>
-              <option value="0/1">PON 0/1</option>
-              <option value="0/2">PON 0/2</option>
-              <option value="0/3">PON 0/3</option>
-              <option value="0/4">PON 0/4</option>
-            </select>
-          </div>
-          <div class="ff">
-            <label>ONU ID</label>
-            <input id="e-onu-id" type="number" />
-          </div>
-          <div class="ff">
-            <label>Current WiFi SSID</label>
-            <input id="e-wifi-ssid" />
-          </div>
-          <div class="ff">
-            <label>WiFi Band</label>
-            <select id="e-wifi-band">
-              <option value="single">Single Band</option>
-              <option value="dual">Dual Band</option>
-            </select>
-          </div>
-        </div>
-        <div class="sec-title">Billing</div>
-          <div class="fgrid">
-            <div class="ff">
-              <label>Balance Due (₹)</label>
-              <input id="e-due" type="number" placeholder="0" min="0" />
+        <div class="cm-body">
+          <!-- TAB 1: DETAILS -->
+          <div class="cm-pane active" data-pane="details">
+            <div class="fgrid">
+              <div class="ff">
+                <label>Full name *</label>
+                <input id="e-name" />
+              </div>
+              <div class="ff">
+                <label>Phone *</label>
+                <input id="e-phone" type="tel" oninput="updateEditPassHint()" />
+              </div>
+              <div class="ff">
+                <label>Email</label>
+                <input id="e-email" type="email" />
+              </div>
+              <div class="ff">
+                <label>Password</label>
+                <input id="e-pass" placeholder="blank = keep current" oninput="updateEditPassHint()" />
+                <div class="cm-hint" id="e-pass-hint">Password will be reset to the new phone number</div>
+              </div>
+              <div class="ff full">
+                <label>Address</label>
+                <input id="e-addr" />
+              </div>
+              <div class="ff">
+                <label>Membership No.</label>
+                <input id="e-mem" />
+              </div>
+              <div class="ff full">
+                <label>Comments</label>
+                <textarea id="e-comments" ></textarea>
+              </div>
             </div>
-            <div class="ff">
-              <label>Billing Type</label>
-              <select id="e-billing-type" onchange="togglePostpaidFieldsEdit()">
-                <option value="prepaid">Prepaid</option>
-                <option value="postpaid">Postpaid</option>
-              </select>
-            </div>
-            <div class="ff" id="e-duemode-field">
-              <label>Due Payment Mode</label>
-              <select id="e-due-mode">
-                <option value="normal">Normal ( Due + Renew plan)</option>
-                <option value="due_only">Due Only (clear due only)</option>
-              </select>
-            </div>
-            <div class="ff" id="e-postpaid-fields" style="display:none">
-              <label>Grace Period (days)</label>
-              <select id="e-grace-days">
-                <option value="7">7 days</option>
-                <option value="10">10 days</option>
-                <option value="15">15 days</option>
-                <option value="20">20 days</option>
-              </select>
-            </div>
-            <div class="ff" id="e-autosuspend-field" style="display:none">
-              <label>Auto-Suspend on Overdue</label>
-              <select id="e-auto-suspend">
-                <option value="1">ON — auto suspend after grace period</option>
-                <option value="0">OFF — only remind, don't suspend</option>
-              </select>
-            </div>
-            <div class="ff" id="e-currentduedate-field" style="display:none">
-              <label>Current Due Date</label>
-              <input id="e-current-due-date" type="date" />
-            </div>
-            <div class="ff" id="e-nextbilldate-field" style="display:none">
-            <label>Next Bill Date</label>
-            <input id="e-next-bill-date" type="date" />
-          </div>
           </div>
 
+          <!-- TAB 2: HARDWARE -->
+          <div class="cm-pane" data-pane="hardware">
+            <div class="fgrid">
+              <div class="ff">
+                <label>Router brand<span class="cm-badge">TR-069</span></label>
+                <select id="e-brand">
+                  <option value="">— Select —</option>
+                  <option value="1">Syrotech</option>
+                  <option value="2">Ubiquiti</option>
+                </select>
+              </div>
+              <div class="ff">
+                <label>WiFi Band<span class="cm-badge">TR-069</span></label>
+                <select id="e-wifi-band">
+                  <option value="single">Single Band</option>
+                  <option value="dual">Dual Band</option>
+                </select>
+              </div>
+              <div class="ff">
+                <label>MAC Address<span class="cm-badge">TR-069</span></label>
+                <input id="e-mac" />
+              </div>
+              <div class="ff">
+                <label>Current WiFi SSID</label>
+                <input id="e-wifi-ssid" />
+              </div>
+              <div class="cm-sub">Manual / extra</div>
+              <div class="ff">
+                <label>PON Port</label>
+                <select id="e-pon-port">
+                  <option value="">— Select —</option>
+                  <option value="0/1">PON 0/1</option>
+                  <option value="0/2">PON 0/2</option>
+                  <option value="0/3">PON 0/3</option>
+                  <option value="0/4">PON 0/4</option>
+                </select>
+              </div>
+              <div class="ff">
+                <label>ONU ID</label>
+                <input id="e-onu-id" type="number" />
+              </div>
+              <div class="ff">
+                <label>Router IP</label>
+                <input id="e-rip" />
+              </div>
+              <div class="ff">
+                <label>Router username</label>
+                <input id="e-ruser" />
+              </div>
+              <div class="ff">
+                <label>Router password</label>
+                <input id="e-rpass" />
+              </div>
+              <div class="ff">
+                <label>IPTV Details</label>
+                <input id="e-iptv" />
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: ISP -->
+          <div class="cm-pane" data-pane="isp">
+            <div class="fgrid">
+              <div class="ff">
+                <label>ISP Server *</label>
+                <select id="e-isp">
+                  <option value="1">Jaze ISP Server</option>
+                  <option value="2">NetAdmin Server</option>
+                </select>
+              </div>
+              <div class="ff">
+                <label>ISP Username (PPPoE)</label>
+                <input id="e-iuser" />
+              </div>
+              <div class="ff">
+                <label>Internet Plan</label>
+                <select id="e-plan" onchange="updateEditPlanWarn()">
+                  <option value="">— Select Plan —</option>
+                </select>
+                <div class="cm-hint" id="e-plan-warn">⚠ No plan selected — customer will be saved without a plan</div>
+              </div>
+              <div class="ff">
+                <label>ISP Customer ID</label>
+                <input id="e-cid" />
+              </div>
+              <div class="ff">
+                <label>Status</label>
+                <select id="e-status">
+                  <option value="active">Active</option>
+                  <option value="expired">Expired</option>
+                  <option value="suspended">Suspended</option>
+                  <option value="lead">Lead</option>
+                  <option value="disconnected">Disconnected</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: BILLING -->
+          <div class="cm-pane" data-pane="billing">
+            <div class="fgrid">
+              <div class="ff">
+                <label>Balance Due (₹)</label>
+                <input id="e-due" type="number" placeholder="0" min="0" />
+              </div>
+              <div class="ff">
+                <label>Billing Type</label>
+                <select id="e-billing-type" onchange="togglePostpaidFieldsEdit()">
+                  <option value="prepaid">Prepaid</option>
+                  <option value="postpaid">Postpaid</option>
+                </select>
+              </div>
+              <div class="ff" id="e-duemode-field">
+                <label>Due Payment Mode</label>
+                <select id="e-due-mode">
+                  <option value="normal">Normal ( Due + Renew plan)</option>
+                  <option value="due_only">Due Only (clear due only)</option>
+                </select>
+              </div>
+              <div class="ff">
+                <label>Expiry date</label>
+                <input id="e-expiry" type="date" />
+              </div>
+              <div class="ff" id="e-postpaid-fields" style="display:none">
+                <label>Grace Period (days)</label>
+                <select id="e-grace-days">
+                  <option value="7">7 days</option>
+                  <option value="10">10 days</option>
+                  <option value="15">15 days</option>
+                  <option value="20">20 days</option>
+                </select>
+              </div>
+              <div class="ff" id="e-autosuspend-field" style="display:none">
+                <label>Auto-Suspend on Overdue</label>
+                <select id="e-auto-suspend">
+                  <option value="1">ON — auto suspend after grace period</option>
+                  <option value="0">OFF — only remind, don't suspend</option>
+                </select>
+              </div>
+              <div class="ff" id="e-currentduedate-field" style="display:none">
+                <label>Current Due Date</label>
+                <input id="e-current-due-date" type="date" />
+              </div>
+              <div class="ff" id="e-nextbilldate-field" style="display:none">
+                <label>Next Bill Date</label>
+                <input id="e-next-bill-date" type="date" />
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div class="errmsg" id="e-err"></div>
-        <div class="mactions">
+        <div class="mactions cm-foot">
           <button class="btn" onclick="closeM('m-edit')">Cancel</button>
           <button class="btn bpri" id="e-btn" onclick="submitEdit()">Save Changes</button>
         </div>
@@ -4283,6 +4346,8 @@
         $("a-auto-suspend").value = "1";
         togglePostpaidFieldsAdd();
         $("a-err").style.display = "none";
+        cmClearDots("m-add");
+        cmTab("m-add", "details");
         $("m-add").style.display = "flex";
       }
 
@@ -4326,6 +4391,11 @@
         $("e-next-bill-date").value = c.next_bill_date || "";
         togglePostpaidFieldsEdit();
         if ($("e-due-mode")) $("e-due-mode").value = c.due_payment_mode || "normal";
+        $("e-orig-phone").value = c.phone || "";
+        updateEditPassHint();
+        updateEditPlanWarn();
+        cmClearDots("m-edit");
+        cmTab("m-edit", "details");
         $("m-edit").style.display = "flex";
       }
 
@@ -4361,8 +4431,13 @@
           grace_period_days: parseInt($("a-grace-days").value) || 10,
           auto_suspend_enabled: parseInt($("a-auto-suspend").value),
         };
-        if (!d.name || !d.phone) {
-          showErr(err, "Name and phone required");
+        cmClearDots("m-add");
+        let firstBad = null;
+        if (!d.name || !d.phone) { cmFlag("m-add", "details"); firstBad = "details"; }
+        if (!d.plan_id) { cmFlag("m-add", "isp"); firstBad = firstBad || "isp"; }
+        if (firstBad) {
+          cmTab("m-add", firstBad);
+          showErr(err, firstBad === "details" ? "Name and phone required" : "Internet plan is required");
           return;
         }
         btn.disabled = true;
@@ -4421,7 +4496,11 @@
         };
         const np = $("e-pass").value.trim();
         if (np) d.password = np;
+        else if (d.phone && d.phone !== $("e-orig-phone").value) d.password = d.phone;
+        cmClearDots("m-edit");
         if (!d.name || !d.phone) {
+          cmFlag("m-edit", "details");
+          cmTab("m-edit", "details");
           showErr(err, "Name and phone required");
           return;
         }
@@ -6478,6 +6557,29 @@ async function loadWaHistory() {
     $('wa-hist-tbody').innerHTML = '<tr><td colspan="6"><div class="empty">Failed to load</div></td></tr>';
   }
 }
+
+// ── Add/Edit customer modal helpers ─────────────────────────
+function cmTab(modalId, name) {
+  const m = $(modalId);
+  m.querySelectorAll('.cm-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  m.querySelectorAll('.cm-pane').forEach(p => p.classList.toggle('active', p.dataset.pane === name));
+}
+function cmClearDots(modalId) {
+  $(modalId).querySelectorAll('.cm-dot').forEach(d => (d.style.display = 'none'));
+}
+function cmFlag(modalId, tab) {
+  const d = $(modalId).querySelector('.cm-tab[data-tab="' + tab + '"] .cm-dot');
+  if (d) d.style.display = 'inline-block';
+}
+function updateEditPassHint() {
+  const phone = $('e-phone').value.trim();
+  const changed = phone && phone !== $('e-orig-phone').value;
+  $('e-pass-hint').style.display = changed && !$('e-pass').value.trim() ? 'block' : 'none';
+}
+function updateEditPlanWarn() {
+  $('e-plan-warn').style.display = $('e-plan').value ? 'none' : 'block';
+}
+
 
 // ── Postpaid field toggles ──────────────────────────────────
 function togglePostpaidFieldsAdd() {
