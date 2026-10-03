@@ -5522,6 +5522,15 @@
         } catch (e) {}
         if (voiceInterval) clearInterval(voiceInterval);
         voiceInterval = setInterval(checkNewPayments, 15000);
+        bgService(true);
+      }
+      // Android app only: keep running in the background while voice alerts are on
+      function bgService(on) {
+        try {
+          if (!window.NetflowApp) return;
+          if (on && NetflowApp.startBackground) NetflowApp.startBackground();
+          if (!on && NetflowApp.stopBackground) NetflowApp.stopBackground();
+        } catch (e) {}
       }
       async function checkNewPayments() {
         if (!voiceReady || !voiceEnabled) return;
@@ -5546,8 +5555,19 @@
           }
         } catch (e) {}
       }
+      // Inside the Android app the browser's speechSynthesis does not exist, so use the phone's own text-to-speech
+      function inApp() { return !!(window.NetflowApp && typeof NetflowApp.speak === "function"); }
+      function stopSpeech() {
+        if (inApp()) NetflowApp.stopSpeaking();
+        else if (window.speechSynthesis) speechSynthesis.cancel();
+      }
       function speak(t) {
         if (!voiceReady || !voiceEnabled) return;
+        if (inApp()) {
+          const err = NetflowApp.speak(t, voiceLang);
+          if (err && !window._ttsWarned) { window._ttsWarned = true; toast(err, "err"); }
+          return;
+        }
         speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(t);
         u.lang = voiceLang;
@@ -5571,7 +5591,8 @@
           speak(voiceLang === "hi-IN" ? "आवाज़ सूचनाएं चालू!" : "Voice enabled!");
         } else {
           clearInterval(voiceInterval);
-          speechSynthesis.cancel();
+          bgService(false);
+          stopSpeech();
         }
         updateVoiceUI();
         await saveVoicePrefs();
@@ -6300,6 +6321,12 @@ async function submitIptvConfig() {
           $("voice-settings-btn").style.display = "flex";
           const b = $("voice-banner");
           if (b) b.style.display = "block";
+          // In the Android app no tap is needed to allow sound: turn voice on automatically
+          if (inApp()) {
+            voiceReady = true;
+            if (voiceEnabled) startPaymentPolling();
+            if (b) b.style.display = "none";
+          }
         }
       });
     } else {
