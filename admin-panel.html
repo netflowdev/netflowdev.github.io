@@ -5892,6 +5892,13 @@ async function sendPayRemWhatsApp() {
 
   if ($('pr-card').value !== '1') { openWa(); return; }
 
+  // Inside the NetFlow Admin Android app: opens the customer's chat with image + message ready
+  if (window.NetflowApp && typeof NetflowApp.shareToWhatsApp === 'function') {
+    const err = NetflowApp.shareToWhatsApp(wa, msg, $('pr-canvas').toDataURL('image/png'));
+    if (err) toast(err, 'err');
+    return;
+  }
+
   const blob = await new Promise((res) => $('pr-canvas').toBlob(res, 'image/png'));
   if (!blob) { openWa(); return; }
   const file = new File([blob], 'payment-reminder.png', { type: 'image/png' });
