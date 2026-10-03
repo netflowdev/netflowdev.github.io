@@ -3799,6 +3799,7 @@
     </div>
     <div class="errmsg" id="pr-err"></div>
     <div class="mactions">
+            <button class="btn" id="pr-wa-choice" style="display:none" onclick="NetflowApp.resetWhatsAppChoice();toast('Next send will ask which WhatsApp to use')">⚙ WhatsApp</button>
       <button class="btn" id="pr-copy-link" onclick="copyPayRemLink()" disabled>📋 Copy Link</button>
       <button class="btn" id="pr-copy-msg" onclick="copyPayRemMsg()" disabled>📋 Copy Message</button>
       <button class="btn bpri" id="pr-send" onclick="sendPayRemWhatsApp()" style="background:#25D366;border-color:#25D366" disabled>📲 Send on WhatsApp</button>
@@ -5713,6 +5714,8 @@ async function openPayReminder(customerId) {
   $('pr-err').style.display = 'none';
   ['pr-send', 'pr-copy-msg', 'pr-copy-link'].forEach((i) => ($(i).disabled = true));
   $('m-payrem').style.display = 'flex';
+    // "WhatsApp" choice button only exists inside the Android app
+  $('pr-wa-choice').style.display = (window.NetflowApp && typeof NetflowApp.resetWhatsAppChoice === 'function') ? '' : 'none';
   try {
     const r = await apiFetch('POST', '/api/admin/payment-links/generate', { customer_id: customerId });
     if (!r.success) {
