@@ -1545,7 +1545,9 @@
         .sidebar.open { transform: translateX(0); }
 
         /* Shell & main */
-        .shell { display: block !important; height: 100vh; overflow-y: auto; overflow-x: hidden; }
+        .shell { height: 100vh; overflow-y: auto; overflow-x: hidden; }
+        /* only force block layout once logged in (startApp sets display:flex); keeps it hidden on the login screen */
+        .shell[style*="flex"] { display: block !important; }
         .main { overflow-y: unset; max-width: 100vw; }
         .content, .tbl-card { max-width: 100%; }
 
@@ -3799,7 +3801,7 @@
     </div>
     <div class="errmsg" id="pr-err"></div>
     <div class="mactions">
-            <button class="btn" id="pr-wa-choice" style="display:none" onclick="NetflowApp.resetWhatsAppChoice();toast('Next send will ask which WhatsApp to use')">⚙ WhatsApp</button>
+      <button class="btn" id="pr-wa-choice" style="display:none" onclick="NetflowApp.resetWhatsAppChoice();toast('Next send will ask which WhatsApp to use')">⚙ WhatsApp</button>
       <button class="btn" id="pr-copy-link" onclick="copyPayRemLink()" disabled>📋 Copy Link</button>
       <button class="btn" id="pr-copy-msg" onclick="copyPayRemMsg()" disabled>📋 Copy Message</button>
       <button class="btn bpri" id="pr-send" onclick="sendPayRemWhatsApp()" style="background:#25D366;border-color:#25D366" disabled>📲 Send on WhatsApp</button>
@@ -4012,7 +4014,8 @@
         try { sessionStorage.removeItem("sub_lock_dismissed"); } catch (e) {}
         $("app-shell").style.display = "none";
         $("login-page").style.display = "flex";
-                // Inside the Android app: reset the WebView so no old screen can come back
+        $("mob-menu-btn").style.display = "none";
+        // Inside the Android app: reset the WebView so no old screen can come back
         try { if (window.NetflowApp && NetflowApp.onLogout) NetflowApp.onLogout(); } catch (e) {}
       }
 
@@ -4057,6 +4060,7 @@
       function startApp() {
         $("login-page").style.display = "none";
         $("app-shell").style.display = "flex";
+        $("mob-menu-btn").style.display = "";
         const u = getUser();
         let dismissed = false;
         try { dismissed = sessionStorage.getItem("sub_lock_dismissed") === "1"; } catch (e) {}
@@ -5716,7 +5720,7 @@ async function openPayReminder(customerId) {
   $('pr-err').style.display = 'none';
   ['pr-send', 'pr-copy-msg', 'pr-copy-link'].forEach((i) => ($(i).disabled = true));
   $('m-payrem').style.display = 'flex';
-    // "WhatsApp" choice button only exists inside the Android app
+  // "WhatsApp" choice button only exists inside the Android app
   $('pr-wa-choice').style.display = (window.NetflowApp && typeof NetflowApp.resetWhatsAppChoice === 'function') ? '' : 'none';
   try {
     const r = await apiFetch('POST', '/api/admin/payment-links/generate', { customer_id: customerId });
@@ -6301,6 +6305,7 @@ async function submitIptvConfig() {
     } else {
       $("login-page").style.display = "flex";
       $("app-shell").style.display = "none";
+      $("mob-menu-btn").style.display = "none";
     }
   });
 
