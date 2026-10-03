@@ -4012,6 +4012,8 @@
         try { sessionStorage.removeItem("sub_lock_dismissed"); } catch (e) {}
         $("app-shell").style.display = "none";
         $("login-page").style.display = "flex";
+                // Inside the Android app: reset the WebView so no old screen can come back
+        try { if (window.NetflowApp && NetflowApp.onLogout) NetflowApp.onLogout(); } catch (e) {}
       }
 
       async function doLogin() {
