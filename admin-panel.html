@@ -5528,7 +5528,11 @@
       function bgService(on) {
         try {
           if (!window.NetflowApp) return;
-          if (on && NetflowApp.startBackground) NetflowApp.startBackground();
+          if (on && NetflowApp.startBackground) {
+            if (typeof NetflowApp.bgVoice === "function")
+              NetflowApp.startBackground(getToken() || "", voiceLang, String(lastPaymentId), BASE);
+            else NetflowApp.startBackground();
+          }
           if (!on && NetflowApp.stopBackground) NetflowApp.stopBackground();
         } catch (e) {}
       }
@@ -5548,7 +5552,7 @@
                 m = p.payment_method || "online";
               toast("💰 ₹" + a + " from " + n + "!");
               const fn = VM[voiceLang] || VM["en-IN"];
-              speak(fn(a, n, m));
+              if (!bgSpeaks()) speak(fn(a, n, m));
               if ($("page-payments").style.display !== "none") loadPayments();
               await new Promise((r) => setTimeout(r, 4000));
             }
@@ -5557,6 +5561,7 @@
       }
       // Inside the Android app the browser's speechSynthesis does not exist, so use the phone's own text-to-speech
       function inApp() { return !!(window.NetflowApp && typeof NetflowApp.speak === "function"); }
+      function bgSpeaks() { return inApp() && typeof NetflowApp.bgVoice === "function"; }
       function stopSpeech() {
         if (inApp()) NetflowApp.stopSpeaking();
         else if (window.speechSynthesis) speechSynthesis.cancel();
@@ -5602,6 +5607,7 @@
         voiceLang = l;
         updateVoiceUI();
         await saveVoicePrefs();
+        if (voiceEnabled) bgService(true);
         speak(l === "hi-IN" ? "भाषा बदली!" : "Language changed!");
         toast("Language saved!");
       }
