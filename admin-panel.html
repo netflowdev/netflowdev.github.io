@@ -2631,7 +2631,7 @@
                       <th>Paid</th>
                       <th>Billing Period</th>
                       <th>Due Date</th>
-                      <th style="padding-right:20px">Status</th>
+                      <th>Status</th><th style="padding-right:20px">Action</th>
                     </tr>
                   </thead>
                   <tbody id="bh-tbody">
@@ -3336,10 +3336,6 @@
                   <option value="postpaid">Postpaid</option>
                 </select>
               </div>
-              <div class="ff">
-                <label>Expiry date</label>
-                <input id="a-expiry" type="date" />
-              </div>
               <div class="ff" id="a-postpaid-fields" style="display:none">
                 <label>Grace Period (days)</label>
                 <select id="a-grace-days">
@@ -3355,6 +3351,10 @@
                   <option value="1" selected>ON — auto suspend after grace period</option>
                   <option value="0">OFF — only remind, don't suspend</option>
                 </select>
+              </div>
+              <div class="ff">
+                <label>Expiry Date</label>
+                <input id="a-expiry" type="date" />
               </div>
             </div>
           </div>
@@ -3559,10 +3559,6 @@
                   <option value="due_only">Due Only (clear due only)</option>
                 </select>
               </div>
-              <div class="ff">
-                <label>Expiry date</label>
-                <input id="e-expiry" type="date" />
-              </div>
               <div class="ff" id="e-postpaid-fields" style="display:none">
                 <label>Grace Period (days)</label>
                 <select id="e-grace-days">
@@ -3579,13 +3575,17 @@
                   <option value="0">OFF — only remind, don't suspend</option>
                 </select>
               </div>
-              <div class="ff" id="e-currentduedate-field" style="display:none">
-                <label>Current Due Date</label>
-                <input id="e-current-due-date" type="date" />
-              </div>
               <div class="ff" id="e-nextbilldate-field" style="display:none">
-                <label>Next Bill Date</label>
+                <label>Next Bill Generation Date</label>
                 <input id="e-next-bill-date" type="date" />
+              </div>
+              <div class="ff">
+                <label>Expiry Date</label>
+                <input id="e-expiry" type="date" />
+              </div>
+              <div class="ff" id="e-currentduedate-field" style="display:none">
+                <label>Reminder Date (Current Due Date)</label>
+                <input id="e-current-due-date" type="date" />
               </div>
             </div>
           </div>
@@ -4766,10 +4766,32 @@
           '<td style="font-family:var(--mono);color:var(--txt3)">₹' + (b.paid_amount || 0) + '</td>' +
           '<td style="font-family:var(--mono);font-size:11.5px;color:var(--txt)">' + fmtDate(b.bill_date) + ' → ' + fmtDate(b.period_end_date) + '</td>' +
           '<td style="font-family:var(--mono);font-size:12px;color:var(--txt)">' + fmtDate(b.due_date) + '</td>' +
-          '<td style="padding-right:20px">' + sbadge(b.status) + '</td>' +
+          '<td>' + sbadge(b.status) + '</td>' +
+          '<td style="padding-right:20px"><button class="btn bsm bdanger" onclick="deleteBillingRecord(' + b.id + ')" title="Delete record">🗑</button></td>' +
           '</tr>'
         ).join("");
       }
+
+            async function deleteBillingRecord(id) {
+        const b = _billingAll.find(x => x.id === id);
+        const label = b ? (b.customer_name || 'customer') + ' — ₹' + (b.bill_amount || 0) + ' bill (' + fmtDate(b.bill_date) + ')' : 'this record';
+        if (!confirm('Delete billing record for ' + label + '?\n\nThis cannot be undone.')) return;
+
+        let adjust = false;
+        if (b && b.status === 'pending') {
+          adjust = confirm('Also subtract ₹' + (b.bill_amount || 0) + ' from the customer\'s balance due?\n\nOK = subtract from balance due\nCancel = delete record only');
+        }
+        try {
+          const r = await apiFetch('DELETE', '/api/admin/postpaid/billing-history/' + id + (adjust ? '?adjust_balance=1' : ''));
+          if (r.success) {
+            toast(r.data?.balance_adjusted ? 'Record deleted & balance adjusted' : 'Record deleted');
+            loadBillingHistory();
+          } else toast(r.error || 'Failed', 'err');
+        } catch (e) {
+          toast('Network error', 'err');
+        }
+      }
+
 
       async function deletePayment(id) {
         if (!confirm("Delete this payment record?")) return;
@@ -5561,7 +5583,7 @@
 
 
       // ── PAYMENT LINKS ─────────────────────────────────────────────
-      const PAY_BASE = 'https://netflowdev.github.io'; // update to your hosted pay.html URL
+      const PAY_BASE = 'https://netflowapp.com'; // update to your hosted pay.html URL
 
       function buildReminderMessage(data, url, lang = 'hi') {
         const name      = data.customer_name;
@@ -5578,7 +5600,7 @@
 
         if (lang === 'en') {
           const appLineEn = `\n\n📱 *NetFlow MyWiFi App* — Recharge • Change WiFi Password • OTT Add-ons • View Plan\n⬇️ Download: ${APP_LINK}\nLogin: Use your WhatsApp number as both Username & Password`;
-          if (data.recharge_type === 'due_only') {
+          if (['due_only','postpaid_due'].includes(data.recharge_type)) {
             return `Dear ${name},\nYour broadband recharge payment of ₹${data.balance_due} till ${formatDate(expiry)} is still pending. Please make the payment using the link below at the earliest.\n\n💳 Pay Now: ${url}${appLineEn}\n\nThank you!`;
           }
           if (isExpired) {
@@ -5591,7 +5613,7 @@
         }
 
         const appLineHi = `\n\n📱 *NetFlow MyWiFi App* से करें — रिचार्ज • WiFi पासवर्ड बदलें • OTT Add-ons • Plan देखें\n⬇️ Download: ${APP_LINK}\nLogin: Username & Password दोनों अपना WhatsApp नंबर डालें`;
-        if (data.recharge_type === 'due_only') {
+        if (['due_only','postpaid_due'].includes(data.recharge_type)) {
           return `प्रिय ${name},\nआपका दि. ${formatDate(expiry)} तक का ब्रॉडबैंड रिचार्ज का ₹${data.balance_due} भुगतान अभी तक बाकी है। कृपया नीचे दिए गए लिंक से जल्द भुगतान करें।\n\n💳 Pay Now: ${url}${appLineHi}\n\nधन्यवाद!`;
         }
         if (isExpired) {
@@ -5720,7 +5742,7 @@ function buildPayRemMsg(d, lang, withApp) {
   const plan = d.plan_name ? ' (' + d.plan_name + ')' : '';
   const expiry = d.expiry_date ? fmtDate(d.expiry_date) : '';
   const td = today();
-  const isDueOnly = d.recharge_type === 'due_only';
+  const isDueOnly = ['due_only','postpaid_due'].includes(d.recharge_type);
   const isExpired = !!d.expiry_date && d.expiry_date < td;
   const daysLeft = d.expiry_date && !isExpired ? Math.ceil((new Date(d.expiry_date) - new Date(td)) / 86400000) : null;
   const soon = daysLeft !== null && daysLeft <= 5;
@@ -6588,16 +6610,16 @@ function updateEditPlanWarn() {
 // ── Postpaid field toggles ──────────────────────────────────
 function togglePostpaidFieldsAdd() {
   const isPost = $('a-billing-type').value === 'postpaid';
-  $('a-postpaid-fields').style.display = isPost ? 'block' : 'none';
-  $('a-autosuspend-field').style.display = isPost ? 'block' : 'none';
+  $('a-postpaid-fields').style.display = isPost ? '' : 'none';
+  $('a-autosuspend-field').style.display = isPost ? '' : 'none';
 }
 function togglePostpaidFieldsEdit() {
   const isPost = $('e-billing-type').value === 'postpaid';
-  $('e-postpaid-fields').style.display = isPost ? 'block' : 'none';
-  $('e-autosuspend-field').style.display = isPost ? 'block' : 'none';
-  $('e-currentduedate-field').style.display = isPost ? 'block' : 'none';
-  $('e-nextbilldate-field').style.display = isPost ? 'block' : 'none';
-  $('e-duemode-field').style.display = isPost ? 'none' : 'block';
+  $('e-postpaid-fields').style.display = isPost ? '' : 'none';
+  $('e-autosuspend-field').style.display = isPost ? '' : 'none';
+  $('e-currentduedate-field').style.display = isPost ? '' : 'none';
+  $('e-nextbilldate-field').style.display = isPost ? '' : 'none';
+  $('e-duemode-field').style.display = isPost ? 'none' : '';
 }
 
 // ── Suspend modal ────────────────────────────────────────────
@@ -6611,7 +6633,7 @@ function openSuspendModal(custId) {
 }
 
 async function generateBillNow(id, name) {
-  if (!confirm('Generate a new bill for ' + name + ' right now?\n\nThis will add the plan price to their current balance due, regardless of the normal billing cycle date.')) return;
+  if (!confirm('Generate a new bill for ' + name + ' right now?\n\nThis will add the plan price to their balance due and extend the expiry from the current expiry date (or from today if already expired).')) return;
   try {
     const r = await apiFetch('POST', '/api/admin/postpaid/generate-bill', { customer_id: id });
     if (r.success) {
