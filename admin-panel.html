@@ -5859,10 +5859,23 @@ function drawPayCard(d, lang) {
   const FONT = '"Noto Sans Devanagari","Mukta","Segoe UI",Roboto,sans-serif';
   const u = getUser();
   const biz = (u.franchise_name || 'NetFlow').trim();
-  const phone = String(u.phone || '').replace(/\D/g, '').slice(-10);
+  const phone = String(d.franchise_phone || u.phone || '').replace(/\D/g, '').slice(-10);
   const isDueOnly = ['due_only', 'postpaid_due'].includes(d.recharge_type);
   const amt = isDueOnly ? (d.balance_due || 0) : (d.amount || 0);
   const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const isDue = ['due_only', 'postpaid_due'].includes(d.recharge_type);
+  const dLeft = d.expiry_date ? Math.ceil((new Date(d.expiry_date) - new Date(today())) / 86400000) : null;
+  let accent = '#ffb347', tagBg = '#3a2b14', tagInk = '#ffc56e';
+  let tag = hi ? 'भुगतान बाकी' : 'Payment due';
+  if (dLeft !== null && dLeft < 0) {
+    accent = '#ff5252'; tagBg = '#3a1c22'; tagInk = '#ff8a8a';
+    if (!isDue) tag = hi ? 'समाप्त हो चुका' : 'Expired';
+   } else if (dLeft !== null && dLeft <= 7) {
+    accent = '#ff7a1a'; tagBg = '#3d2410'; tagInk = '#ff9a4d';
+    tag = dLeft === 0
+      ? (hi ? 'आज समाप्त' : 'Expires today')
+      : dLeft + (hi ? ' दिन बाकी' : (dLeft === 1 ? ' day left' : ' days left'));
+  }
   let dt = '';
   if (d.expiry_date) {
     const [y, m, dd] = d.expiry_date.split('-');
@@ -5882,7 +5895,7 @@ function drawPayCard(d, lang) {
   g.restore();
 
   // bell badge
-  g.beginPath(); g.arc(100, 95, 46, 0, Math.PI * 2); g.fillStyle = '#ffb347'; g.fill();
+  g.beginPath(); g.arc(100, 95, 46, 0, Math.PI * 2); g.fillStyle = accent; g.fill();
   g.font = '48px ' + FONT; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.fillStyle = '#10131a'; g.fillText('🔔', 100, 98);
 
@@ -5895,6 +5908,13 @@ function drawPayCard(d, lang) {
   g.font = '500 32px ' + FONT; g.fillStyle = '#9aa3b8';
   if (phone) g.fillText(phone, 170, 140);
 
+  // status tag (top-right)
+  g.font = '600 26px ' + FONT;
+  const tw = g.measureText(tag).width + 44;
+  rr(W - 48 - tw, 112, tw, 46, 23); g.fillStyle = tagBg; g.fill();
+  g.fillStyle = tagInk; g.textAlign = 'center'; g.fillText(tag, W - 48 - tw / 2, 145);
+  g.textAlign = 'left';
+
   // divider
   g.fillStyle = '#2a3042'; g.fillRect(48, 190, W - 96, 2);
 
@@ -5903,7 +5923,7 @@ function drawPayCard(d, lang) {
   g.fillText(hi ? 'भुगतान रिमाइन्डर' : 'Payment Reminder', 48, 272);
 
   // amount
-  g.font = '800 124px ' + FONT; g.fillStyle = '#ffb347';
+  g.font = '800 124px ' + FONT; g.fillStyle = accent;
   g.fillText('₹' + amt, 48, 410);
 
   // due date
