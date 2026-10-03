@@ -3781,6 +3781,17 @@
           <option value="1">Include</option>
         </select>
       </div>
+      <div class="ff">
+        <label>Card Image</label>
+        <select id="pr-card" onchange="refreshPayRemMsg()">
+          <option value="1">Include</option>
+          <option value="0">Don't include</option>
+        </select>
+      </div>
+      <div class="ff full" id="pr-card-wrap">
+        <label>Card Preview</label>
+        <canvas id="pr-canvas" width="900" height="520" style="width:100%;max-width:420px;border-radius:14px;display:block"></canvas>
+      </div>
       <div class="ff full">
         <label>Message (you can edit before sending)</label>
         <textarea id="pr-msg" rows="12"></textarea>
@@ -4792,7 +4803,7 @@
         }
       }
 
-
+      
       async function deletePayment(id) {
         if (!confirm("Delete this payment record?")) return;
         try {
@@ -5583,7 +5594,7 @@
 
 
       // ── PAYMENT LINKS ─────────────────────────────────────────────
-      const PAY_BASE = 'https://netflowapp.com'; // update to your hosted pay.html URL
+      const PAY_BASE = 'https://netflowapp.com';
 
       function buildReminderMessage(data, url, lang = 'hi') {
         const name      = data.customer_name;
@@ -5800,15 +5811,109 @@ function buildPayRemMsg(d, lang, withApp) {
 function refreshPayRemMsg() {
   if (!_prData) return;
   $('pr-msg').value = buildPayRemMsg(_prData, $('pr-lang').value, $('pr-app').value === '1');
+  const useCard = $('pr-card').value === '1';
+  $('pr-card-wrap').style.display = useCard ? '' : 'none';
+  if (useCard) drawPayCard(_prData, $('pr-lang').value);
 }
 
-function sendPayRemWhatsApp() {
+// ── Payment card image (drawn in the browser, no server load) ──
+function drawPayCard(d, lang) {
+  const cv = $('pr-canvas'), g = cv.getContext('2d');
+  const W = cv.width, H = cv.height, hi = lang === 'hi';
+  const FONT = '"Noto Sans Devanagari","Mukta","Segoe UI",Roboto,sans-serif';
+  const u = getUser();
+  const biz = (u.franchise_name || 'NetFlow').trim();
+  const phone = String(u.phone || '').replace(/\D/g, '').slice(-10);
+  const isDueOnly = ['due_only', 'postpaid_due'].includes(d.recharge_type);
+  const amt = isDueOnly ? (d.balance_due || 0) : (d.amount || 0);
+  const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let dt = '';
+  if (d.expiry_date) {
+    const [y, m, dd] = d.expiry_date.split('-');
+    dt = dd + '-' + mon[+m - 1] + '-' + y.slice(2);
+  }
+
+  g.clearRect(0, 0, W, H);
+  const rr = (x, y, w, h, r) => { g.beginPath(); g.roundRect(x, y, w, h, r); };
+
+  // card body
+  rr(0, 0, W, H, 36); g.fillStyle = '#10131a'; g.fill();
+  g.save(); rr(0, 0, W, H, 36); g.clip();
+  // header band
+  const hg = g.createLinearGradient(0, 0, W, 0);
+  hg.addColorStop(0, '#1b2030'); hg.addColorStop(1, '#10131a');
+  g.fillStyle = hg; g.fillRect(0, 0, W, 190);
+  g.restore();
+
+  // bell badge
+  g.beginPath(); g.arc(100, 95, 46, 0, Math.PI * 2); g.fillStyle = '#ffb347'; g.fill();
+  g.font = '48px ' + FONT; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillStyle = '#10131a'; g.fillText('🔔', 100, 98);
+
+  // business name (shrinks to fit) + phone
+  g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  let fs = 50;
+  g.font = '700 ' + fs + 'px ' + FONT;
+  while (g.measureText(biz).width > W - 210 && fs > 26) { fs -= 2; g.font = '700 ' + fs + 'px ' + FONT; }
+  g.fillStyle = '#ffffff'; g.fillText(biz, 170, 94);
+  g.font = '500 32px ' + FONT; g.fillStyle = '#9aa3b8';
+  if (phone) g.fillText(phone, 170, 140);
+
+  // divider
+  g.fillStyle = '#2a3042'; g.fillRect(48, 190, W - 96, 2);
+
+  // reminder title
+  g.font = '600 44px ' + FONT; g.fillStyle = '#e8eaf0';
+  g.fillText(hi ? 'भुगतान रिमाइन्डर' : 'Payment Reminder', 48, 272);
+
+  // amount
+  g.font = '800 124px ' + FONT; g.fillStyle = '#ffb347';
+  g.fillText('₹' + amt, 48, 410);
+
+  // due date
+  if (dt) {
+    g.font = '600 38px ' + FONT; g.fillStyle = '#e8eaf0';
+    g.fillText(hi ? 'दि. ' + dt + ' तक' : 'By ' + dt, 48, 474);
+  }
+
+  // footer tag
+  g.textAlign = 'right'; g.font = '500 26px ' + FONT; g.fillStyle = '#6b7390';
+  g.fillText('NetFlow MyWiFi', W - 48, 474);
+  g.textAlign = 'left';
+}
+
+async function sendPayRemWhatsApp() {
   if (!_prData) return;
   const msg = $('pr-msg').value.trim();
   if (!msg) { showErr($('pr-err'), 'Message is empty'); return; }
   const ph = String(_prData.customer_phone || '').replace(/\D/g, '');
   const wa = ph.length === 10 ? '91' + ph : ph;
-  window.open('https://wa.me/' + wa + '?text=' + encodeURIComponent(msg), '_blank');
+  const openWa = () => window.open('https://wa.me/' + wa + '?text=' + encodeURIComponent(msg), '_blank');
+
+  if ($('pr-card').value !== '1') { openWa(); return; }
+
+  const blob = await new Promise((res) => $('pr-canvas').toBlob(res, 'image/png'));
+  if (!blob) { openWa(); return; }
+  const file = new File([blob], 'payment-reminder.png', { type: 'image/png' });
+
+  // Phone: share sheet -> WhatsApp gets the image + message together
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], text: msg });
+    } catch (e) {
+      if (e.name !== 'AbortError') toast('Share failed', 'err');
+    }
+    return;
+  }
+
+  // Desktop fallback: save the image, open the chat with the text
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'payment-reminder-' + (ph.slice(-10) || 'card') + '.png';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast('Image saved - attach it in the WhatsApp chat');
+  openWa();
 }
 
 function copyPayRemLink() {
