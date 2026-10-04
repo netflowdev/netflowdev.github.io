@@ -3557,8 +3557,9 @@
               <div class="ff" id="e-duemode-field">
                 <label>Due Payment Mode</label>
                 <select id="e-due-mode">
-                  <option value="normal">Normal ( Due + Renew plan)</option>
-                  <option value="due_only">Due Only (clear due only)</option>
+                  <option value="auto">Auto (recommended)</option>
+                  <option value="due_only">Force Due Only</option>
+                  <option value="normal">Force Due + Renew</option>
                 </select>
               </div>
               <div class="ff" id="e-postpaid-fields" style="display:none">
@@ -4217,7 +4218,7 @@
             '<td data-label="Expiry" style="font-family:var(--mono);font-size:12px;color:var(--txt);white-space:nowrap">' + fmtDate(c.expiry_date) + '</td>' +
             '<td data-label="Due" style="color:' + (c.balance_due > 0 ? "var(--red)" : "var(--txt3)") + ';font-family:var(--mono);font-weight:' + (c.balance_due > 0 ? "700" : "400") + '">' +
               "₹" + (c.balance_due || 0) +
-            (c.due_payment_mode === "due_only" ? ' <span class="badge berr" style="font-size:9px;padding:2px 6px">DUE ONLY</span>' : "") +
+            ((c.effective_due_mode || c.due_payment_mode) === "due_only" ? ' <span class="badge berr" style="font-size:9px;padding:2px 6px">DUE ONLY</span>' : "") +
             '</td>' +
             '<td data-label="Billing">' + billingBadge + '</td>' +
             '<td data-label="Status">' + sbadge(realSt(c)) + '</td>' +
@@ -4412,7 +4413,7 @@
         $("e-current-due-date").value = c.current_due_date || "";
         $("e-next-bill-date").value = c.next_bill_date || "";
         togglePostpaidFieldsEdit();
-        if ($("e-due-mode")) $("e-due-mode").value = c.due_payment_mode || "normal";
+        if ($("e-due-mode")) $("e-due-mode").value = c.due_payment_mode || "auto";
         $("e-orig-phone").value = c.phone || "";
         updateEditPassHint();
         updateEditPlanWarn();
@@ -4509,7 +4510,7 @@
           wifi_ssid: $("e-wifi-ssid") ? $("e-wifi-ssid").value.trim() || null : null,
           wifi_band: $("e-wifi-band") ? $("e-wifi-band").value || "single" : "single",
           balance_due: parseFloat($("e-due").value) || 0,
-          due_payment_mode: $("e-due-mode") ? $("e-due-mode").value : "normal",
+          due_payment_mode: $("e-due-mode") ? $("e-due-mode").value : "auto",
           billing_type: $("e-billing-type").value,
           grace_period_days: parseInt($("e-grace-days").value) || 10,
           auto_suspend_enabled: parseInt($("e-auto-suspend").value),
