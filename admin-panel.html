@@ -5865,7 +5865,7 @@ function drawPayCard(d, lang) {
   const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const isDue = ['due_only', 'postpaid_due'].includes(d.recharge_type);
   const dLeft = d.expiry_date ? Math.ceil((new Date(d.expiry_date) - new Date(today())) / 86400000) : null;
-  let accent = '#ffb347', tagBg = '#3a2b14', tagInk = '#ffc56e';
+  let accent = '#ffc83d', tagBg = '#3a3014', tagInk = '#ffd966';
   let tag = hi ? 'भुगतान बाकी' : 'Payment due';
   if (dLeft !== null && dLeft < 0) {
     accent = '#ff5252'; tagBg = '#3a1c22'; tagInk = '#ff8a8a';
