@@ -5917,24 +5917,27 @@ function drawPayCard(d, lang) {
   g.textAlign = 'left';
 
   // divider
-  g.fillStyle = '#2a3042'; g.fillRect(48, 190, W - 96, 2);
+  g.fillStyle = accent; g.fillRect(48, 189, W - 96, 7);
 
   // reminder title
   g.font = '600 44px ' + FONT; g.fillStyle = '#e8eaf0';
   g.fillText(hi ? 'भुगतान रिमाइन्डर' : 'Payment Reminder', 48, 272);
 
   // amount
-  g.font = '800 124px ' + FONT; g.fillStyle = accent;
-  g.fillText('₹' + amt, 48, 410);
+  g.font = '800 100px ' + FONT; g.fillStyle = accent;
+  g.fillText('₹' + amt, 48, 400);
 
   // due date
   if (dt) {
+    const expired = dLeft !== null && dLeft < 0;
+    const lbl = hi ? (expired ? 'प्लान समाप्त हुआ: ' : 'प्लान समाप्ति: ')
+                   : (expired ? 'Plan expired: ' : 'Plan expires: ');
     g.font = '600 38px ' + FONT; g.fillStyle = '#e8eaf0';
-    g.fillText(hi ? 'दि. ' + dt + ' तक' : 'By ' + dt, 48, 474);
+    g.fillText(lbl + dt, 48, 474);
   }
 
   // footer tag
-  g.textAlign = 'right'; g.font = '500 26px ' + FONT; g.fillStyle = '#ffffff';
+  g.textAlign = 'right'; g.font = '500 28px ' + FONT; g.fillStyle = '#ffffff';
   g.fillText('NetFlow MyWiFi', W - 48, 474);
   g.textAlign = 'left';
 }
