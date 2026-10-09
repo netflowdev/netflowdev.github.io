@@ -1685,6 +1685,305 @@
         .pg-title { font-size: 16px; }
       }
       
+      /* ── Payments list → cards (mobile) ── */
+      @media (max-width: 768px) {
+        #page-payments table { min-width: 0; }
+        #page-payments thead { display: none; }
+        /* 3 stat cards: Total on its own row, Online + Cash side by side */
+        #page-payments .stats3 .sc:first-child { grid-column: 1 / -1; }
+
+        #ptbody tr { display: grid; grid-template-columns: 1fr auto; column-gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+        /* loading / empty row (no data-label) just spans the card */
+        #ptbody td:not([data-label]) { grid-column: 1 / -1; }
+
+        #ptbody td[data-label] { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 4px 0 !important; border: none; text-align: right; max-width: none !important; }
+        #ptbody td[data-label]::before { content: attr(data-label); font-family: var(--mono); font-size: 10px; text-transform: uppercase; color: var(--txt3); text-align: left; flex-shrink: 0; }
+
+        /* header row: customer (left) | amount (right) */
+        #ptbody td[data-label="Customer"] { grid-column: 1; grid-row: 1; display: block; text-align: left; font-size: 14px; padding-bottom: 2px !important; }
+        #ptbody td[data-label="Amount"] { grid-column: 2; grid-row: 1; justify-content: flex-end; font-size: 16px; }
+        /* second row: date (left) | status (right) */
+        #ptbody td[data-label="Date"] { grid-column: 1; grid-row: 2; justify-content: flex-start; text-align: left; padding-bottom: 8px !important; }
+        #ptbody td[data-label="Status"] { grid-column: 2; grid-row: 2; justify-content: flex-end; padding-bottom: 8px !important; }
+        #ptbody td[data-label="Customer"]::before,
+        #ptbody td[data-label="Amount"]::before,
+        #ptbody td[data-label="Date"]::before,
+        #ptbody td[data-label="Status"]::before,
+        #ptbody td[data-label="Del"]::before { display: none; }
+
+        /* detail rows */
+        #ptbody td[data-label="Method"] { grid-row: 3; }
+        #ptbody td[data-label="Type"] { grid-row: 4; }
+        #ptbody td[data-label="App Ref"] { grid-row: 5; }
+        #ptbody td[data-label="Bank Txn"] { grid-row: 6; }
+        #ptbody td[data-label="ID"] { grid-row: 7; }
+
+        /* delete button bottom-right */
+        #ptbody td[data-label="Del"] { grid-row: 8; justify-content: flex-end; padding-top: 10px !important; }
+      }
+
+      /* ── All other list pages → cards (mobile) ── */
+      @media (max-width: 768px) {
+        /* 3 stat cards: first one full width, other two side by side */
+        .stats3 > .sc:first-child:nth-last-child(3) { grid-column: 1 / -1; }
+
+        /* section header rows (title + buttons) wrap instead of overflowing */
+        .tbl-card > div[style*="padding:18px 20px 0"],
+        .tbl-card > div[style*="padding: 18px 20px 0"] { flex-wrap: wrap; gap: 10px; padding: 14px 14px 0 !important; }
+
+        /* WhatsApp two-column layout (inline style has no spaces, so the old stack rule missed it) */
+        div[style*="grid-template-columns:1.1fr"] { display: flex !important; flex-direction: column !important; gap: 14px !important; }
+        #wa-balance-card > div > div:last-child { text-align: left !important; }
+
+        /* hide table headers + drop the 750px min-width on these pages */
+        :is(#page-activations, #page-settlements, #page-notifications, #page-plans, #page-ott, #page-billing, #page-paylinks, #page-whatsapp, #page-brands, #page-iptv, #settlement-txns-list) table { min-width: 0; }
+        :is(#page-activations, #page-settlements, #page-notifications, #page-plans, #page-ott, #page-billing, #page-paylinks, #page-whatsapp, #page-brands, #page-iptv, #settlement-txns-list) thead { display: none; }
+
+        /* common card shell */
+        :is(
+          #atbody,
+          #st-tbody,
+          #nhtbody,
+          #plan-tbody,
+          #ott-tbody,
+          #ott-subs-tbody,
+          #bh-tbody,
+          #pl-tbody,
+          #wa-hist-tbody,
+          #brands-tbody,
+          #iptv-tbody,
+          #settlement-txns-list tbody
+        ) tr { display: grid; grid-template-columns: 1fr auto; column-gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+        :is(
+          #atbody,
+          #st-tbody,
+          #nhtbody,
+          #plan-tbody,
+          #ott-tbody,
+          #ott-subs-tbody,
+          #bh-tbody,
+          #pl-tbody,
+          #wa-hist-tbody,
+          #brands-tbody,
+          #iptv-tbody,
+          #settlement-txns-list tbody
+        ) td:not([data-label]) { grid-column: 1 / -1; }
+        :is(
+          #atbody,
+          #st-tbody,
+          #nhtbody,
+          #plan-tbody,
+          #ott-tbody,
+          #ott-subs-tbody,
+          #bh-tbody,
+          #pl-tbody,
+          #wa-hist-tbody,
+          #brands-tbody,
+          #iptv-tbody,
+          #settlement-txns-list tbody
+        ) td[data-label] { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 4px 0 !important; border: none; text-align: right; max-width: none !important; white-space: normal !important; overflow: visible !important; }
+        :is(
+          #atbody,
+          #st-tbody,
+          #nhtbody,
+          #plan-tbody,
+          #ott-tbody,
+          #ott-subs-tbody,
+          #bh-tbody,
+          #pl-tbody,
+          #wa-hist-tbody,
+          #brands-tbody,
+          #iptv-tbody,
+          #settlement-txns-list tbody
+        ) td[data-label]::before { content: attr(data-label); font-family: var(--mono); font-size: 10px; text-transform: uppercase; color: var(--txt3); text-align: left; flex-shrink: 0; }
+        :is(
+          #atbody,
+          #st-tbody,
+          #nhtbody,
+          #plan-tbody,
+          #ott-tbody,
+          #ott-subs-tbody,
+          #bh-tbody,
+          #pl-tbody,
+          #wa-hist-tbody,
+          #brands-tbody,
+          #iptv-tbody,
+          #settlement-txns-list tbody
+        ) .abtns { flex-wrap: wrap; row-gap: 8px; justify-content: flex-end; }
+
+
+        /* #atbody */
+        #atbody tr td:nth-child(2) { grid-column: 1; grid-row: 1; display: block; text-align: left; font-size: 14px; padding-bottom: 2px !important; }
+        #atbody tr td:nth-child(7) { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+        #atbody tr td:nth-child(3) { grid-column: 1; grid-row: 2; justify-content: flex-start; text-align: left; padding-bottom: 8px !important; }
+        #atbody tr td:nth-child(4) { grid-column: 2; grid-row: 2; justify-content: flex-end; }
+        #atbody tr td:nth-child(5) { grid-column: 1 / -1; grid-row: 3; }
+        #atbody tr td:nth-child(6) { grid-column: 1 / -1; grid-row: 4; }
+        #atbody tr td:nth-child(8) { grid-column: 1 / -1; grid-row: 5; }
+        #atbody tr td:nth-child(9) { grid-column: 1 / -1; grid-row: 6; }
+        #atbody tr td:nth-child(1) { grid-column: 1 / -1; grid-row: 7; }
+        #atbody tr td:nth-child(10) { grid-column: 1 / -1; grid-row: 8; justify-content: flex-end; }
+        #atbody tr td:nth-child(2)::before,
+        #atbody tr td:nth-child(7)::before,
+        #atbody tr td:nth-child(3)::before,
+        #atbody tr td:nth-child(4)::before,
+        #atbody tr td:nth-child(10)::before { display: none; }
+
+        /* #st-tbody */
+        #st-tbody tr td:nth-child(2) { grid-column: 1; grid-row: 1; display: block; text-align: left; font-size: 14px; padding-bottom: 2px !important; }
+        #st-tbody tr td:nth-child(5) { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+        #st-tbody tr td:nth-child(7) { grid-column: 1; grid-row: 2; justify-content: flex-start; text-align: left; padding-bottom: 8px !important; }
+        #st-tbody tr td:nth-child(1) { grid-column: 1 / -1; grid-row: 3; }
+        #st-tbody tr td:nth-child(3) { grid-column: 1 / -1; grid-row: 4; }
+        #st-tbody tr td:nth-child(4) { grid-column: 1 / -1; grid-row: 5; }
+        #st-tbody tr td:nth-child(6) { grid-column: 1 / -1; grid-row: 6; }
+        #st-tbody tr td:nth-child(8) { grid-column: 1 / -1; grid-row: 7; justify-content: flex-end; }
+        #st-tbody tr td:nth-child(2)::before,
+        #st-tbody tr td:nth-child(5)::before,
+        #st-tbody tr td:nth-child(7)::before,
+        #st-tbody tr td:nth-child(8)::before { display: none; }
+
+        /* #nhtbody */
+        #nhtbody tr td:nth-child(1) { grid-column: 1; grid-row: 1; display: block; text-align: left; font-size: 14px; padding-bottom: 2px !important; }
+        #nhtbody tr td:nth-child(4) { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+        #nhtbody tr td:nth-child(5) { grid-column: 1; grid-row: 2; justify-content: flex-start; text-align: left; padding-bottom: 8px !important; }
+        #nhtbody tr td:nth-child(2) { grid-column: 2; grid-row: 2; justify-content: flex-end; }
+        #nhtbody tr td:nth-child(3) { grid-column: 1 / -1; grid-row: 3; display: block; text-align: left; padding-top: 6px !important; line-height: 1.5; }
+        #nhtbody tr td:nth-child(1)::before,
+        #nhtbody tr td:nth-child(4)::before,
+        #nhtbody tr td:nth-child(5)::before,
+        #nhtbody tr td:nth-child(2)::before,
+        #nhtbody tr td:nth-child(3)::before { display: none; }
+
+        /* #plan-tbody */
+        #plan-tbody tr td:nth-child(2) { grid-column: 1; grid-row: 1; display: block; text-align: left; font-size: 14px; padding-bottom: 2px !important; }
+        #plan-tbody tr td:nth-child(5) { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+        #plan-tbody tr td:nth-child(7) { grid-column: 1; grid-row: 2; justify-content: flex-start; text-align: left; padding-bottom: 8px !important; }
+        #plan-tbody tr td:nth-child(9) { grid-column: 2; grid-row: 2; justify-content: flex-end; }
+        #plan-tbody tr td:nth-child(3) { grid-column: 1 / -1; grid-row: 3; }
+        #plan-tbody tr td:nth-child(4) { grid-column: 1 / -1; grid-row: 4; }
+        #plan-tbody tr td:nth-child(6) { grid-column: 1 / -1; grid-row: 5; }
+        #plan-tbody tr td:nth-child(8) { grid-column: 1 / -1; grid-row: 6; }
+        #plan-tbody tr td:nth-child(1) { grid-column: 1 / -1; grid-row: 7; }
+        #plan-tbody tr td:nth-child(10) { grid-column: 1 / -1; grid-row: 8; justify-content: flex-end; }
+        #plan-tbody tr td:nth-child(2)::before,
+        #plan-tbody tr td:nth-child(5)::before,
+        #plan-tbody tr td:nth-child(7)::before,
+        #plan-tbody tr td:nth-child(9)::before,
+        #plan-tbody tr td:nth-child(10)::before { display: none; }
+
+        /* #ott-tbody */
+        #ott-tbody tr td:nth-child(2) { grid-column: 1; grid-row: 1; display: block; text-align: left; font-size: 14px; padding-bottom: 2px !important; }
+        #ott-tbody tr td:nth-child(3) { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+        #ott-tbody tr td:nth-child(4) { grid-column: 1; grid-row: 2; justify-content: flex-start; text-align: left; padding-bottom: 8px !important; }
+        #ott-tbody tr td:nth-child(7) { grid-column: 2; grid-row: 2; justify-content: flex-end; }
+        #ott-tbody tr td:nth-child(5) { grid-column: 1 / -1; grid-row: 3; flex-direction: column; align-items: flex-start; gap: 6px; }
+        #ott-tbody tr td:nth-child(6) { grid-column: 1 / -1; grid-row: 4; }
+        #ott-tbody tr td:nth-child(1) { grid-column: 1 / -1; grid-row: 5; }
+        #ott-tbody tr td:nth-child(8) { grid-column: 1 / -1; grid-row: 6; justify-content: flex-end; }
+        #ott-tbody tr td:nth-child(2)::before,
+        #ott-tbody tr td:nth-child(3)::before,
+        #ott-tbody tr td:nth-child(4)::before,
+        #ott-tbody tr td:nth-child(7)::before,
+        #ott-tbody tr td:nth-child(8)::before { display: none; }
+
+        /* #ott-subs-tbody */
+        #ott-subs-tbody tr td:nth-child(2) { grid-column: 1; grid-row: 1; display: block; text-align: left; font-size: 14px; padding-bottom: 2px !important; }
+        #ott-subs-tbody tr td:nth-child(6) { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+        #ott-subs-tbody tr td:nth-child(3) { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; text-align: left; padding-bottom: 8px !important; }
+        #ott-subs-tbody tr td:nth-child(4) { grid-column: 1 / -1; grid-row: 3; }
+        #ott-subs-tbody tr td:nth-child(5) { grid-column: 1 / -1; grid-row: 4; }
+        #ott-subs-tbody tr td:nth-child(7) { grid-column: 1 / -1; grid-row: 5; }
+        #ott-subs-tbody tr td:nth-child(1) { grid-column: 1 / -1; grid-row: 6; }
+        #ott-subs-tbody tr td:nth-child(2)::before,
+        #ott-subs-tbody tr td:nth-child(6)::before,
+        #ott-subs-tbody tr td:nth-child(3)::before { display: none; }
+
+        /* #bh-tbody */
+        #bh-tbody tr td:nth-child(2) { grid-column: 1; grid-row: 1; display: block; text-align: left; font-size: 14px; padding-bottom: 2px !important; }
+        #bh-tbody tr td:nth-child(10) { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+        #bh-tbody tr td:nth-child(8) { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; text-align: left; padding-bottom: 8px !important; }
+        #bh-tbody tr td:nth-child(3) { grid-column: 1 / -1; grid-row: 3; }
+        #bh-tbody tr td:nth-child(4) { grid-column: 1 / -1; grid-row: 4; }
+        #bh-tbody tr td:nth-child(5) { grid-column: 1 / -1; grid-row: 5; }
+        #bh-tbody tr td:nth-child(6) { grid-column: 1 / -1; grid-row: 6; }
+        #bh-tbody tr td:nth-child(7) { grid-column: 1 / -1; grid-row: 7; }
+        #bh-tbody tr td:nth-child(9) { grid-column: 1 / -1; grid-row: 8; }
+        #bh-tbody tr td:nth-child(1) { grid-column: 1 / -1; grid-row: 9; }
+        #bh-tbody tr td:nth-child(11) { grid-column: 1 / -1; grid-row: 10; justify-content: flex-end; }
+        #bh-tbody tr td:nth-child(2)::before,
+        #bh-tbody tr td:nth-child(10)::before,
+        #bh-tbody tr td:nth-child(8)::before,
+        #bh-tbody tr td:nth-child(11)::before { display: none; }
+
+        /* #pl-tbody */
+        #pl-tbody tr td:nth-child(2) { grid-column: 1; grid-row: 1; display: block; text-align: left; font-size: 14px; padding-bottom: 2px !important; }
+        #pl-tbody tr td:nth-child(4) { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+        #pl-tbody tr td:nth-child(3) { grid-column: 1; grid-row: 2; justify-content: flex-start; text-align: left; padding-bottom: 8px !important; }
+        #pl-tbody tr td:nth-child(6) { grid-column: 2; grid-row: 2; justify-content: flex-end; }
+        #pl-tbody tr td:nth-child(7) { grid-column: 1 / -1; grid-row: 3; }
+        #pl-tbody tr td:nth-child(1) { grid-column: 1 / -1; grid-row: 4; }
+        #pl-tbody tr td:nth-child(5) { grid-column: 1 / -1; grid-row: 5; flex-wrap: wrap; row-gap: 6px; }
+        #pl-tbody tr td:nth-child(8) { grid-column: 1 / -1; grid-row: 6; justify-content: flex-end; }
+        #pl-tbody tr td:nth-child(2)::before,
+        #pl-tbody tr td:nth-child(4)::before,
+        #pl-tbody tr td:nth-child(3)::before,
+        #pl-tbody tr td:nth-child(6)::before,
+        #pl-tbody tr td:nth-child(8)::before { display: none; }
+
+        /* #wa-hist-tbody */
+        #wa-hist-tbody tr td:nth-child(2) { grid-column: 1; grid-row: 1; display: block; text-align: left; font-size: 14px; padding-bottom: 2px !important; }
+        #wa-hist-tbody tr td:nth-child(5) { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+        #wa-hist-tbody tr td:nth-child(6) { grid-column: 1; grid-row: 2; justify-content: flex-start; text-align: left; padding-bottom: 8px !important; }
+        #wa-hist-tbody tr td:nth-child(3) { grid-column: 2; grid-row: 2; justify-content: flex-end; }
+        #wa-hist-tbody tr td:nth-child(4) { grid-column: 1 / -1; grid-row: 3; display: block; text-align: left; padding-top: 6px !important; line-height: 1.5; }
+        #wa-hist-tbody tr td:nth-child(1) { grid-column: 1 / -1; grid-row: 4; }
+        #wa-hist-tbody tr td:nth-child(2)::before,
+        #wa-hist-tbody tr td:nth-child(5)::before,
+        #wa-hist-tbody tr td:nth-child(6)::before,
+        #wa-hist-tbody tr td:nth-child(3)::before,
+        #wa-hist-tbody tr td:nth-child(4)::before { display: none; }
+
+        /* #brands-tbody */
+        #brands-tbody tr td:nth-child(2) { grid-column: 1; grid-row: 1; display: block; text-align: left; font-size: 14px; padding-bottom: 2px !important; }
+        #brands-tbody tr td:nth-child(4) { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+        #brands-tbody tr td:nth-child(3) { grid-column: 1 / -1; grid-row: 2; }
+        #brands-tbody tr td:nth-child(1) { grid-column: 1 / -1; grid-row: 3; }
+        #brands-tbody tr td:nth-child(5) { grid-column: 1 / -1; grid-row: 4; justify-content: flex-end; }
+        #brands-tbody tr td:nth-child(2)::before,
+        #brands-tbody tr td:nth-child(4)::before,
+        #brands-tbody tr td:nth-child(5)::before { display: none; }
+
+        /* #iptv-tbody */
+        #iptv-tbody tr td:nth-child(2) { grid-column: 1; grid-row: 1; display: block; text-align: left; font-size: 14px; padding-bottom: 2px !important; }
+        #iptv-tbody tr td:nth-child(6) { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+        #iptv-tbody tr td:nth-child(3) { grid-column: 1; grid-row: 2; justify-content: flex-start; text-align: left; padding-bottom: 8px !important; }
+        #iptv-tbody tr td:nth-child(7) { grid-column: 2; grid-row: 2; justify-content: flex-end; }
+        #iptv-tbody tr td:nth-child(4) { grid-column: 1 / -1; grid-row: 3; }
+        #iptv-tbody tr td:nth-child(5) { grid-column: 1 / -1; grid-row: 4; word-break: break-all; }
+        #iptv-tbody tr td:nth-child(1) { grid-column: 1 / -1; grid-row: 5; }
+        #iptv-tbody tr td:nth-child(8) { grid-column: 1 / -1; grid-row: 6; justify-content: flex-end; }
+        #iptv-tbody tr td:nth-child(2)::before,
+        #iptv-tbody tr td:nth-child(6)::before,
+        #iptv-tbody tr td:nth-child(3)::before,
+        #iptv-tbody tr td:nth-child(7)::before,
+        #iptv-tbody tr td:nth-child(8)::before { display: none; }
+
+        /* #settlement-txns-list tbody */
+        #settlement-txns-list tbody tr td:nth-child(1) { grid-column: 1; grid-row: 1; display: block; text-align: left; font-size: 14px; padding-bottom: 2px !important; }
+        #settlement-txns-list tbody tr td:nth-child(8) { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+        #settlement-txns-list tbody tr td:nth-child(2) { grid-column: 1; grid-row: 2; justify-content: flex-start; text-align: left; padding-bottom: 8px !important; }
+        #settlement-txns-list tbody tr td:nth-child(6) { grid-column: 2; grid-row: 2; justify-content: flex-end; }
+        #settlement-txns-list tbody tr td:nth-child(5) { grid-column: 1 / -1; grid-row: 3; }
+        #settlement-txns-list tbody tr td:nth-child(7) { grid-column: 1 / -1; grid-row: 4; }
+        #settlement-txns-list tbody tr td:nth-child(3) { grid-column: 1 / -1; grid-row: 5; }
+        #settlement-txns-list tbody tr td:nth-child(4) { grid-column: 1 / -1; grid-row: 6; }
+        #settlement-txns-list tbody tr td:nth-child(1)::before,
+        #settlement-txns-list tbody tr td:nth-child(8)::before,
+        #settlement-txns-list tbody tr td:nth-child(2)::before,
+        #settlement-txns-list tbody tr td:nth-child(6)::before { display: none; }
+      }
+
       /* ── Add/Edit customer: tabbed modal ── */
       .cm-modal { display: flex; flex-direction: column; overflow: hidden; height: min(700px, 90vh); }
       .cm-modal .modal-title { margin-bottom: 14px; }
@@ -4622,26 +4921,26 @@
           $("ptbody").innerHTML = pays
             .map(
               (p) =>
-                '<tr><td style="font-family:var(--mono);color:var(--txt3);font-size:12px">#' +
+                '<tr><td data-label="ID" style="font-family:var(--mono);color:var(--txt3);font-size:12px">#' +
                 p.id +
-                '</td><td><div style="font-weight:600;color:var(--txt)">' +
+                '</td><td data-label="Customer"><div style="font-weight:600;color:var(--txt)">' +
                 (p.customer_name || "—") +
                 '</div><div style="font-size:11px;color:var(--txt3);font-family:var(--mono)">' +
                 (p.customer_phone || "") +
-                '</div></td><td style="font-family:var(--mono);font-weight:700;color:var(--green)">₹' +
+                '</div></td><td data-label="Amount" style="font-family:var(--mono);font-weight:700;color:var(--green)">₹' +
                 (p.amount_total || 0).toLocaleString("en-IN") +
-                "</td><td>" +
+                '</td><td data-label="Method">' +
                 mbadge(p.payment_method) +
-                '</td><td style="color:var(--txt2)">' +
+                '</td><td data-label="Type" style="color:var(--txt2)">' +
                 (p.recharge_type || "").replace(/_/g, " ") +
-                '</td><td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' +
+                '</td><td data-label="App Ref" style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' +
                 (p.payu_order_id || "—") +
-                '</td><td style="font-family:var(--mono);font-size:11px;color:var(--txt3);max-width:160px;word-break:break-all;white-space:normal">' + (p.payu_txn_id || "—") +
-                "</td><td>" +
+                '</td><td data-label="Bank Txn" style="font-family:var(--mono);font-size:11px;color:var(--txt3);max-width:160px;word-break:break-all;white-space:normal">' + (p.payu_txn_id || "—") +
+                '</td><td data-label="Status">' +
                 sbadge(p.status) +
-                '</td><td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' +
+                '</td><td data-label="Date" style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' +
                 fmtDateTime(p.created_at) +
-                '</td><td style="padding-right:20px"><button class="btn bsm bdanger" onclick="deletePayment(' +
+                '</td><td data-label="Del" style="padding-right:20px"><button class="btn bsm bdanger" onclick="deletePayment(' +
                 p.id +
                 ')">🗑</button></td></tr>',
             )
@@ -4652,6 +4951,32 @@
       }
 
       // ── SETTLEMENTS ──────────────────────────────────────────────
+      // ── Mobile cards: auto-fill data-label on table cells from the <th> text ──
+      (function () {
+        var IDS = ["atbody", "st-tbody", "nhtbody", "plan-tbody", "ott-tbody", "ott-subs-tbody", "bh-tbody", "pl-tbody", "wa-hist-tbody", "brands-tbody", "iptv-tbody", "settlement-txns-list"];
+        function label(root) {
+          var tbs = root.tagName === "TBODY" ? [root] : root.querySelectorAll("tbody");
+          Array.prototype.forEach.call(tbs, function (tb) {
+            var table = tb.closest("table");
+            var ths = table ? table.querySelectorAll("thead th") : [];
+            if (!ths.length) return;
+            var names = Array.prototype.map.call(ths, function (t) { return t.textContent.replace(/\s+/g, " ").trim(); });
+            Array.prototype.forEach.call(tb.rows, function (tr) {
+              if (tr.cells.length !== names.length) return; // loading / empty rows
+              Array.prototype.forEach.call(tr.cells, function (td, i) {
+                if (!td.hasAttribute("data-label")) td.setAttribute("data-label", names[i]);
+              });
+            });
+          });
+        }
+        IDS.forEach(function (id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          label(el);
+          new MutationObserver(function () { label(el); }).observe(el, { childList: true, subtree: true });
+        });
+      })();
+
       let _settlementsCache = [];
 
       async function loadSettlements() {
@@ -6933,6 +7258,72 @@ window.addEventListener('message', function(e){
   }
 });
 
+// ===== Android back button support =====
+(function () {
+  const openStack = [];
+  let ignorePop = 0;
+  let exitArmed = false;
+
+  const isOpen = (el) => el.style.display && el.style.display !== "none";
+
+  // base entry + root entry, taaki back dabane par page ke andar hi rahe
+  history.replaceState({ base: 1 }, "");
+  history.pushState({ root: 1 }, "");
+
+  // koi bhi modal khule/band ho to history sync karo
+  const obs = new MutationObserver((muts) => {
+    muts.forEach((m) => {
+      const bg = m.target;
+      if (!bg.classList || !bg.classList.contains("modal-bg") || !bg.id) return;
+      const idx = openStack.indexOf(bg.id);
+      if (isOpen(bg) && idx < 0) {
+        openStack.push(bg.id);
+        history.pushState({ modal: bg.id }, "");
+      } else if (!isOpen(bg) && idx >= 0) {
+        // ✕ ya Save se band hua -> extra history entry hata do
+        openStack.splice(idx, 1);
+        ignorePop++;
+        history.back();
+      }
+    });
+  });
+  document.querySelectorAll(".modal-bg[id]").forEach((bg) =>
+    obs.observe(bg, { attributes: true, attributeFilter: ["style"] })
+  );
+
+  window.addEventListener("popstate", () => {
+    if (ignorePop > 0) { ignorePop--; return; }
+
+    // 1) khula modal ho to wahi band karo
+    if (openStack.length) {
+      const id = openStack.pop();
+      document.getElementById(id).style.display = "none";
+      return;
+    }
+
+    // 2) kisi aur page par ho to dashboard par jao
+    const cur = PAGES.find((p) => {
+      const el = document.getElementById("page-" + p);
+      return el && el.style.display === "block";
+    });
+    if (cur && cur !== "dashboard") {
+      showPage("dashboard");
+      history.pushState({ root: 1 }, "");
+      return;
+    }
+
+    // 3) dashboard par: double back to exit
+    if (!exitArmed) {
+      exitArmed = true;
+      toast("Exit karne ke liye dobara back dabao");
+      history.pushState({ root: 1 }, "");
+      setTimeout(() => (exitArmed = false), 2000);
+    } else {
+  if (window.NetflowApp && window.NetflowApp.exitApp) window.NetflowApp.exitApp();
+  else history.back();
+  }
+  });
+})();
 
 
 
