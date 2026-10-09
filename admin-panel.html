@@ -7266,11 +7266,11 @@ window.addEventListener('message', function(e){
 
   const isOpen = (el) => el.style.display && el.style.display !== "none";
 
-  // base entry + root entry, taaki back dabane par page ke andar hi rahe
+  // base entry + root entry, so back stays inside the page
   history.replaceState({ base: 1 }, "");
   history.pushState({ root: 1 }, "");
 
-  // koi bhi modal khule/band ho to history sync karo
+  // keep history in sync whenever any modal opens or closes
   const obs = new MutationObserver((muts) => {
     muts.forEach((m) => {
       const bg = m.target;
@@ -7280,7 +7280,7 @@ window.addEventListener('message', function(e){
         openStack.push(bg.id);
         history.pushState({ modal: bg.id }, "");
       } else if (!isOpen(bg) && idx >= 0) {
-        // ✕ ya Save se band hua -> extra history entry hata do
+        // closed via ✕ or Save -> remove the extra history entry
         openStack.splice(idx, 1);
         ignorePop++;
         history.back();
@@ -7294,14 +7294,14 @@ window.addEventListener('message', function(e){
   window.addEventListener("popstate", () => {
     if (ignorePop > 0) { ignorePop--; return; }
 
-    // 1) khula modal ho to wahi band karo
+    // 1) if a modal is open, close it
     if (openStack.length) {
       const id = openStack.pop();
       document.getElementById(id).style.display = "none";
       return;
     }
 
-    // 2) kisi aur page par ho to dashboard par jao
+    // 2) if on any other page, go to the dashboard
     const cur = PAGES.find((p) => {
       const el = document.getElementById("page-" + p);
       return el && el.style.display === "block";
@@ -7312,19 +7312,18 @@ window.addEventListener('message', function(e){
       return;
     }
 
-    // 3) dashboard par: double back to exit
+    // 3) on the dashboard: press back twice to exit
     if (!exitArmed) {
       exitArmed = true;
-      toast("Exit karne ke liye dobara back dabao");
+      toast("Press back again to exit");
       history.pushState({ root: 1 }, "");
       setTimeout(() => (exitArmed = false), 2000);
     } else {
-  if (window.NetflowApp && window.NetflowApp.exitApp) window.NetflowApp.exitApp();
-  else history.back();
-  }
+      if (window.NetflowApp && window.NetflowApp.exitApp) window.NetflowApp.exitApp();
+      else history.back();
+    }
   });
 })();
-
 
 
 
