@@ -324,6 +324,19 @@
         gap: 16px;
         margin-bottom: 24px;
       }
+      .stats.stats5 { grid-template-columns: repeat(5, 1fr); }
+      #csort { display: none; }
+      @media (max-width: 1100px) { .stats.stats5 { grid-template-columns: repeat(3, 1fr); } }
+      @media (max-width: 768px) {
+        .stats.stats5 { grid-template-columns: 1fr 1fr; }
+        .stats.stats5 .sc:last-child { grid-column: 1 / -1; }
+        #csort { display: block; }
+      }
+      th.sortable { cursor: pointer; user-select: none; }
+      th.sortable:hover { color: var(--txt); }
+      th.sortable .sort-ar { margin-left: 5px; font-size: 9px; opacity: 0.35; }
+      th.sortable.sorted { color: var(--amber); }
+      th.sortable.sorted .sort-ar { opacity: 1; }
       .sc {
         background: var(--surface);
         border: 1px solid var(--border);
@@ -2096,7 +2109,7 @@
             Dashboard
           </div>
           <div class="nav-sec">Management</div>
-          <div class="nav-item" id="nav-customers" onclick="showPage('customers')">
+          <div class="nav-item" id="nav-customers" onclick="openCustFilter('')">
             <div class="nav-icon">🙋🏻‍♂️</div>
             Customers
           </div>
@@ -2192,7 +2205,7 @@
           </div>
           <div class="content">
             <div class="stats">
-              <div class="sc blue fade-up" onclick="showPage('customers')">
+              <div class="sc blue fade-up" onclick="openCustFilter('')">
                 <div class="sc-row">
                   <div class="sc-icon blue">👥</div>
                   <div class="sc-text">
@@ -2243,6 +2256,58 @@
                   </div>
                 </div>
                 <div class="sc-sub" style="color: var(--amber)">activations</div>
+              </div>
+            </div>
+            <div class="stats stats5">
+              <div class="sc amber fade-up" onclick="openCustFilter('today','expiry',1)">
+                <div class="sc-row">
+                  <div class="sc-icon amber">📅</div>
+                  <div class="sc-text">
+                    <div class="sc-label">Expiring Today</div>
+                    <div class="sc-val" id="s-today" style="color: var(--amber)">—</div>
+                  </div>
+                </div>
+                <div class="sc-sub" style="color: var(--amber)">renew today</div>
+              </div>
+              <div class="sc blue fade-up fade-up-d1" onclick="openCustFilter('soon7','expiry',1)">
+                <div class="sc-row">
+                  <div class="sc-icon blue">⏰</div>
+                  <div class="sc-text">
+                    <div class="sc-label">Expiring in 7 days</div>
+                    <div class="sc-val" id="s-soon7" style="color: var(--amber)">—</div>
+                  </div>
+                </div>
+                <div class="sc-sub">incl. today</div>
+              </div>
+              <div class="sc red fade-up fade-up-d2" onclick="openCustFilter('recent7','expiry',-1)">
+                <div class="sc-row">
+                  <div class="sc-icon red">↩</div>
+                  <div class="sc-text">
+                    <div class="sc-label">Expired (7 days)</div>
+                    <div class="sc-val" id="s-recent7" style="color: var(--red)">—</div>
+                  </div>
+                </div>
+                <div class="sc-sub" style="color: var(--red)">in last 7 days</div>
+              </div>
+              <div class="sc red fade-up fade-up-d3" onclick="openCustFilter('due','due',-1)">
+                <div class="sc-row">
+                  <div class="sc-icon red">₹</div>
+                  <div class="sc-text">
+                    <div class="sc-label">Due Pending</div>
+                    <div class="sc-val" id="s-due" style="color: var(--red)">—</div>
+                  </div>
+                </div>
+                <div class="sc-sub" style="color: var(--red)" id="s-due-amt">—</div>
+              </div>
+              <div class="sc purple fade-up fade-up-d3" onclick="openCustFilter('suspended')">
+                <div class="sc-row">
+                  <div class="sc-icon purple">⏸</div>
+                  <div class="sc-text">
+                    <div class="sc-label">Suspended</div>
+                    <div class="sc-val" id="s-suspended">—</div>
+                  </div>
+                </div>
+                <div class="sc-sub">on hold</div>
               </div>
             </div>
             <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px">
@@ -2362,12 +2427,30 @@
           <div class="content">
             <div class="toolbar">
               <input class="sbox" id="csearch" placeholder="Search name or phone..." oninput="searchC()" />
-              <select class="fsel" id="cstatus" onchange="searchC()">
+              <select class="fsel" id="cstatus" onchange="_custFilterChanged()">
                 <option value="">All status</option>
                 <option value="active">Active</option>
                 <option value="expired">Expired</option>
+                <option value="today">Expiring today</option>
+                <option value="soon7">Expiring in 7 days</option>
+                <option value="recent7">Expired in last 7 days</option>
                 <option value="suspended">Suspended</option>
                 <option value="lead">Lead</option>
+                <option value="due">Has due</option>
+              </select>
+              <select class="fsel" id="cbilling" onchange="_custViewChanged()">
+                <option value="">All billing</option>
+                <option value="prepaid">Prepaid</option>
+                <option value="postpaid">Postpaid</option>
+              </select>
+              <select class="fsel" id="csort" onchange="_custSortSelect()" title="Sort">
+                <option value="">Sort: Default</option>
+                <option value="name:1">Name A-Z</option>
+                <option value="name:-1">Name Z-A</option>
+                <option value="expiry:1">Expiry: soonest</option>
+                <option value="expiry:-1">Expiry: latest</option>
+                <option value="due:-1">Due: high to low</option>
+                <option value="due:1">Due: low to high</option>
               </select>
               <select class="fsel" id="cpagesize" onchange="_custChangeSize()" title="Rows per page">
                 <option value="25">25 / page</option>
@@ -2385,15 +2468,15 @@
                   <thead>
                     <tr>
                       <th>Sr.</th>
-                      <th>Name</th>
-                      <th>Phone</th>
+                      <th class="sortable" data-sort="name" onclick="_custSortBy('name')">Name<span class="sort-ar">↕</span></th>
+                      <th class="sortable" data-sort="phone" onclick="_custSortBy('phone')">Phone<span class="sort-ar">↕</span></th>
                       <th>ISP</th>
                       <th>Username</th>
-                      <th>Plan</th>
-                      <th>Expiry</th>
-                      <th>Due</th>
-                      <th>Billing</th>
-                      <th>Status</th>
+                      <th class="sortable" data-sort="plan" onclick="_custSortBy('plan')">Plan<span class="sort-ar">↕</span></th>
+                      <th class="sortable" data-sort="expiry" onclick="_custSortBy('expiry')">Expiry<span class="sort-ar">↕</span></th>
+                      <th class="sortable" data-sort="due" onclick="_custSortBy('due')">Due<span class="sort-ar">↕</span></th>
+                      <th class="sortable" data-sort="billing" onclick="_custSortBy('billing')">Billing<span class="sort-ar">↕</span></th>
+                      <th class="sortable" data-sort="status" onclick="_custSortBy('status')">Status<span class="sort-ar">↕</span></th>
                       <th style="padding-right: 20px">Actions</th>
                     </tr>
                   </thead>
@@ -4272,7 +4355,8 @@
       }
 
       function today() {
-        return new Date().toISOString().split("T")[0];
+        const d = new Date();
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
       }
       function realSt(c) {
         if (!c.expiry_date) return c.status || "unknown";
@@ -4431,7 +4515,16 @@
           const td = today();
           $("s-total").textContent = all.length;
           $("s-active").textContent = all.filter(c => c.status === "active" && (!c.expiry_date || c.expiry_date >= td)).length;
-          $("s-expired").textContent = all.filter(c => c.status === "expired" || (c.status === "active" && c.expiry_date && c.expiry_date < td)).length;
+          _custRaw = all;
+          $("s-active").textContent = all.filter(c => _custMatch(c, "active")).length;
+          $("s-expired").textContent = all.filter(c => _custMatch(c, "expired")).length;
+          $("s-today").textContent = all.filter(c => _custMatch(c, "today")).length;
+          $("s-soon7").textContent = all.filter(c => _custMatch(c, "soon7")).length;
+          $("s-recent7").textContent = all.filter(c => _custMatch(c, "recent7")).length;
+          $("s-suspended").textContent = all.filter(c => _custMatch(c, "suspended")).length;
+          const dueList = all.filter(c => _custMatch(c, "due"));
+          $("s-due").textContent = dueList.length;
+          $("s-due-amt").textContent = "₹" + dueList.reduce((s, c) => s + (Number(c.balance_due) || 0), 0).toLocaleString("en-IN") + " total";
           $("s-pending").textContent = ar.data?.activations?.length || 0;
 
           // Recent Payments
@@ -4451,7 +4544,8 @@
         } catch(e) { console.error(e); }
       }
 
-      let _custAll = [], _custPage = 1, _custSize = 100;
+      let _custAll = [], _custRaw = [], _custPage = 1, _custSize = 100;
+      let _custSort = { key: null, dir: 1 };
 
       function waNumber(p) {
         var d = String(p || "").replace(/\D/g, "");
@@ -4464,17 +4558,16 @@
       }
       async function loadCustomers(resetPage) {
         if (resetPage !== false) _custPage = 1;
-        const search = $("csearch").value.trim(), status = $("cstatus").value;
+        const search = $("csearch").value.trim();
         let p = "?page=1&limit=9999";
         if (search) p += "&search=" + encodeURIComponent(search);
-        if (status) p += "&status=" + status;
         $("ctbody").innerHTML = '<tr><td colspan="10"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
         $("cpagination").style.display = "none";
         try {
           const r = await apiFetch("GET", "/api/admin/customers" + p);
-          _custAll = r.data?.customers || [];
-          custCache = _custAll;
-          _renderCustPage();
+          _custRaw = r.data?.customers || [];
+          custCache = _custRaw;
+          _custApplyView();
         } catch (e) { console.error(e); }
       }
 
@@ -4564,7 +4657,121 @@
       }
 
       function searchC() { loadCustomers(); }
-      function filterSt(s) { $("cstatus").value = s; loadCustomers(); }
+      function filterSt(s) {
+        $("cstatus").value = s;
+        $("cbilling").value = "";
+        _custSort = _custDefaultSort(s);
+        _custViewChanged();
+      }
+
+      // Dashboard card -> customers page with filter (and sort) already applied
+      function openCustFilter(f) {
+        $("csearch").value = "";
+        $("cstatus").value = f || "";
+        $("cbilling").value = "";
+        _custSort = _custDefaultSort(f);
+        showPage("customers");
+        _custViewChanged();
+      }
+
+      // Default sort for a category: nearest expiry on top. "All" keeps the normal order.
+      function _custDefaultSort(f) {
+        if (!f) return { key: null, dir: 1 };
+        // expired lists: most recently expired first (closest to today)
+        return { key: "expiry", dir: (f === "expired" || f === "recent7") ? -1 : 1 };
+      }
+
+      // Called when the status dropdown is changed by hand
+      function _custFilterChanged() {
+        _custSort = _custDefaultSort($("cstatus").value);
+        _custViewChanged();
+      }
+
+      // ── Customers: quick filters + sorting (all done in the browser) ──
+      function _ymd(off) {
+        const d = new Date();
+        d.setDate(d.getDate() + (off || 0));
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+      }
+
+      // One definition used by both the dashboard counts and the customers list
+      function _custMatch(c, f) {
+        const t = _ymd(0);
+        const exp = c.expiry_date ? String(c.expiry_date).slice(0, 10) : "";
+        const st = c.status;
+        switch (f) {
+          case "active":    return st === "active" && (!exp || exp >= t);
+          case "expired":   return st === "expired" || (st === "active" && exp && exp < t);
+          case "today":     return st === "active" && exp === t;
+          case "soon7":     return st === "active" && exp && exp >= t && exp <= _ymd(7);
+          case "recent7":   return exp && exp < t && exp >= _ymd(-7) && (st === "expired" || st === "active");
+          case "suspended": return st === "suspended";
+          case "lead":      return st === "lead";
+          case "due":       return Number(c.balance_due) > 0;
+          default:          return true;
+        }
+      }
+
+      const _SORT_GET = {
+        name:    (c) => (c.name || "").toLowerCase(),
+        phone:   (c) => String(c.phone || ""),
+        plan:    (c) => (c.plan_name || "").toLowerCase(),
+        expiry:  (c) => (c.expiry_date ? String(c.expiry_date).slice(0, 10) : ""),
+        due:     (c) => Number(c.balance_due) || 0,
+        billing: (c) => (c.billing_type === "postpaid" ? "postpaid" : "prepaid"),
+        status:  (c) => realSt(c),
+      };
+
+      function _custApplyView() {
+        const f = $("cstatus").value, b = $("cbilling").value;
+        let list = _custRaw.filter((c) =>
+          _custMatch(c, f) && (!b || (c.billing_type === "postpaid" ? "postpaid" : "prepaid") === b)
+        );
+        if (_custSort.key) {
+          const get = _SORT_GET[_custSort.key], dir = _custSort.dir;
+          list = list.slice().sort((a, z) => {
+            const x = get(a), y = get(z);
+            const xe = x === "", ye = y === "";
+            if (xe || ye) return xe && ye ? 0 : xe ? 1 : -1;   // empty values always last
+            if (typeof x === "number") return (x - y) * dir;
+            return x.localeCompare(y, undefined, { numeric: true }) * dir;
+          });
+        }
+        _custAll = list;
+
+        // header arrows + mobile sort dropdown
+        document.querySelectorAll("th.sortable").forEach((th) => {
+          const on = th.dataset.sort === _custSort.key;
+          th.classList.toggle("sorted", on);
+          th.querySelector(".sort-ar").textContent = on ? (_custSort.dir === 1 ? "▲" : "▼") : "↕";
+        });
+        const sel = $("csort");
+        if (sel) {
+          sel.value = _custSort.key ? _custSort.key + ":" + _custSort.dir : "";
+          if (sel.selectedIndex < 0) sel.value = "";
+        }
+        _renderCustPage();
+      }
+
+      function _custViewChanged() {
+        _custPage = 1;
+        if (_custRaw.length) _custApplyView();
+      }
+
+      function _custSortBy(key) {
+        if (_custSort.key === key) _custSort.dir = -_custSort.dir;
+        else _custSort = { key: key, dir: key === "due" ? -1 : 1 };
+        _custPage = 1;
+        _custApplyView();
+      }
+
+      function _custSortSelect() {
+        const v = $("csort").value;
+        if (!v) _custSort = { key: null, dir: 1 };
+        else { const p = v.split(":"); _custSort = { key: p[0], dir: parseInt(p[1], 10) }; }
+        _custPage = 1;
+        _custApplyView();
+      }
       function _custChangeSize() { _custSize = parseInt($("cpagesize").value); _custPage = 1; _renderCustPage(); }
 
       function openView(id) {
