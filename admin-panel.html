@@ -3770,6 +3770,19 @@
         <div class="dgrid" id="v-hw"></div>
         <div class="sec-title">Billing</div>
         <div class="dgrid" id="v-bill"></div>
+        <div class="sec-title">Billing &amp; Payment History</div>
+        <div class="dgrid" id="v-hist-sum"></div>
+        <div style="display:flex;gap:6px;margin:10px 0 6px">
+          <button class="btn bsm" id="vh-all" onclick="setCustHistFilter('all')">All</button>
+          <button class="btn bsm" id="vh-pay" onclick="setCustHistFilter('pay')">Payments</button>
+          <button class="btn bsm" id="vh-bill" onclick="setCustHistFilter('bill')">Bills</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%">
+            <thead><tr><th>Date</th><th>Entry</th><th>Details</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody id="v-hist-body"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -4824,6 +4837,76 @@
               di("Auto-Suspend", c.auto_suspend_enabled ? "ON" : "OFF")
             : "");
         $("m-view").style.display = "flex";
+        loadCustHistory(id);
+      }
+
+      let _custHist = [];
+
+      async function loadCustHistory(id) {
+        const body = $("v-hist-body");
+        $("v-hist-sum").innerHTML = "";
+        body.innerHTML = '<tr><td colspan="5"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+        try {
+          const [pr, br] = await Promise.all([
+            apiFetch("GET", "/api/admin/payments?customer_id=" + id),
+            apiFetch("GET", "/api/admin/postpaid/billing-history?customer_id=" + id),
+          ]);
+          const pays = pr.data?.payments || [];
+          const bills = br.data?.billing_history || [];
+          const c = custCache.find((x) => x.id === id) || {};
+
+          _custHist = [
+            ...pays.map((p) => ({
+              kind: "pay",
+              sort: p.created_at || "",
+              date: fmtDateTime(p.created_at),
+              amount: p.amount_total || 0,
+              status: p.status,
+              detail: (p.payment_method || "—") + " · " + (p.recharge_type || "").replace(/_/g, " "),
+            })),
+            ...bills.map((b) => ({
+              kind: "bill",
+              sort: b.bill_date || b.created_at || "",
+              date: fmtDate(b.bill_date),
+              amount: b.bill_amount || 0,
+              status: b.status,
+              detail: "Due " + fmtDate(b.due_date) + (b.paid_amount > 0 && b.status !== "paid" ? " · paid ₹" + b.paid_amount : ""),
+            })),
+          ].sort((a, b) => String(b.sort).localeCompare(String(a.sort)));
+
+          const paid = pays.filter((p) => p.status === "success").reduce((s, p) => s + (p.amount_total || 0), 0);
+          const billed = bills.reduce((s, b) => s + (b.bill_amount || 0), 0);
+          $("v-hist-sum").innerHTML =
+            di("Total Billed", "₹" + billed.toLocaleString("en-IN"), "", "mono") +
+            di("Total Paid", '<span style="color:var(--green);font-weight:600">₹' + paid.toLocaleString("en-IN") + "</span>", "", "mono") +
+            di("Balance Due", c.balance_due > 0 ? '<span style="color:var(--red);font-weight:700">₹' + c.balance_due + "</span>" : "₹0", "", "mono");
+          setCustHistFilter("all");
+        } catch (e) {
+          body.innerHTML = '<tr><td colspan="5"><div class="empty">Could not load history</div></td></tr>';
+          console.error(e);
+        }
+      }
+
+      function setCustHistFilter(f) {
+        ["all", "pay", "bill"].forEach((k) => {
+          const b = $("vh-" + k);
+          if (b) b.style.fontWeight = k === f ? "700" : "400";
+        });
+        const rows = _custHist.filter((r) => f === "all" || r.kind === f);
+        const cls = { success: "bok", paid: "bok", partial: "bwarn", pending: "bwarn", failed: "berr" };
+        $("v-hist-body").innerHTML = rows.length
+          ? rows
+              .map(
+                (r) =>
+                  '<tr><td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' + r.date +
+                  '</td><td><span class="badge ' + (r.kind === "bill" ? "bpurple" : "bgray") + '">' + (r.kind === "bill" ? "Postpaid bill" : "Payment") +
+                  '</span></td><td style="color:var(--txt2)">' + r.detail +
+                  '</td><td style="font-family:var(--mono);font-weight:700;color:' + (r.kind === "pay" ? "var(--green)" : "var(--txt)") + '">' +
+                  (r.kind === "pay" ? "+" : "") + "₹" + r.amount.toLocaleString("en-IN") +
+                  '</td><td><span class="badge ' + (cls[r.status] || "bgray") + '">' + (r.status || "—") + "</span></td></tr>",
+              )
+              .join("")
+          : '<tr><td colspan="5"><div class="empty">Nothing here yet</div></td></tr>';
       }
 
 
