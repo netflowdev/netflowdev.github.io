@@ -1554,6 +1554,39 @@
       }
       .wa-link:hover svg { fill: rgb(40, 190, 150); }
       .isp-inline { display: none; }
+      /* Customers list (desktop): new actions, days-left, billing under due */
+      .act-new, .dl, .due-bill { display: none; }
+      .ab {
+        height: 30px; display: inline-flex; align-items: center; gap: 6px; padding: 0 10px;
+        border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+        color: var(--txt2); font-family: inherit; font-size: 12px; font-weight: 600;
+        white-space: nowrap; cursor: pointer;
+      }
+      .ab:hover { border-color: var(--amber); color: var(--amber); }
+      .ab-cash, .ab-cash:hover { background: var(--amber); border-color: var(--amber); color: #fff; }
+      .ab-ok { background: var(--green-l); border-color: rgba(15, 157, 130, 0.25); color: var(--green); }
+      .ab-warn { background: var(--amber-l); border-color: rgba(180, 83, 9, 0.25); color: var(--amber); }
+      .ab svg, .row-menu svg {
+        width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor;
+        stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+      }
+      .row-menu {
+        position: fixed; z-index: 3000; width: 210px; padding: 6px 0;
+        background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+        box-shadow: 0 10px 28px rgba(31, 29, 26, 0.16);
+      }
+      .row-menu button {
+        display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 14px;
+        border: 0; background: none; text-align: left; font-family: inherit;
+        font-size: 12.5px; font-weight: 500; color: var(--txt2); cursor: pointer;
+      }
+      .row-menu button:hover { background: var(--surface-2); }
+      @media (min-width: 769px) {
+        #ctbody .abtns { display: none; }
+        #ctbody .act-new { display: flex; align-items: center; gap: 6px; }
+        #ctbody .dl, #ctbody .due-bill { display: block; margin-top: 3px; font-family: var(--font); font-size: 11px; font-weight: 500; }
+        #ctbody td[data-label="Billing"], th[data-sort="billing"] { display: none; }
+      }
       /* Customers list: tighter rows (desktop only) */
       @media (min-width: 769px) {
         #ctbody td { padding-top: 7px; padding-bottom: 7px; }
@@ -4279,6 +4312,10 @@
         <option value="more_time">Customer requested more time</option>
       </select>
     </div>
+    <div class="ff" id="rc-amount-wrap" style="margin-bottom:14px">
+      <label>Amount received (₹)</label>
+      <input id="rc-amount" type="number" min="1" step="0.01"/>
+    </div>
     <div class="ff" id="rc-duedate-wrap" style="display:none;margin-bottom:14px">
       <label>New Due Date</label>
       <input id="rc-new-due-date" type="date"/>
@@ -4648,6 +4685,93 @@
         } catch (e) { console.error(e); }
       }
 
+      const _ICO = {
+        edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+        cash: '<path d="M6 5h12M6 9h12M9 5c5 0 7 7 0 7H8l7 7"/>',
+        play: '<path d="M7 4l13 8-13 8z"/>',
+        pause: '<path d="M9 5v14M15 5v14"/>',
+        eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+        down: '<path d="M6 9l6 6 6-6"/>',
+        link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+        bill: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/>',
+        trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>'
+      };
+      function _ico(n) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + _ICO[n] + "</svg>"; }
+
+      function _daysLeftHtml(d) {
+        if (!d) return "";
+        const exp = new Date(String(d).slice(0, 10) + "T00:00:00");
+        if (isNaN(exp)) return "";
+        const t = new Date(); t.setHours(0, 0, 0, 0);
+        const n = Math.round((exp - t) / 86400000);
+        let txt, col;
+        if (n > 1) { txt = n + " days left"; col = n > 7 ? "var(--green)" : "var(--amber)"; }
+        else if (n === 1) { txt = "1 day left"; col = "var(--amber)"; }
+        else if (n === 0) { txt = "Expires today"; col = "var(--red)"; }
+        else { txt = "Expired " + (-n) + (n === -1 ? " day ago" : " days ago"); col = "var(--red)"; }
+        return '<div class="dl" style="color:' + col + '">' + txt + "</div>";
+      }
+
+      function _actNewHtml(c) {
+        const post = c.billing_type === "postpaid";
+        const susp = realSt(c) === "suspended";
+        let h = '<div class="act-new">';
+        h += '<button class="ab" onclick="openEdit(' + c.id + ')">' + _ico("edit") + "Edit</button>";
+        h += '<button class="ab ab-cash" onclick="openCash(' + c.id + ')">' + _ico("cash") + "Cash</button>";
+        if (post) h += susp
+          ? '<button class="ab ab-ok" onclick="openReactivateModal(' + c.id + ')">' + _ico("play") + "Reactivate</button>"
+          : '<button class="ab ab-warn" onclick="openSuspendModal(' + c.id + ')">' + _ico("pause") + "Suspend</button>";
+        h += '<button class="ab" onclick="openView(' + c.id + ')">' + _ico("eye") + "View</button>";
+        h += '<button class="ab act-more" onclick="openRowMenu(this,' + c.id + ')" aria-label="More">More' + _ico("down") + "</button>";
+        return h + "</div>";
+      }
+
+      let _rowMenuBtn = null;
+      function closeRowMenu() {
+        const m = document.getElementById("row-menu");
+        if (m) m.remove();
+        _rowMenuBtn = null;
+        document.removeEventListener("mousedown", _rowMenuOutside, true);
+        window.removeEventListener("scroll", closeRowMenu, true);
+        window.removeEventListener("resize", closeRowMenu);
+        document.removeEventListener("keydown", _rowMenuKey);
+      }
+      function _rowMenuOutside(e) {
+        if (e.target.closest(".row-menu") || e.target.closest(".act-more")) return;
+        closeRowMenu();
+      }
+      function _rowMenuKey(e) { if (e.key === "Escape") closeRowMenu(); }
+      function openRowMenu(btn, id) {
+        if (_rowMenuBtn === btn) { closeRowMenu(); return; }
+        closeRowMenu();
+        const c = (custCache || []).find(function (x) { return x.id === id; });
+        if (!c) return;
+        const items = [["link", "Send payment link", function () { openPayReminder(id); }]];
+        if (c.billing_type === "postpaid") items.push(["bill", "Generate bill now", function () { generateBillNow(id, c.name); }]);
+        items.push(["trash", "Delete customer", function () { deleteCustomer(id, c.name); }, "var(--red)"]);
+        const m = document.createElement("div");
+        m.id = "row-menu"; m.className = "row-menu";
+        items.forEach(function (it) {
+          const b = document.createElement("button");
+          b.innerHTML = _ico(it[0]) + it[1];
+          if (it[3]) b.style.color = it[3];
+          b.onclick = function () { closeRowMenu(); it[2](); };
+          m.appendChild(b);
+        });
+        document.body.appendChild(m);
+        const r = btn.getBoundingClientRect();
+        const mh = m.offsetHeight;
+        let top = r.bottom + 6;
+        if (top + mh > window.innerHeight - 8) top = Math.max(8, r.top - mh - 6);
+        m.style.top = top + "px";
+        m.style.left = Math.max(8, Math.min(r.right - 210, window.innerWidth - 218)) + "px";
+        _rowMenuBtn = btn;
+        document.addEventListener("mousedown", _rowMenuOutside, true);
+        window.addEventListener("scroll", closeRowMenu, true);
+        window.addEventListener("resize", closeRowMenu);
+        document.addEventListener("keydown", _rowMenuKey);
+      }
+
       function _renderCustPage() {
         const cs = _custAll;
         if (!cs.length) {
@@ -4684,14 +4808,15 @@
             '<td data-label="ISP">' + abadge(c.isp_server_id == 1 ? 'jaze_renew' : 'update') + '</td>' +
             '<td data-label="Username" style="font-family:var(--mono);font-size:12px;color:var(--txt3)">' + (c.isp_username || "—") + '</td>' +
             '<td data-label="Plan" style="color:var(--txt2)">' + '<span class="plan-val"><span class="isp-inline">' + abadge(c.isp_server_id == 1 ? 'jaze_renew' : 'update') + '</span>' + (c.plan_name || "—") + '</span></td>' +
-            '<td data-label="Expiry" style="font-family:var(--mono);font-size:12px;color:var(--txt);white-space:nowrap">' + fmtDate(c.expiry_date) + '</td>' +
+            '<td data-label="Expiry" style="font-family:var(--mono);font-size:12px;color:var(--txt);white-space:nowrap">' + fmtDate(c.expiry_date) + _daysLeftHtml(c.expiry_date) + '</td>' +
             '<td data-label="Due" style="color:' + (c.balance_due > 0 ? "var(--red)" : "var(--txt3)") + ';font-family:var(--mono);font-weight:' + (c.balance_due > 0 ? "700" : "400") + '">' +
               "₹" + (c.balance_due || 0) +
             ((c.effective_due_mode || c.due_payment_mode) === "due_only" ? ' <span class="badge berr" style="font-size:9px;padding:2px 6px">DUE ONLY</span>' : "") +
+            '<div class="due-bill" style="color:' + (c.billing_type === 'postpaid' ? 'var(--purple)' : 'var(--txt3)') + '">' + (c.billing_type === 'postpaid' ? 'Postpaid' : 'Prepaid') + '</div>' +
             '</td>' +
             '<td data-label="Billing">' + billingBadge + '</td>' +
             '<td data-label="Status">' + sbadge(realSt(c)) + '</td>' +
-            '<td style="padding-right:20px"><div class="abtns">' +
+            '<td style="padding-right:20px">' + _actNewHtml(c) + '<div class="abtns">' +
             '<button class="btn bsm bpurple-btn" onclick="openPayReminder(' + c.id + ')" title="Send payment reminder">🔗</button>' +
             '<button class="btn bsm" style="background:var(--green-l);border-color:rgba(5,150,105,0.2);color:var(--green);font-size:11px" onclick="openCash(' + c.id + ')" title="Cash payment">💵</button>' +
             '<button class="btn bsm bview" onclick="openView(' + c.id + ')" title="View customer" style="font-size:11px">👁️</button>' +
@@ -7586,15 +7711,20 @@ async function submitSuspend() {
 
 // ── Reactivate modal ─────────────────────────────────────────
 function openReactivateModal(custId) {
+  const cu = custCache.find((x) => x.id === custId);
   $('rc-cust-id').value = custId;
   $('rc-type').value = 'paid';
+  $('rc-amount').value = cu && cu.balance_due > 0 ? cu.balance_due : '';
   $('rc-new-due-date').value = '';
   $('rc-duedate-wrap').style.display = 'none';
+  $('rc-amount-wrap').style.display = 'block';
   $('rc-err').style.display = 'none';
   $('m-reactivate').style.display = 'flex';
 }
 function toggleReactivateFields() {
-  $('rc-duedate-wrap').style.display = $('rc-type').value === 'more_time' ? 'block' : 'none';
+  const isMore = $('rc-type').value === 'more_time';
+  $('rc-duedate-wrap').style.display = isMore ? 'block' : 'none';
+  $('rc-amount-wrap').style.display = isMore ? 'none' : 'block';
 }
 
 async function submitReactivate() {
@@ -7607,12 +7737,18 @@ async function submitReactivate() {
     showErr(err, 'Please select a new due date');
     return;
   }
+  const amount = parseFloat($('rc-amount').value);
+  if (reactivateType === 'paid' && (!amount || amount <= 0)) {
+    showErr(err, 'Please enter the amount received');
+    return;
+  }
   btn.disabled = true; btn.textContent = 'Reactivating...';
   try {
     const r = await apiFetch('POST', '/api/admin/postpaid/reactivate', {
       customer_id: custId,
       reactivate_type: reactivateType,
       new_due_date: reactivateType === 'more_time' ? newDueDate : undefined,
+      amount_received: reactivateType === 'paid' ? amount : undefined,
     });
     if (r.success) {
       toast('Customer reactivated');
