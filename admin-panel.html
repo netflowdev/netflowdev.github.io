@@ -1557,9 +1557,9 @@
       /* Customers list (desktop): new actions, days-left, billing under due */
       .act-new, .dl, .due-bill { display: none; }
       .ab {
-        height: 30px; display: inline-flex; align-items: center; gap: 6px; padding: 0 10px;
+        height: 26px; display: inline-flex; align-items: center; gap: 5px; padding: 0 8px;
         border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
-        color: var(--txt2); font-family: inherit; font-size: 12px; font-weight: 600;
+        color: var(--txt2); font-family: inherit; font-size: 11.5px; font-weight: 600;
         white-space: nowrap; cursor: pointer;
       }
       .ab:hover { border-color: var(--amber); color: var(--amber); }
@@ -1583,7 +1583,7 @@
       .row-menu button:hover { background: var(--surface-2); }
       @media (min-width: 769px) {
         #ctbody .abtns { display: none; }
-        #ctbody .act-new { display: flex; align-items: center; gap: 6px; }
+        #ctbody .act-new { display: flex; align-items: center; gap: 4px; }
         #ctbody .dl, #ctbody .due-bill { display: block; margin-top: 3px; font-family: var(--font); font-size: 11px; font-weight: 500; }
         #ctbody td[data-label="Billing"], th[data-sort="billing"] { display: none; }
       }
@@ -4717,10 +4717,7 @@
         const susp = realSt(c) === "suspended";
         let h = '<div class="act-new">';
         h += '<button class="ab" onclick="openEdit(' + c.id + ')">' + _ico("edit") + "Edit</button>";
-        h += '<button class="ab ab-cash" onclick="openCash(' + c.id + ')">' + _ico("cash") + "Cash</button>";
-        if (post) h += susp
-          ? '<button class="ab ab-ok" onclick="openReactivateModal(' + c.id + ')">' + _ico("play") + "Reactivate</button>"
-          : '<button class="ab ab-warn" onclick="openSuspendModal(' + c.id + ')">' + _ico("pause") + "Suspend</button>";
+        h += '<button class="ab" onclick="openCash(' + c.id + ')">' + _ico("cash") + "Cash</button>";
         h += '<button class="ab" onclick="openView(' + c.id + ')">' + _ico("eye") + "View</button>";
         h += '<button class="ab act-more" onclick="openRowMenu(this,' + c.id + ')" aria-label="More">More' + _ico("down") + "</button>";
         return h + "</div>";
@@ -4748,6 +4745,10 @@
         if (!c) return;
         const items = [["link", "Send payment link", function () { openPayReminder(id); }]];
         if (c.billing_type === "postpaid") items.push(["bill", "Generate bill now", function () { generateBillNow(id, c.name); }]);
+        if (c.billing_type === "postpaid") {
+          if (realSt(c) === "suspended") items.push(["play", "Reactivate", function () { openReactivateModal(id); }, "var(--green)"]);
+          else items.push(["pause", "Suspend", function () { openSuspendModal(id); }, "var(--amber)"]);
+        }
         items.push(["trash", "Delete customer", function () { deleteCustomer(id, c.name); }, "var(--red)"]);
         const m = document.createElement("div");
         m.id = "row-menu"; m.className = "row-menu";
