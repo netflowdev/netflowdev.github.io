@@ -852,6 +852,22 @@
       .modal-lg {
         max-width: 780px;
       }
+      @keyframes mNudge {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-7px); }
+        40%, 80% { transform: translateX(7px); }
+      }
+      @keyframes mRing {
+        0% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.6); }
+        100% { box-shadow: 0 0 0 12px rgba(217, 119, 6, 0); }
+      }
+      .modal.nudge { animation: mNudge 0.35s ease; }
+      .modal .attn {
+        animation: mRing 0.6s ease-out 2;
+        background: var(--amber) !important;
+        border-color: var(--amber) !important;
+        color: #fff !important;
+      }
       .modal-xwrap {
         position: sticky;
         top: 0;
@@ -1521,6 +1537,15 @@
       
       .mob-overlay.show { display: block; }
       .phone-cell { display: inline-flex; align-items: center; gap: 8px; }
+      /* Customers list: phone + WhatsApp under the name (desktop only) */
+      .name-phone { display: none; }
+      @media (min-width: 769px) {
+        .name-phone { display: block; margin-top: 3px; font-family: var(--mono); font-size: 12px; font-weight: 400; }
+        .name-phone .wa-link svg { width: 16px; height: 18px; }
+        #ctbody td:nth-child(2):not(:only-child) { min-width: 200px; }
+        #ctbody td[data-label="Phone"],
+        th[data-sort="phone"] { display: none; }
+      }
       .tel-link { color: var(--txt2); text-decoration: none; }
       .tel-link:hover { color: var(--blue); text-decoration: underline; }
       .wa-link {
@@ -1529,6 +1554,11 @@
       }
       .wa-link:hover svg { fill: rgb(40, 190, 150); }
       .isp-inline { display: none; }
+      /* Customers list: tighter rows (desktop only) */
+      @media (min-width: 769px) {
+        #ctbody td { padding-top: 7px; padding-bottom: 7px; }
+        #ctbody td[data-label="Plan"] { white-space: nowrap; }
+      }
 
       body.sb-open .mob-menu-btn { display: none !important; }
       .sb-close { display: none; }
@@ -3178,6 +3208,11 @@
                     <option value="expiry_reminder">Expiry Reminder</option>
                     <option value="plan_expired">Plan Expired</option>
                     <option value="new_customer_welcome">New Customer Welcome</option>
+                    <option value="postpaid_suspended">Postpaid Suspended</option>
+                    <option value="postpaid_reactivated_paid">Postpaid Reactivated</option>
+                    <option value="postpaid_overdue_reminder">Postpaid Overdue Reminder</option>
+                    <option value="postpaid_bill_generated">Postpaid Bill Generated</option>
+                    <option value="payment_due_reminder">Payment Due Reminder</option>
                   </select>
                   <button class="btn bsm" onclick="loadWaHistory()">↺ Refresh</button>
                 </div>
@@ -4110,7 +4145,25 @@
               <input type="hidden" id="cc-id" />
               <div id="cc-selected" style="display:none;margin-top:6px;padding:8px 12px;background:var(--green-l);border:1px solid rgba(5,150,105,0.2);border-radius:var(--r-sm);font-size:12px;color:var(--green);font-weight:600"></div>
             </div>
-            <div class="ff full">
+            <div class="ff full" id="cc-action-wrap" style="display:none">
+              <label>What should this payment do?</label>
+              <label style="display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:6px 0;cursor:pointer">
+                <input type="radio" name="cc-action" value="renew" checked onchange="ccActionChanged()" />
+                <span><strong>Renew plan + activate on ISP</strong><br /><small>Extend expiry and enable the customer on the router</small></span>
+              </label>
+              <label style="display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:6px 0;cursor:pointer">
+                <input type="radio" name="cc-action" value="collect" onchange="ccActionChanged()" />
+                <span><strong>Collect payment only (no ISP)</strong><br /><small>Record the money and reduce the due. No renewal, no router change</small></span>
+              </label>
+            </div>
+            <div class="ff full" id="cc-isp-wrap" style="display:none">
+              <label style="display:flex;gap:8px;align-items:center;font-weight:400;cursor:pointer">
+                <input type="checkbox" id="cc-isp" checked />
+                <span>Activate / reactivate on ISP</span>
+              </label>
+              <small style="color:var(--txt3)">Uncheck to only record the money. Customer will not be enabled on the router.</small>
+            </div>
+            <div class="ff full" id="cc-plan-wrap">
               <label>Plan *</label>
               <select id="cc-plan">
                 <option value="">— Select Plan —</option>
@@ -4124,6 +4177,15 @@
               <label>Notes</label>
               <input id="cc-notes" placeholder="Collected by agent..." />
             </div>
+          </div>
+          <div class="ff full" style="margin-top:10px">
+            <label>Payment date</label>
+            <input id="cc-date" type="date" onchange="ccDateChanged()" />
+            <small style="color:var(--txt3)">Leave as today, or pick the past date the customer actually paid.</small>
+            <label style="display:flex;gap:8px;align-items:center;font-weight:400;margin-top:8px;cursor:pointer">
+              <input type="checkbox" id="cc-wa" checked />
+              <span>Send WhatsApp message to customer</span>
+            </label>
           </div>
           <div class="errmsg" id="cc-err"></div>
           <div class="mactions">
@@ -4387,6 +4449,8 @@
           pending: "bwarn",
           failed: "berr",
           success: "bok",
+          sent: "bok",
+          skipped: "bwarn",
         };
         return '<span class="badge ' + (m[s] || "bgray") + '">' + (s || "—") + "</span>";
       }
@@ -4629,6 +4693,7 @@
             '<td data-label="Status">' + sbadge(realSt(c)) + '</td>' +
             '<td style="padding-right:20px"><div class="abtns">' +
             '<button class="btn bsm bpurple-btn" onclick="openPayReminder(' + c.id + ')" title="Send payment reminder">🔗</button>' +
+            '<button class="btn bsm" style="background:var(--green-l);border-color:rgba(5,150,105,0.2);color:var(--green);font-size:11px" onclick="openCash(' + c.id + ')" title="Cash payment">💵</button>' +
             '<button class="btn bsm bview" onclick="openView(' + c.id + ')" title="View customer" style="font-size:11px">👁️</button>' +
             '<button class="btn bsm bedit" onclick="openEdit(' + c.id + ')" title="Edit customer" style="font-size:11px">✏️</button>' +
             generateBillBtn +
@@ -4636,6 +4701,17 @@
             '<button class="btn bsm bdanger" onclick="deleteCustomer(' + c.id + ',' + "'" + n + "'" + ')" title="Delete customer" style="font-size:11px">🗑️</button>' +
             '</div></td></tr>';
         }).join("");
+
+        // Desktop: show phone + WhatsApp under the name (hidden on mobile via CSS)
+        Array.prototype.forEach.call($("ctbody").rows, function (tr) {
+          var nameTd = tr.cells[1];
+          var phoneSpan = tr.querySelector('td[data-label="Phone"] .phone-cell');
+          if (!nameTd || !phoneSpan || nameTd.querySelector(".name-phone")) return;
+          var d = document.createElement("div");
+          d.className = "name-phone";
+          d.appendChild(phoneSpan.cloneNode(true));
+          nameTd.appendChild(d);
+        });
 
         // Pagination bar
         const pgn = $("cpagination");
@@ -5452,12 +5528,36 @@
         }
       }
 
-      function openCash() {
+      function openCash(preId) {
         $("cc-search").value = "";
         $("cc-id").value = "";
         $("cc-results").style.display = "none";
         $("cc-selected").style.display = "none";
+        $("cc-action-wrap").style.display = "none";
+        document.querySelector('input[name="cc-action"][value="renew"]').checked = true;
+        ccActionChanged();
+        $("cc-date").value = $("cc-date").max = new Date().toLocaleDateString("en-CA");
+        $("cc-wa").checked = true;
+        $("cc-isp").checked = true;
         $("m-cash").style.display = "flex";
+        if (preId) {
+          const pc = custCache.find((x) => x.id === preId);
+          if (pc) selectCashCustomer(pc.id, pc.name, pc.balance_due || 0);
+        }
+      }
+
+      function ccDateChanged() {
+        const today = new Date().toLocaleDateString("en-CA");
+        $("cc-wa").checked = !$("cc-date").value || $("cc-date").value >= today;
+      }
+
+      function ccActionChanged() {
+        const cu = custCache.find((x) => x.id === parseInt($("cc-id").value));
+        const post = cu && cu.billing_type === "postpaid";
+        const collect = document.querySelector('input[name="cc-action"]:checked').value === "collect";
+        $("cc-plan-wrap").style.display = !post && !collect && cu && !cu.plan_id ? "block" : "none";
+        $("cc-isp-wrap").style.display = cu && post && cu.status === "suspended" ? "block" : "none";
+        $("cc-btn").textContent = post || collect ? "Record payment" : "Record and renew";
       }
 
       async function submitCash() {
@@ -5466,11 +5566,17 @@
         err.style.display = "none";
         const d = {
           customer_id: parseInt($("cc-id").value),
-          plan_id: $("cc-plan").value ? parseInt($("cc-plan").value) : null,
+          plan_id: $("cc-plan-wrap").style.display !== "none" && $("cc-plan").value ? parseInt($("cc-plan").value) : null,
           amount_received: parseFloat($("cc-amt").value),
           notes: $("cc-notes").value.trim(),
+          action: document.querySelector('input[name="cc-action"]:checked').value,
+          payment_date: $("cc-date").value || null,
+          send_whatsapp: $("cc-wa").checked,
+          isp_activate: $("cc-isp-wrap").style.display === "none" ? true : $("cc-isp").checked,
         };
-        if (!d.customer_id || !d.plan_id || !d.amount_received) {
+        const cu = custCache.find((x) => x.id === d.customer_id);
+        const needsPlan = cu && cu.billing_type !== "postpaid" && d.action === "renew" && !cu.plan_id;
+        if (!d.customer_id || !d.amount_received || (needsPlan && !d.plan_id)) {
           showErr(err, "All fields required");
           return;
         }
@@ -5481,6 +5587,8 @@
           if (r.success) {
             toast(r.data.message || "Recorded!");
             closeM("m-cash");
+            if ($("page-payments").style.display !== "none") loadPayments();
+            if ($("page-customers").style.display !== "none") loadCustomers();
             ["cc-id", "cc-amt", "cc-notes"].forEach((i) => ($(i).value = ""));
             $("cc-plan").value = "";
           } else showErr(err, r.error || "Failed");
@@ -5488,7 +5596,7 @@
           showErr(err, "Network error");
         } finally {
           btn.disabled = false;
-          btn.textContent = "Record";
+          ccActionChanged();
         }
       }
 
@@ -6099,7 +6207,11 @@
         $("cc-results").style.display = "none";
         const sel = $("cc-selected");
         sel.style.display = "block";
-        sel.innerHTML = "✓ Selected: <strong>" + name + "</strong>" + (due > 0 ? ' · <span style="color:var(--red)">Due ₹' + due + '</span>' : "");
+        const pn = (custCache.find((x) => x.id === id) || {}).plan_name;
+        sel.innerHTML = "✓ Selected: <strong>" + name + "</strong>" + (pn ? " · " + pn : "") + (due > 0 ? ' · <span style="color:var(--red)">Due ₹' + due + '</span>' : "");
+        const cu = custCache.find((x) => x.id === id);
+        $("cc-action-wrap").style.display = cu && cu.billing_type === "postpaid" ? "none" : "block";
+        ccActionChanged();
       }
 
 
@@ -6953,7 +7065,17 @@ async function submitIptvConfig() {
     $("logout-btn").addEventListener("click", doLogout);
     ["m-add", "m-view", "m-edit", "m-cash", "m-tpl", "m-plan", "m-ott", "m-brand", "m-suspend", "m-reactivate", "m-devices", "m-settlement-txns"].forEach(function (id) {
       $(id).addEventListener("click", function (e) {
-        if (e.target === this) closeM(id);
+        if (e.target !== this) return;
+        // Outside click does NOT close: nudge the box and highlight the Close buttons
+        var box = this.querySelector(".modal");
+        var btns = this.querySelectorAll(".modal-x, button[onclick*=\"closeM('" + id + "')\"]");
+        if (box) { box.classList.remove("nudge"); void box.offsetWidth; box.classList.add("nudge"); }
+        btns.forEach(function (b) { b.classList.remove("attn"); void b.offsetWidth; b.classList.add("attn"); });
+        clearTimeout(this._attnT);
+        this._attnT = setTimeout(function () {
+          if (box) box.classList.remove("nudge");
+          btns.forEach(function (b) { b.classList.remove("attn"); });
+        }, 1300);
       });
     });
     if (getToken()) {
