@@ -969,6 +969,21 @@
         resize: vertical;
         min-height: 72px;
       }
+      /* Comments boxes: auto-grow, no drag handle near the Save button */
+      #e-comments,
+      #a-comments {
+        field-sizing: content;
+        resize: none;
+        min-height: 150px;
+        max-height: 480px;
+        line-height: 1.5;
+        padding-bottom: 110px; /* fallback for old browsers */
+        padding-bottom: 3lh; /* ~6 empty lines always below the text */
+      }
+      @supports not (field-sizing: content) {
+        #e-comments,
+        #a-comments { resize: vertical; margin-bottom: 14px; }
+      }
       .mactions {
         display: flex;
         gap: 10px;
@@ -1554,6 +1569,12 @@
       }
       .wa-link:hover svg { fill: rgb(40, 190, 150); }
       .isp-inline { display: none; }
+      /* Customers list (desktop): tighter column gaps, headers aligned with cells */
+      @media (min-width: 769px) {
+        #ctbody td { padding-right: 8px; }
+        .tbl-card:has(#ctbody) th { padding-left: 0; padding-right: 8px; }
+        .tbl-card:has(#ctbody) th:first-child { padding-left: 20px; }
+      }
       /* Customers list (desktop): new actions, days-left, billing under due */
       .act-new, .dl, .due-bill { display: none; }
       .ab {
