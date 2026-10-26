@@ -4131,7 +4131,7 @@
           <div class="modal-title">Record cash payment</div>
           <div class="fgrid">
             <div class="ff full">
-              <label>Search Customer *</label>
+              <label id="cc-search-lbl">Search Customer *</label>
               <input id="cc-search" placeholder="Type name or mobile..." oninput="searchCashCustomer()" autocomplete="off" />
               <div id="cc-results" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);margin-top:4px;max-height:180px;overflow-y:auto;box-shadow:var(--sh-sm)"></div>
               <input type="hidden" id="cc-id" />
@@ -4140,11 +4140,11 @@
             <div class="ff full" id="cc-action-wrap" style="display:none">
               <label>What should this payment do?</label>
               <label style="display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:6px 0;cursor:pointer">
-                <input type="radio" name="cc-action" value="renew" checked onchange="ccActionChanged()" />
+                <input type="radio" name="cc-action" value="renew" onchange="ccActionChanged()" />
                 <span><strong>Renew plan + activate on ISP</strong><br /><small>Extend expiry and enable the customer on the router</small></span>
               </label>
               <label style="display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:6px 0;cursor:pointer">
-                <input type="radio" name="cc-action" value="collect" onchange="ccActionChanged()" />
+                <input type="radio" name="cc-action" value="collect" checked onchange="ccActionChanged()" />
                 <span><strong>Collect payment only (no ISP)</strong><br /><small>Record the money and reduce the due. No renewal, no router change</small></span>
               </label>
             </div>
@@ -4175,7 +4175,7 @@
             <input id="cc-date" type="date" onchange="ccDateChanged()" />
             <small style="color:var(--txt3)">Leave as today, or pick the past date the customer actually paid.</small>
             <label style="display:flex;gap:8px;align-items:center;font-weight:400;margin-top:8px;cursor:pointer">
-              <input type="checkbox" id="cc-wa" checked />
+              <input type="checkbox" id="cc-wa" />
               <span>Send WhatsApp message to customer</span>
             </label>
           </div>
@@ -5892,21 +5892,25 @@
         $("cc-results").style.display = "none";
         $("cc-selected").style.display = "none";
         $("cc-action-wrap").style.display = "none";
-        document.querySelector('input[name="cc-action"][value="renew"]').checked = true;
+        document.querySelector('input[name="cc-action"][value="collect"]').checked = true;
         ccActionChanged();
         $("cc-date").value = $("cc-date").max = new Date().toLocaleDateString("en-CA");
-        $("cc-wa").checked = true;
+        $("cc-wa").checked = false;
         $("cc-isp").checked = true;
+        $("cc-amt").value = "";
         $("m-cash").style.display = "flex";
+        let fromRow = false;
         if (preId) {
           const pc = custCache.find((x) => x.id === preId);
-          if (pc) selectCashCustomer(pc.id, pc.name, pc.balance_due || 0);
+          if (pc) { selectCashCustomer(pc.id, pc.name, pc.balance_due || 0); fromRow = true; }
         }
+        // Opened from a customer row: customer is already known, so hide the search box
+        $("cc-search-lbl").style.display = $("cc-search").style.display = fromRow ? "none" : "";
       }
 
       function ccDateChanged() {
         const today = new Date().toLocaleDateString("en-CA");
-        $("cc-wa").checked = !$("cc-date").value || $("cc-date").value >= today;
+        if ($("cc-date").value && $("cc-date").value < today) $("cc-wa").checked = false;
       }
 
       function ccActionChanged() {
@@ -6569,6 +6573,9 @@
         sel.innerHTML = "✓ Selected: <strong>" + name + "</strong>" + (pn ? " · " + pn : "") + (due > 0 ? ' · <span style="color:var(--red)">Due ₹' + due + '</span>' : "");
         const cu = custCache.find((x) => x.id === id);
         $("cc-action-wrap").style.display = cu && cu.billing_type === "postpaid" ? "none" : "block";
+        // Default amount = full remaining due (or the plan price if nothing is due)
+        const _due = Number(cu && cu.balance_due) || 0, _pp = Number(cu && cu.plan_price) || 0;
+        $("cc-amt").value = _due > 0 ? _due : (_pp > 0 ? _pp : "");
         ccActionChanged();
       }
 
