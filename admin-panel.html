@@ -2146,7 +2146,7 @@
             <div class="logo-icon">NA</div>
             <div class="logo-name">NetFlow Admin</div>
           </div>
-          <div class="logo-sub">// ISP Management</div>
+          <div class="logo-sub">ISP Management</div>
         </div>
         <nav class="nav">
           <div
@@ -2504,7 +2504,7 @@
           <div class="topbar">
             <div>
               <div class="pg-title">Customers</div>
-              <div class="pg-sub">// manage subscribers</div>
+              <div class="pg-sub">manage subscribers</div>
             </div>
             <button class="btn bpri" onclick="openAdd()">+ Add Customer</button>
           </div>
@@ -2786,7 +2786,7 @@
           <div class="topbar">
             <div>
               <div class="pg-title">Notifications</div>
-              <div class="pg-sub">// send push notifications</div>
+              <div class="pg-sub">send push notifications</div>
             </div>
           </div>
           <div class="content">
@@ -2900,7 +2900,7 @@
           <div class="topbar">
             <div>
               <div class="pg-title">Plans</div>
-              <div class="pg-sub">// manage broadband plans</div>
+              <div class="pg-sub">manage broadband plans</div>
             </div>
             <button class="btn bpri" onclick="openAddPlan()">+ Add Plan</button>
           </div>
@@ -2943,7 +2943,7 @@
           <div class="topbar">
             <div>
               <div class="pg-title">OTT Add-ons</div>
-              <div class="pg-sub">// manage streaming plans per franchise</div>
+              <div class="pg-sub">manage streaming plans per franchise</div>
             </div>
             <button class="btn bpri" onclick="openAddOtt()">+ Add OTT Plan</button>
           </div>
@@ -3733,21 +3733,7 @@
                 <label>Current WiFi SSID</label>
                 <input id="a-wifi-ssid" />
               </div>
-              <div class="cm-sub">Manual / extra</div>
-              <div class="ff">
-                <label>PON Port</label>
-                <select id="a-pon-port">
-                  <option value="">— Select —</option>
-                  <option value="0/1">PON 0/1</option>
-                  <option value="0/2">PON 0/2</option>
-                  <option value="0/3">PON 0/3</option>
-                  <option value="0/4">PON 0/4</option>
-                </select>
-              </div>
-              <div class="ff">
-                <label>ONU ID</label>
-                <input id="a-onu-id" type="number" placeholder="22" />
-              </div>
+              <div class="cm-sub">Extra (Optional)</div>
               <div class="ff">
                 <label>Router IP</label>
                 <input id="a-rip" placeholder="192.168.1.1" />
@@ -3787,10 +3773,6 @@
                   <option value="">— Select Plan —</option>
                 </select>
                 
-              </div>
-              <div class="ff">
-                <label>ISP Customer ID</label>
-                <input id="a-cid" placeholder="Optional" />
               </div>
             </div>
           </div>
@@ -3859,16 +3841,14 @@
         <div class="dgrid" id="v-hw"></div>
         <div class="sec-title">Billing</div>
         <div class="dgrid" id="v-bill"></div>
-        <div class="sec-title">Billing &amp; Payment History</div>
-        <div class="dgrid" id="v-hist-sum"></div>
-        <div style="display:flex;gap:6px;margin:10px 0 6px">
-          <button class="btn bsm" id="vh-all" onclick="setCustHistFilter('all')">All</button>
-          <button class="btn bsm" id="vh-pay" onclick="setCustHistFilter('pay')">Payments</button>
-          <button class="btn bsm" id="vh-bill" onclick="setCustHistFilter('bill')">Bills</button>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="sec-title" style="margin:0">Balance History</div>
+          <button class="btn bsm" onclick="downloadLedgerCsv()">Download</button>
         </div>
-        <div style="overflow-x:auto">
+        <div class="dgrid" id="v-hist-sum"></div>
+        <div style="overflow-x:auto;margin-top:10px">
           <table style="width:100%">
-            <thead><tr><th>Date</th><th>Entry</th><th>Details</th><th>Amount</th><th>Status</th></tr></thead>
+            <thead><tr><th>Entry</th><th>Transaction amount</th><th>Final</th><th></th></tr></thead>
             <tbody id="v-hist-body"></tbody>
           </table>
         </div>
@@ -3952,21 +3932,7 @@
                 <label>Current WiFi SSID</label>
                 <input id="e-wifi-ssid" />
               </div>
-              <div class="cm-sub">Manual / extra</div>
-              <div class="ff">
-                <label>PON Port</label>
-                <select id="e-pon-port">
-                  <option value="">— Select —</option>
-                  <option value="0/1">PON 0/1</option>
-                  <option value="0/2">PON 0/2</option>
-                  <option value="0/3">PON 0/3</option>
-                  <option value="0/4">PON 0/4</option>
-                </select>
-              </div>
-              <div class="ff">
-                <label>ONU ID</label>
-                <input id="e-onu-id" type="number" />
-              </div>
+              <div class="cm-sub">Extra (Optional)</div>
               <div class="ff">
                 <label>Router IP</label>
                 <input id="e-rip" />
@@ -4006,10 +3972,6 @@
                   <option value="">— Select Plan —</option>
                 </select>
                 <div class="cm-hint" id="e-plan-warn">⚠ No plan selected — customer will be saved without a plan</div>
-              </div>
-              <div class="ff">
-                <label>ISP Customer ID</label>
-                <input id="e-cid" />
               </div>
               <div class="ff">
                 <label>Status</label>
@@ -4248,6 +4210,45 @@
           </div>
         </div>
       </div>
+
+    <!-- GENERATE BILL MODAL -->
+<div class="modal-bg" id="m-genbill" style="display:none" onclick="if(event.target===this)closeM('m-genbill')">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title">Generate Bill</div>
+    <input type="hidden" id="gb-cust-id"/>
+    <div id="gb-info" style="font-size:13px;color:var(--txt2);margin-bottom:14px"></div>
+
+    <div class="ff" style="margin-bottom:14px">
+      <label>Start plan days from</label>
+      <select id="gb-start" onchange="gbUpdatePreview()">
+        <option value="expiry">Last expiry date</option>
+        <option value="today">Today</option>
+        <option value="custom">Custom date</option>
+      </select>
+    </div>
+    <div class="ff" id="gb-custom-wrap" style="display:none;margin-bottom:14px">
+      <label>Start date</label>
+      <input type="date" id="gb-custom" onchange="gbUpdatePreview()"/>
+    </div>
+
+    <div id="gb-preview" style="font-size:13px;padding:10px 12px;border-radius:8px;background:var(--bg2,#f4f5f7);margin-bottom:14px"></div>
+    
+    <div class="ff" id="gb-due-wrap" style="display:none;margin-bottom:14px">
+      <label>Pay within (days) — shown in the WhatsApp message</label>
+      <input type="number" id="gb-due-days" min="0" max="60" value="7"/>
+    </div>
+    <label id="gb-isp-wrap" style="display:none;align-items:center;gap:8px;font-size:13px;margin-bottom:14px;cursor:pointer">
+      <input type="checkbox" id="gb-isp"/> Also recharge on ISP side
+    </label>
+
+    <div class="errmsg" id="gb-err"></div>
+    <div class="mactions">
+      <button class="btn" onclick="closeM('m-genbill')">Cancel</button>
+      <button class="btn bpurple-btn" id="gb-btn" onclick="submitGenerateBill()">Generate Bill</button>
+    </div>
+  </div>
+</div>
+
 
       <!-- SUSPEND MODAL -->
 <div class="modal-bg" id="m-suspend" style="display:none">
@@ -4765,7 +4766,7 @@
         const c = (custCache || []).find(function (x) { return x.id === id; });
         if (!c) return;
         const items = [["link", "Send payment link", function () { openPayReminder(id); }]];
-        if (c.billing_type === "postpaid") items.push(["bill", "Generate bill now", function () { generateBillNow(id, c.name); }]);
+        items.push(["bill", "Generate bill now", function () { generateBillNow(id, c.name); }]);
         if (c.billing_type === "postpaid") {
           if (realSt(c) === "suspended") items.push(["play", "Reactivate", function () { openReactivateModal(id); }, "var(--green)"]);
           else items.push(["pause", "Suspend", function () { openSuspendModal(id); }, "var(--amber)"]);
@@ -4815,9 +4816,7 @@
                 : '<button class="btn bsm" style="background:var(--amber-l);border-color:rgba(217,119,6,0.2);color:var(--amber);font-size:11px" onclick="openSuspendModal(' + c.id + ')" title="Suspend">⏸️</button>')
             : '';
 
-          const generateBillBtn = c.billing_type === 'postpaid'
-          ? '<button class="btn bsm bpurple-btn" onclick="generateBillNow(' + c.id + ',' + "'" + n + "'" + ')" title="Generate Bill Now" style="font-size:11px">🧾</button>'
-          : '';
+          const generateBillBtn = '<button class="btn bsm bpurple-btn" onclick="generateBillNow(' + c.id + ',' + "'" + n + "'" + ')" title="Generate Bill Now" style="font-size:11px">🧾</button>';
 
           const billingBadge = c.billing_type === 'postpaid'
             ? '<span class="badge bpurple">Postpaid</span>'
@@ -5032,7 +5031,6 @@
           di("Comments", c.comments, "full");
         $("v-isp").innerHTML =
           di("ISP Server", c.isp_server) +
-          di("ISP Customer ID", c.isp_customer_id, "", "mono") +
           di("ISP Username", c.isp_username, "full", "mono") +
           di("Plan", c.plan_name) +
           di("Plan ID", c.plan_id);
@@ -5063,73 +5061,168 @@
         loadCustHistory(id);
       }
 
-      let _custHist = [];
+      let _custLedger = { rows: [], name: "" };
+      let _custLedgerId = null;
+      const _LG_MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+      function lgDate(d, full) {
+        if (!d) return "—";
+        const p = String(d).slice(0, 10).split("-");
+        if (p.length !== 3) return d;
+        return p[2] + "-" + _LG_MON[parseInt(p[1], 10) - 1] + "-" + (full ? p[0] : p[0].slice(2));
+      }
+      function lgDateTime(d) {
+        if (!d) return "";
+        const s = String(d).replace("T", " ");
+        return s.slice(0, 19);
+      }
 
       async function loadCustHistory(id) {
+        _custLedgerId = id;
         const body = $("v-hist-body");
         $("v-hist-sum").innerHTML = "";
-        body.innerHTML = '<tr><td colspan="5"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+        body.innerHTML = '<tr><td colspan="4"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
         try {
           const [pr, br] = await Promise.all([
             apiFetch("GET", "/api/admin/payments?customer_id=" + id),
             apiFetch("GET", "/api/admin/postpaid/billing-history?customer_id=" + id),
           ]);
-          const pays = pr.data?.payments || [];
+          const pays = (pr.data?.payments || []).filter((p) => p.status === "success");
           const bills = br.data?.billing_history || [];
           const c = custCache.find((x) => x.id === id) || {};
 
-          _custHist = [
-            ...pays.map((p) => ({
-              kind: "pay",
-              sort: p.created_at || "",
-              date: fmtDateTime(p.created_at),
-              amount: p.amount_total || 0,
-              status: p.status,
-              detail: (p.payment_method || "—") + " · " + (p.recharge_type || "").replace(/_/g, " "),
-            })),
-            ...bills.map((b) => ({
+          const items = [];
+          bills.forEach((b) =>
+            items.push({
+              ts: String(b.bill_date || "").slice(0, 10) + " 00:00:00",
+              ord: 0,
               kind: "bill",
-              sort: b.bill_date || b.created_at || "",
-              date: fmtDate(b.bill_date),
-              amount: b.bill_amount || 0,
-              status: b.status,
-              detail: "Due " + fmtDate(b.due_date) + (b.paid_amount > 0 && b.status !== "paid" ? " · paid ₹" + b.paid_amount : ""),
-            })),
-          ].sort((a, b) => String(b.sort).localeCompare(String(a.sort)));
+              delta: b.bill_amount || 0,
+              title: "Bill From " + lgDate(b.bill_date) + " To " + lgDate(b.period_end_date),
+              sub: "Billed On " + lgDate(b.bill_date, true),
+            }),
+          );
+          pays.forEach((p) => {
+            const ts = lgDateTime(p.created_at);
+            const postpaidType = String(p.recharge_type || "").indexOf("postpaid") === 0;
+            if (!postpaidType && (p.amount_plan || 0) > 0) {
+              items.push({
+                ts: ts,
+                ord: 0,
+                kind: "charge",
+                delta: p.amount_plan,
+                title: p.recharge_type === "ott" ? "OTT Subscription" : "Plan Recharge" + (p.plan_name ? " — " + p.plan_name : ""),
+                sub: "Recharged On " + lgDate(p.created_at, true),
+              });
+            }
+            items.push({
+              ts: ts,
+              ord: 1,
+              kind: "pay",
+              id: p.id,
+              delta: -(p.amount_total || 0),
+              title: (p.payment_method === "cash" ? "Cash" : "Online") + " Payment Received On " + ts,
+              sub: "Recorded On " + lgDate(p.created_at, true),
+            });
+          });
 
-          const paid = pays.filter((p) => p.status === "success").reduce((s, p) => s + (p.amount_total || 0), 0);
-          const billed = bills.reduce((s, b) => s + (b.bill_amount || 0), 0);
+          items.sort((a, b) => (a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : a.ord - b.ord));
+
+          // Make the ledger end exactly at the customer's real balance due
+          const net = items.reduce((s, r) => s + r.delta, 0);
+          const opening = Math.round(((c.balance_due || 0) - net) * 100) / 100;
+          if (Math.abs(opening) >= 0.01) {
+            items.unshift({
+              ts: "",
+              ord: -1,
+              kind: "open",
+              delta: opening,
+              title: "Opening balance / earlier adjustments",
+              sub: "Difference between the recorded entries and the current balance",
+            });
+          }
+          let bal = 0;
+          items.forEach((r) => {
+            bal = Math.round((bal + r.delta) * 100) / 100;
+            r.final = bal;
+          });
+
+          _custLedger = { rows: items.slice().reverse(), name: c.name || "customer" };
+
+          const billed = items.filter((r) => r.kind === "bill" || r.kind === "charge").reduce((s, r) => s + r.delta, 0);
+          const paid = -items.filter((r) => r.kind === "pay").reduce((s, r) => s + r.delta, 0);
           $("v-hist-sum").innerHTML =
             di("Total Billed", "₹" + billed.toLocaleString("en-IN"), "", "mono") +
             di("Total Paid", '<span style="color:var(--green);font-weight:600">₹' + paid.toLocaleString("en-IN") + "</span>", "", "mono") +
             di("Balance Due", c.balance_due > 0 ? '<span style="color:var(--red);font-weight:700">₹' + c.balance_due + "</span>" : "₹0", "", "mono");
-          setCustHistFilter("all");
+          renderLedger();
         } catch (e) {
-          body.innerHTML = '<tr><td colspan="5"><div class="empty">Could not load history</div></td></tr>';
+          body.innerHTML = '<tr><td colspan="4"><div class="empty">Could not load history</div></td></tr>';
           console.error(e);
         }
       }
 
-      function setCustHistFilter(f) {
-        ["all", "pay", "bill"].forEach((k) => {
-          const b = $("vh-" + k);
-          if (b) b.style.fontWeight = k === f ? "700" : "400";
-        });
-        const rows = _custHist.filter((r) => f === "all" || r.kind === f);
-        const cls = { success: "bok", paid: "bok", partial: "bwarn", pending: "bwarn", failed: "berr" };
+      function renderLedger() {
+        const rows = _custLedger.rows;
         $("v-hist-body").innerHTML = rows.length
           ? rows
-              .map(
-                (r) =>
-                  '<tr><td style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' + r.date +
-                  '</td><td><span class="badge ' + (r.kind === "bill" ? "bpurple" : "bgray") + '">' + (r.kind === "bill" ? "Postpaid bill" : "Payment") +
-                  '</span></td><td style="color:var(--txt2)">' + r.detail +
-                  '</td><td style="font-family:var(--mono);font-weight:700;color:' + (r.kind === "pay" ? "var(--green)" : "var(--txt)") + '">' +
-                  (r.kind === "pay" ? "+" : "") + "₹" + r.amount.toLocaleString("en-IN") +
-                  '</td><td><span class="badge ' + (cls[r.status] || "bgray") + '">' + (r.status || "—") + "</span></td></tr>",
-              )
+              .map((r) => {
+                const icon = r.kind === "pay" ? "💵" : r.kind === "open" ? "⚖️" : "🧾";
+                const plus = r.delta >= 0;
+                const amt =
+                  '<span style="color:' + (plus ? "var(--green)" : "var(--red)") + '">(' + (plus ? "+" : "−") + ") ₹" +
+                  Math.abs(r.delta).toLocaleString("en-IN") + "</span>";
+                const fin =
+                  r.final > 0
+                    ? '<span class="badge bok">₹' + r.final.toLocaleString("en-IN") + '</span> <small style="color:var(--txt3)">Due</small>'
+                    : r.final < 0
+                      ? '<span class="badge bgray">₹' + Math.abs(r.final).toLocaleString("en-IN") + '</span> <small style="color:var(--txt3)">Advance</small>'
+                      : '<span class="badge bgray">₹0</span>';
+                const del =
+                  r.kind === "pay"
+                    ? '<button class="btn bsm" style="background:rgba(220,38,38,0.1);border-color:rgba(220,38,38,0.25);color:var(--red)" title="Delete payment record" onclick="deleteLedgerPayment(' + r.id + ')">🗑</button>'
+                    : "";
+                return (
+                  '<tr><td><div style="display:flex;gap:10px;align-items:center"><span style="font-size:22px">' + icon +
+                  '</span><div><div>' + r.title + '</div><div style="font-size:11px;color:var(--txt3)">' + r.sub +
+                  '</div></div></div></td><td style="font-family:var(--mono);white-space:nowrap">' + amt +
+                  '</td><td style="white-space:nowrap">' + fin + "</td><td>" + del + "</td></tr>"
+                );
+              })
               .join("")
-          : '<tr><td colspan="5"><div class="empty">Nothing here yet</div></td></tr>';
+          : '<tr><td colspan="4"><div class="empty">Nothing here yet</div></td></tr>';
+      }
+
+      async function deleteLedgerPayment(id) {
+        if (!confirm("Delete this payment record?\n\nThis only removes the record. It does not change the customer's balance due or expiry.")) return;
+        try {
+          const r = await apiFetch("DELETE", "/api/admin/payments/" + id);
+          if (r.success) {
+            toast("Payment deleted");
+            loadCustHistory(_custLedgerId);
+          } else toast(r.error || "Failed", "err");
+        } catch (e) {
+          toast("Network error", "err");
+        }
+      }
+
+      function downloadLedgerCsv() {
+        const rows = _custLedger.rows.slice().reverse();
+        if (!rows.length) {
+          toast("Nothing to download", "err");
+          return;
+        }
+        const q = (v) => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
+        const lines = [["Entry", "Details", "Amount", "Final balance"].map(q).join(",")];
+        rows.forEach((r) => lines.push([r.title, r.sub, r.delta, r.final].map(q).join(",")));
+        const blob = new Blob(["\ufeff" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "balance-history-" + (_custLedger.name || "customer").replace(/[^a-z0-9]+/gi, "-") + ".csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
       }
 
 
@@ -5173,8 +5266,6 @@
         $("a-isp").value = "1";
         $("a-brand").value = "";
         $("a-plan").value = "";
-        $("a-pon-port").value = "";
-        $("a-onu-id").value = "";
         $("a-wifi-band").value = "single";
         $("a-billing-type").value = "prepaid";
         $("a-grace-days").value = "10";
@@ -5200,7 +5291,6 @@
         $("e-pass").value = "";
         $("e-addr").value = c.address || "";
         $("e-isp").value = c.isp_server_id || "2";
-        $("e-cid").value = c.isp_customer_id || "";
         $("e-iuser").value = c.isp_username || "";
         $("e-brand").value = c.router_brand_id || "";
         $("e-rip").value = c.router_ip || "192.168.1.1";
@@ -5214,8 +5304,6 @@
         $("e-iptv").value = c.iptv || "";
         $("e-err").style.display = "none";
         $("e-plan").value = c.plan_id ? String(c.plan_id) : "";
-        if ($("e-pon-port")) $("e-pon-port").value = c.pon_port || "";
-        if ($("e-onu-id")) $("e-onu-id").value = c.onu_id || "";
         if ($("e-wifi-ssid")) $("e-wifi-ssid").value = c.wifi_ssid || "";
         if ($("e-wifi-band")) $("e-wifi-band").value = c.wifi_band || "single";
         $("e-due").value = c.balance_due || 0;
@@ -5245,7 +5333,6 @@
           password: $("a-pass").value.trim(),
           address: $("a-addr").value.trim(),
           isp_server_id: parseInt($("a-isp").value),
-          isp_customer_id: $("a-cid").value.trim(),
           isp_username: $("a-iuser").value.trim(),
           router_brand_id: $("a-brand").value || null,
           router_ip: $("a-rip").value.trim() || "192.168.1.1",
@@ -5257,8 +5344,6 @@
           comments: $("a-comments").value.trim(),
           mac_address: $("a-mac").value.trim(),
           iptv: $("a-iptv").value.trim(),
-          pon_port: $("a-pon-port").value || null,
-          onu_id: $("a-onu-id").value ? parseInt($("a-onu-id").value) : null,
           wifi_ssid: $("a-wifi-ssid").value.trim() || null,
           wifi_band: $("a-wifi-band").value || "single",
           balance_due: parseFloat($("a-due").value) || 0,
@@ -5304,7 +5389,6 @@
           email: $("e-email").value.trim(),
           address: $("e-addr").value.trim(),
           isp_server_id: parseInt($("e-isp").value),
-          isp_customer_id: $("e-cid").value.trim(),
           isp_username: $("e-iuser").value.trim(),
           router_brand_id: $("e-brand").value || null,
           router_ip: $("e-rip").value.trim(),
@@ -5317,8 +5401,6 @@
           comments: $("e-comments").value.trim(),
           mac_address: $("e-mac").value.trim(),
           iptv: $("e-iptv").value.trim(),
-          pon_port: $("e-pon-port") ? $("e-pon-port").value || null : null,
-          onu_id: $("e-onu-id") && $("e-onu-id").value ? parseInt($("e-onu-id").value) : null,
           wifi_ssid: $("e-wifi-ssid") ? $("e-wifi-ssid").value.trim() || null : null,
           wifi_band: $("e-wifi-band") ? $("e-wifi-band").value || "single" : "single",
           balance_due: parseFloat($("e-due").value) || 0,
@@ -7695,19 +7777,82 @@ function openSuspendModal(custId) {
   $('m-suspend').style.display = 'flex';
 }
 
-async function generateBillNow(id, name) {
-  if (!confirm('Generate a new bill for ' + name + ' right now?\n\nThis will add the plan price to their balance due and extend the expiry from the current expiry date (or from today if already expired).')) return;
+function generateBillNow(id, name) {
+  const c = (custCache || []).find(function (x) { return x.id === id; });
+  if (!c) return;
+  $('gb-cust-id').value = id;
+  $('gb-start').value = 'expiry';
+  $('gb-custom').value = today();
+  $('gb-custom-wrap').style.display = 'none';
+  $('gb-err').style.display = 'none';
+  $('gb-isp').checked = false;                       // ISP recharge is OFF by default
+  $('gb-isp-wrap').style.display = c.billing_type === 'postpaid' ? 'none' : 'flex';
+  $('gb-due-days').value = 7;
+  $('gb-due-wrap').style.display = c.billing_type === 'postpaid' ? 'none' : 'block';
+  $('gb-info').innerHTML = '<b>' + name + '</b> · ' + (c.plan_name || 'No plan') +
+    ' · ₹' + (c.plan_price || 0) + ' / ' + (c.plan_validity_days || 30) + ' days · Current expiry: ' + fmtDate(c.expiry_date);
+  $('m-genbill').style.display = 'flex';
+  gbUpdatePreview();
+}
+
+function gbAddDays(dateStr, days) {
+  const p = dateStr.split('-');
+  const d = new Date(+p[0], +p[1] - 1, +p[2]);
+  d.setDate(d.getDate() + days);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function gbUpdatePreview() {
+  const c = (custCache || []).find(function (x) { return x.id === parseInt($('gb-cust-id').value); });
+  if (!c) return;
+  const mode = $('gb-start').value;
+  $('gb-custom-wrap').style.display = mode === 'custom' ? 'block' : 'none';
+  let start = mode === 'today' ? today() : (mode === 'custom' ? $('gb-custom').value : (c.expiry_date || today()));
+  if (!start) { $('gb-preview').innerHTML = 'Pick a start date.'; return; }
+  const days = c.plan_validity_days || 30;
+  const newExp = gbAddDays(start, days);
+  const dueAfter = (c.balance_due || 0) + (c.plan_price || 0);
+  let html = 'Plan starts <b>' + fmtDate(start) + '</b> → new expiry <b>' + fmtDate(newExp) + '</b><br>' +
+             'Bill ₹' + (c.plan_price || 0) + ' · Total due after: <b>₹' + dueAfter + '</b>';
+  if (newExp < today()) html += '<br><span style="color:var(--amber)">⚠ New expiry is still in the past — the customer will remain expired.</span>';
+  $('gb-preview').innerHTML = html;
+}
+
+async function submitGenerateBill() {
+  const id = parseInt($('gb-cust-id').value);
+  const mode = $('gb-start').value;
+  const btn = $('gb-btn'), err = $('gb-err');
+  err.style.display = 'none';
+  if (mode === 'custom' && !$('gb-custom').value) { err.textContent = 'Pick a start date'; err.style.display = 'block'; return; }
+  btn.disabled = true;
   try {
-    const r = await apiFetch('POST', '/api/admin/postpaid/generate-bill', { customer_id: id });
+    const r = await apiFetch('POST', '/api/admin/postpaid/generate-bill', {
+      customer_id: id,
+      start_from: mode,
+      custom_date: mode === 'custom' ? $('gb-custom').value : null,
+      isp_recharge: $('gb-isp-wrap').style.display !== 'none' && $('gb-isp').checked,
+      due_days: $('gb-due-wrap').style.display !== 'none' ? parseInt($('gb-due-days').value) : null
+    });
     if (r.success) {
-      toast('Bill generated! Due ₹' + r.data.total_due_after + ' by ' + fmtDate(r.data.due_date));
+      let msg = 'Bill generated! Due ₹' + r.data.total_due_after + ' · Expiry ' + fmtDate(r.data.new_expiry);
+      if (r.data.isp_status === 'confirmed') msg += ' · ISP recharged';
+      else if (r.data.isp_status === 'pending') msg += ' · ISP recharge queued';
+      if (r.data.isp_status === 'failed') {
+        toast(msg + ' · ISP recharge FAILED: ' + (r.data.isp_error || 'unknown'), 'err');
+      } else {
+        toast(msg);
+      }
+      closeM('m-genbill');
       loadCustomers();
     } else {
-      toast(r.error || 'Failed to generate bill', 'err');
+      err.textContent = r.error || 'Failed to generate bill';
+      err.style.display = 'block';
     }
-  } catch(e) {
-    toast('Network error', 'err');
+  } catch (e) {
+    err.textContent = 'Network error';
+    err.style.display = 'block';
   }
+  btn.disabled = false;
 }
 
 async function submitSuspend() {
