@@ -2510,7 +2510,8 @@
           </div>
           <div class="content">
             <div class="toolbar">
-              <input class="sbox" id="csearch" placeholder="Search name or phone..." oninput="searchC()" />
+              <input class="sbox" id="csearch" placeholder="Search name, username or mobile..." oninput="searchC()" />
+              <input class="sbox" id="csearch2" placeholder="Advanced: address, membership no, MAC, hardware, plan..." oninput="searchC()" />
               <select class="fsel" id="cstatus" onchange="_custFilterChanged()">
                 <option value="">All status</option>
                 <option value="active">Active</option>
@@ -4705,7 +4706,6 @@
         if (resetPage !== false) _custPage = 1;
         const search = $("csearch").value.trim();
         let p = "?page=1&limit=9999";
-        if (search) p += "&search=" + encodeURIComponent(search);
         $("ctbody").innerHTML = '<tr><td colspan="10"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
         $("cpagination").style.display = "none";
         try {
@@ -4900,7 +4900,27 @@
         _renderCustPage();
       }
 
-      function searchC() { loadCustomers(); }
+      function searchC() { _custViewChanged(); }
+
+      // ── Customer search (in browser; every word must match) ──
+      function _custWords(q) { return String(q || "").toLowerCase().split(/\s+/).filter(Boolean); }
+      function _custHas(text, words) {
+        if (!words.length) return true;
+        const t = String(text || "").toLowerCase();
+        const ts = t.replace(/[:.\-]/g, "");
+        return words.every(function (w) {
+          if (t.indexOf(w) !== -1) return true;
+          const ws = w.replace(/[:.\-]/g, "");   // MAC typed as aa-bb-cc / aa:bb:cc
+          return ws.length >= 4 && ts.indexOf(ws) !== -1;
+        });
+      }
+      // Box 1: name, mobile, PPPoE username
+      function _custBasicText(c) { return [c.name, c.phone, c.isp_username].join(" "); }
+      // Box 2: address, membership no, MAC, router, plan, hardware... (passwords NOT searched)
+      function _custAdvText(c) {
+        return [c.address, c.membership, c.mac_address,
+                c.plan_name, c.isp_server, c.email, c.hw_text].join(" ");
+      }
       function filterSt(s) {
         $("cstatus").value = s;
         $("cbilling").value = "";
@@ -4968,8 +4988,10 @@
 
       function _custApplyView() {
         const f = $("cstatus").value, b = $("cbilling").value;
+        const w1 = _custWords($("csearch").value), w2 = _custWords($("csearch2").value);
         let list = _custRaw.filter((c) =>
-          _custMatch(c, f) && (!b || (c.billing_type === "postpaid" ? "postpaid" : "prepaid") === b)
+          _custMatch(c, f) && (!b || (c.billing_type === "postpaid" ? "postpaid" : "prepaid") === b) &&
+          _custHas(_custBasicText(c), w1) && _custHas(_custAdvText(c), w2)
         );
         if (_custSort.key) {
           const get = _SORT_GET[_custSort.key], dir = _custSort.dir;
@@ -5356,7 +5378,7 @@
           toast("Network error", "err");
         }
       }
-      
+
       function openAdd() {
         [
           "a-name",
