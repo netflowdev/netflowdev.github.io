@@ -3733,23 +3733,8 @@
                 <label>Current WiFi SSID</label>
                 <input id="a-wifi-ssid" />
               </div>
-              <div class="cm-sub">Extra (Optional)</div>
-              <div class="ff">
-                <label>Router IP</label>
-                <input id="a-rip" placeholder="192.168.1.1" />
-              </div>
-              <div class="ff">
-                <label>Router username</label>
-                <input id="a-ruser" placeholder="admin" />
-              </div>
-              <div class="ff">
-                <label>Router password</label>
-                <input id="a-rpass" />
-              </div>
-              <div class="ff">
-                <label>IPTV Details</label>
-                <input id="a-iptv" />
-              </div>
+                            <div class="cm-sub">Additional hardware</div>
+              <div class="cm-hint" style="grid-column:1/-1">Save the customer first, then open Edit to add more hardware (ONT, set-top box, extra router…).</div>
             </div>
           </div>
 
@@ -3839,6 +3824,8 @@
         <div class="dgrid" id="v-isp"></div>
         <div class="sec-title">Hardware Details</div>
         <div class="dgrid" id="v-hw"></div>
+        <div class="sec-title">Additional Hardware</div>
+        <div id="v-hw-extra" style="display:flex;flex-wrap:wrap;gap:12px"></div>
         <div class="sec-title">Billing</div>
         <div class="dgrid" id="v-bill"></div>
         <div style="display:flex;align-items:center;justify-content:space-between">
@@ -3932,22 +3919,10 @@
                 <label>Current WiFi SSID</label>
                 <input id="e-wifi-ssid" />
               </div>
-              <div class="cm-sub">Extra (Optional)</div>
-              <div class="ff">
-                <label>Router IP</label>
-                <input id="e-rip" />
-              </div>
-              <div class="ff">
-                <label>Router username</label>
-                <input id="e-ruser" />
-              </div>
-              <div class="ff">
-                <label>Router password</label>
-                <input id="e-rpass" />
-              </div>
-              <div class="ff">
-                <label>IPTV Details</label>
-                <input id="e-iptv" />
+              <div class="cm-sub">Additional hardware</div>
+              <div style="grid-column:1/-1">
+                <div id="e-hw-list" style="display:flex;flex-wrap:wrap;gap:12px"></div>
+                <button type="button" class="btn bsm" style="margin-top:10px" onclick="openHwModal(null)">+ Add hardware</button>
               </div>
             </div>
           </div>
@@ -4210,6 +4185,40 @@
           </div>
         </div>
       </div>
+
+
+<!-- HARDWARE MODAL -->
+<div class="modal-bg" id="m-hw" style="display:none" onclick="if(event.target===this)closeM('m-hw')">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title" id="hw-title">Add Hardware</div>
+    <input type="hidden" id="hw-id"/>
+    <div class="ff" style="margin-bottom:12px">
+      <label>Name *</label>
+      <input id="hw-name" placeholder="ONT, Set-top box, Second router…"/>
+    </div>
+    <div class="ff" style="margin-bottom:12px">
+      <label>IP</label>
+      <input id="hw-ip"/>
+    </div>
+    <div class="ff" style="margin-bottom:12px">
+      <label>Username</label>
+      <input id="hw-user"/>
+    </div>
+    <div class="ff" style="margin-bottom:12px">
+      <label>Password</label>
+      <input id="hw-pass"/>
+    </div>
+    <div class="ff" style="margin-bottom:12px">
+      <label>Details</label>
+      <textarea id="hw-details"></textarea>
+    </div>
+    <div class="errmsg" id="hw-err"></div>
+    <div class="mactions">
+      <button class="btn" onclick="closeM('m-hw')">Cancel</button>
+      <button class="btn bpurple-btn" id="hw-btn" onclick="saveHw()">Save</button>
+    </div>
+  </div>
+</div>
 
     <!-- GENERATE BILL MODAL -->
 <div class="modal-bg" id="m-genbill" style="display:none" onclick="if(event.target===this)closeM('m-genbill')">
@@ -5036,11 +5045,8 @@
           di("Plan ID", c.plan_id);
         $("v-hw").innerHTML =
           di("Router Brand", c.router_brand) +
-          di("Router IP", c.router_ip, "", "mono") +
-          di("Router User", c.router_username, "", "mono") +
-          di("Router Pass", c.router_password, "", "mono") +
-          di("MAC Address", c.mac_address, "", "mono") +
-          di("IPTV", c.iptv);
+          di("MAC Address", c.mac_address, "", "mono");
+        loadHw(c.id, "v-hw-extra", false);
         $("v-bill").innerHTML =
           di("Expiry Date", fmtDate(c.expiry_date), "", "mono") +
           di(
@@ -5240,6 +5246,117 @@
         );
       }
 
+            let _hwList = [];
+      let _hwCustId = null;
+
+      function hwEsc(s) {
+        return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      }
+
+      function hwCardHtml(h, editable) {
+        const row = function (label, value, mono) {
+          if (!value) return "";
+          return (
+            '<div style="padding:8px 0;border-bottom:1px solid var(--border,#e5e7eb)">' +
+            '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3)">' + label + "</div>" +
+            '<div style="font-weight:600;white-space:pre-wrap;word-break:break-word;' + (mono ? "font-family:var(--mono);" : "") + '">' + hwEsc(value) + "</div></div>"
+          );
+        };
+        return (
+          '<div style="flex:1 1 220px;min-width:220px;max-width:300px;border:1px solid var(--border,#e5e7eb);border-radius:10px;padding:10px 14px">' +
+          '<div style="font-weight:700;margin-bottom:4px">' + hwEsc(h.name) + "</div>" +
+          row("IP", h.ip, true) +
+          row("Username", h.username, true) +
+          row("Password", h.password, true) +
+          row("Details", h.details, false) +
+          (editable
+            ? '<div style="display:flex;gap:6px;justify-content:flex-end;margin-top:10px">' +
+              '<button type="button" class="btn bsm" onclick="openHwModal(' + h.id + ')">Correct Details</button>' +
+              '<button type="button" class="btn bsm" style="color:var(--red)" onclick="deleteHw(' + h.id + ')">Remove</button></div>'
+            : "") +
+          "</div>"
+        );
+      }
+
+      async function loadHw(custId, targetId, editable) {
+        const box = $(targetId);
+        if (!box) return;
+        box.innerHTML = '<div style="color:var(--txt3);font-size:12px">Loading…</div>';
+        try {
+          const r = await apiFetch("GET", "/api/admin/hardware?customer_id=" + custId);
+          const list = (r.data && r.data.hardware) || [];
+          if (editable) _hwList = list;
+          box.innerHTML = list.length
+            ? list.map(function (h) { return hwCardHtml(h, editable); }).join("")
+            : '<div style="color:var(--txt3);font-size:12px">No additional hardware</div>';
+        } catch (e) {
+          box.innerHTML = '<div style="color:var(--txt3);font-size:12px">Could not load hardware</div>';
+        }
+      }
+
+      function openHwModal(id) {
+        const h = id ? _hwList.find(function (x) { return x.id === id; }) : null;
+        $("hw-title").textContent = h ? "Correct Details" : "Add Hardware";
+        $("hw-id").value = h ? h.id : "";
+        $("hw-name").value = h ? h.name || "" : "";
+        $("hw-ip").value = h ? h.ip || "" : "";
+        $("hw-user").value = h ? h.username || "" : "";
+        $("hw-pass").value = h ? h.password || "" : "";
+        $("hw-details").value = h ? h.details || "" : "";
+        $("hw-err").style.display = "none";
+        $("m-hw").style.display = "flex";
+      }
+
+      async function saveHw() {
+        const errBox = $("hw-err"), btn = $("hw-btn");
+        errBox.style.display = "none";
+        const name = $("hw-name").value.trim();
+        if (!name) {
+          errBox.textContent = "Name is required";
+          errBox.style.display = "block";
+          return;
+        }
+        const id = $("hw-id").value;
+        const body = {
+          name: name,
+          ip: $("hw-ip").value,
+          username: $("hw-user").value,
+          password: $("hw-pass").value,
+          details: $("hw-details").value,
+        };
+        btn.disabled = true;
+        try {
+          const r = id
+            ? await apiFetch("PUT", "/api/admin/hardware/" + id, body)
+            : await apiFetch("POST", "/api/admin/hardware", Object.assign({ customer_id: _hwCustId }, body));
+          if (r.success) {
+            closeM("m-hw");
+            toast(id ? "Hardware updated" : "Hardware added");
+            loadHw(_hwCustId, "e-hw-list", true);
+          } else {
+            errBox.textContent = r.error || "Failed";
+            errBox.style.display = "block";
+          }
+        } catch (e) {
+          errBox.textContent = "Network error";
+          errBox.style.display = "block";
+        }
+        btn.disabled = false;
+      }
+
+      async function deleteHw(id) {
+        if (!confirm("Remove this hardware?")) return;
+        try {
+          const r = await apiFetch("DELETE", "/api/admin/hardware/" + id);
+          if (r.success) {
+            toast("Hardware removed");
+            loadHw(_hwCustId, "e-hw-list", true);
+          } else toast(r.error || "Failed", "err");
+        } catch (e) {
+          toast("Network error", "err");
+        }
+      }
+      
       function openAdd() {
         [
           "a-name",
@@ -5293,15 +5410,13 @@
         $("e-isp").value = c.isp_server_id || "2";
         $("e-iuser").value = c.isp_username || "";
         $("e-brand").value = c.router_brand_id || "";
-        $("e-rip").value = c.router_ip || "192.168.1.1";
-        $("e-ruser").value = c.router_username || "admin";
-        $("e-rpass").value = c.router_password || "";
+        _hwCustId = c.id;
+        loadHw(c.id, "e-hw-list", true);
         $("e-expiry").value = c.expiry_date || "";
         $("e-status").value = c.status || "active";
         $("e-mem").value = c.membership || "";
         $("e-comments").value = c.comments || "";
         $("e-mac").value = c.mac_address || "";
-        $("e-iptv").value = c.iptv || "";
         $("e-err").style.display = "none";
         $("e-plan").value = c.plan_id ? String(c.plan_id) : "";
         if ($("e-wifi-ssid")) $("e-wifi-ssid").value = c.wifi_ssid || "";
@@ -5335,15 +5450,11 @@
           isp_server_id: parseInt($("a-isp").value),
           isp_username: $("a-iuser").value.trim(),
           router_brand_id: $("a-brand").value || null,
-          router_ip: $("a-rip").value.trim() || "192.168.1.1",
-          router_username: $("a-ruser").value.trim() || "admin",
-          router_password: $("a-rpass").value.trim(),
           expiry_date: $("a-expiry").value || null,
           plan_id: $("a-plan").value ? parseInt($("a-plan").value) : null,
           membership: $("a-mem").value.trim(),
           comments: $("a-comments").value.trim(),
           mac_address: $("a-mac").value.trim(),
-          iptv: $("a-iptv").value.trim(),
           wifi_ssid: $("a-wifi-ssid").value.trim() || null,
           wifi_band: $("a-wifi-band").value || "single",
           balance_due: parseFloat($("a-due").value) || 0,
@@ -5391,16 +5502,12 @@
           isp_server_id: parseInt($("e-isp").value),
           isp_username: $("e-iuser").value.trim(),
           router_brand_id: $("e-brand").value || null,
-          router_ip: $("e-rip").value.trim(),
-          router_username: $("e-ruser").value.trim(),
-          router_password: $("e-rpass").value.trim(),
           expiry_date: $("e-expiry").value || null,
           plan_id: $("e-plan").value ? parseInt($("e-plan").value) : null,
           status: $("e-status").value,
           membership: $("e-mem").value.trim(),
           comments: $("e-comments").value.trim(),
           mac_address: $("e-mac").value.trim(),
-          iptv: $("e-iptv").value.trim(),
           wifi_ssid: $("e-wifi-ssid") ? $("e-wifi-ssid").value.trim() || null : null,
           wifi_band: $("e-wifi-band") ? $("e-wifi-band").value || "single" : "single",
           balance_due: parseFloat($("e-due").value) || 0,
