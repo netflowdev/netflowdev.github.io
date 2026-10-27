@@ -6,8 +6,7 @@
     <title>NetAdmin ISP Management</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
+      rel="stylesheet"/>
     <style>
       :root {
         --sb-bg: #ffffff;
@@ -3802,9 +3801,8 @@
       <div class="modal modal-lg">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px">
           <div class="modal-title" style="margin: 0" id="v-title">Customer</div>
-          <div style="display: flex; gap: 8px">
+          <div style="display: flex; gap: 8px; margin-right: 36px">
             <button class="btn bsm bedit" id="v-edit-btn">✏ Edit</button>
-            <button class="btn bsm" onclick="closeM('m-view')">✕ Close</button>
           </div>
         </div>
         <div class="sec-title">Customer Details</div>
@@ -4742,9 +4740,9 @@
         const post = c.billing_type === "postpaid";
         const susp = realSt(c) === "suspended";
         let h = '<div class="act-new">';
+        h += '<button class="ab" onclick="openView(' + c.id + ')">' + _ico("eye") + "View</button>";
         h += '<button class="ab" onclick="openEdit(' + c.id + ')">' + _ico("edit") + "Edit</button>";
         h += '<button class="ab" onclick="openCash(' + c.id + ')">' + _ico("cash") + "Cash</button>";
-        h += '<button class="ab" onclick="openView(' + c.id + ')">' + _ico("eye") + "View</button>";
         h += '<button class="ab act-more" onclick="openRowMenu(this,' + c.id + ')" aria-label="More">More' + _ico("down") + "</button>";
         return h + "</div>";
       }
@@ -5653,7 +5651,7 @@
                 '</td><td data-label="Type" style="color:var(--txt2)">' +
                 (p.recharge_type || "").replace(/_/g, " ") +
                 '</td><td data-label="App Ref" style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' +
-                (p.payu_order_id || "—") +
+                (p.payu_order_id || (p.payment_method === "cash" ? "CASH-" + p.id : "—")) +
                 '</td><td data-label="Bank Txn" style="font-family:var(--mono);font-size:11px;color:var(--txt3);max-width:160px;word-break:break-all;white-space:normal">' + (p.payu_txn_id || "—") +
                 '</td><td data-label="Status">' +
                 sbadge(p.status) +
