@@ -5544,7 +5544,7 @@
           grace_period_days: parseInt($("e-grace-days").value) || 10,
           auto_suspend_enabled: parseInt($("e-auto-suspend").value),
           current_due_date: $("e-current-due-date").value || null,
-          next_bill_date: $("e-next-bill-date").value || null,
+          next_bill_date: $("e-billing-type").value === "postpaid" ? ($("e-expiry").value || null) : ($("e-next-bill-date").value || null),
         };
         const np = $("e-pass").value.trim();
         if (np) d.password = np;
@@ -5560,7 +5560,6 @@
           const isPostE = d.billing_type === "postpaid";
           const missingE = [];
           if (!d.expiry_date) missingE.push("Expiry date");
-          if (isPostE && !d.next_bill_date) missingE.push("Next bill generation date");
           if (isPostE && !d.current_due_date) missingE.push("Reminder date");
           if (missingE.length) {
             cmFlag("m-edit", "billing");
@@ -7918,7 +7917,7 @@ function togglePostpaidFieldsEdit() {
   $('e-postpaid-fields').style.display = isPost ? '' : 'none';
   $('e-autosuspend-field').style.display = isPost ? '' : 'none';
   $('e-currentduedate-field').style.display = isPost ? '' : 'none';
-  $('e-nextbilldate-field').style.display = isPost ? '' : 'none';
+  $('e-nextbilldate-field').style.display = 'none';
   $('e-duemode-field').style.display = isPost ? 'none' : '';
 }
 
