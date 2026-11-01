@@ -289,7 +289,7 @@
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border-bottom: 1px solid var(--border);
-        padding: 6px 36px;
+        padding: 6px 14px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -309,7 +309,7 @@
         letter-spacing: 0.02em;
       }
       .content {
-        padding: 8px 36px 6px;
+        padding: 8px 14px 6px;
       }
       .stats {
         display: grid;
@@ -1669,6 +1669,13 @@
         width: 22px; height: 22px; flex-shrink: 0;
       }
       .wa-link:hover svg { fill: rgb(40, 190, 150); }
+      #a-name, #a-local, #e-name, #e-local { text-transform: uppercase; }
+      #wa-panel-send .card-hd { margin-bottom: 6px; }
+      #wa-panel-send .sec-title { margin: 8px 0 8px; padding-bottom: 5px; }
+      #wa-multi-search { margin-top: 2px !important; }
+      #wa-multi-chips { margin-top: 8px !important; gap: 6px !important; }
+      #wa-multi-chips + div { margin-top: 8px !important; }
+      .wa-chip { min-height: 30px; padding: 0 11px; font-size: 12.5px; }
       .cs-cb { width: 16px; height: 16px; accent-color: #25D366; cursor: pointer; margin: 0 8px 0 0; vertical-align: middle; }
       #cs-all { display: none; }
       @media (min-width: 769px) {
@@ -5132,13 +5139,13 @@
           toast("Not found", "err");
           return;
         }
-        $("v-title").textContent = c.name + " — #" + c.id;
+        $("v-title").textContent = (c.local_name || c.name) + " — #" + c.id;
         $("v-edit-btn").onclick = () => {
           closeM("m-view");
           openEdit(id);
         };
         $("v-cust").innerHTML =
-          di("Name", c.name) +
+          di("Billing name", c.name) +
           di("Local name", c.local_name) +
           di("Phone", c.phone) +
           di("Email", c.email) +
@@ -6438,7 +6445,7 @@
       async function deleteCustomer(id, name) {
         if (
           !confirm(
-            "Delete " + name + "?\n\nThis will permanently delete all payments, recharge history, and notifications.",
+            "Delete " + ((custCache.find(function (x) { return x.id === id; }) || {}).local_name || name) + "?\n\nThis will permanently delete all payments, recharge history, and notifications.",
           )
         )
           return;
@@ -7714,7 +7721,7 @@ async function openWaSend(ids) {
   $('ws-err').style.display = 'none';
   $('ws-custom').value = '';
   if (one) {
-    $('ws-to').innerHTML = '<strong>' + esc(one.name || '') + '</strong> <span style="font-family:var(--mono);font-size:12px;color:var(--txt3)">' + esc(one.phone || '') + '</span>';
+    $('ws-to').innerHTML = '<strong>' + esc(one.local_name || one.name || '') + '</strong>' + (one.local_name ? '<div style="font-size:12px;color:var(--txt3)">' + esc(one.name || '') + '</div>' : '') + '<span style="font-family:var(--mono);font-size:12px;color:var(--txt3)">' + esc(one.phone || '') + '</span>';
     // smart default: due -> due reminder, expired -> plan expired, else expiring soon
     $('ws-template').value = (one.balance_due || 0) > 0 ? 'payment_due_reminder' : (realSt(one) === 'expired' ? 'plan_expired' : 'expiry_reminder');
     $('ws-open').style.display = '';
@@ -7977,7 +7984,7 @@ function renderWaMultiList() {
   const el = $('wa-multi-list');
   document.querySelectorAll('#wa-multi-chips .wa-chip').forEach((b) => {
     const k = b.dataset.chip;
-    b.textContent = WA_CHIPS[k] + ' ' + custCache.filter((c) => _waChipMatch(c, k)).length;
+    b.textContent = WA_CHIPS[k] + ' (' + custCache.filter((c) => _waChipMatch(c, k)).length + ')';
     b.classList.toggle('active', k === waMultiChip);
   });
 
@@ -8008,8 +8015,8 @@ function renderWaMultiList() {
     const on = waMultiSelected.has(c.id);
     return '<label class="wa-r' + (on ? ' sel' : '') + '" id="wamr' + c.id + '">' +
       '<input type="checkbox" id="wam' + c.id + '"' + (on ? ' checked' : '') + ' onchange="toggleWaMulti(' + c.id + ')">' +
-      '<span style="min-width:0"><span style="display:block;font-weight:600;color:var(--txt)">' + esc(c.name || '') + '</span>' +
-      '<span style="display:block;font-family:var(--mono);font-size:12px;color:var(--txt3);margin-top:2px">' + esc(c.phone || '') + (c.local_name ? ' · ' + esc(c.local_name) : '') + '</span></span>' +
+      '<span style="min-width:0"><span style="display:block;font-weight:600;color:var(--txt)">' + esc(c.local_name || c.name || '') + '</span>' + (c.local_name ? '<span style="display:block;font-size:11px;color:var(--txt3);margin-top:2px">' + esc(c.name || '') + '</span>' : '') +
+      '<span style="display:block;font-family:var(--mono);font-size:12px;color:var(--txt3);margin-top:2px">' + esc(c.phone || '') + '</span></span>' +
       '<span>' + expHtml + '</span>' +
       '<span>' + dueHtml + '</span>' +
       '<span><span class="badge ' + stCls + '" style="font-size:11px;padding:2px 8px">' + st + '</span></span>' +
@@ -8094,7 +8101,7 @@ function searchWaCustomer() {
   if (q.length < 2) { res.style.display = 'none'; return; }
 
   const matches = custCache.filter(c =>
-    c.name.toLowerCase().includes(q) || (c.phone || '').includes(q)
+    c.name.toLowerCase().includes(q) || (c.local_name || '').toLowerCase().includes(q) || (c.phone || '').includes(q)
   ).slice(0, 8);
 
   if (!matches.length) {
@@ -8112,7 +8119,7 @@ function searchWaCustomer() {
     return '<div onclick="selectWaCustomer(' + c.id + ',\'' + c.name.replace(/'/g,"\\'") + '\')" ' +
     'style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border)" ' +
     'onmouseover="this.style.background=\'var(--blue-l)\'" onmouseout="this.style.background=\'\'">' +
-    '<div style="font-weight:600;font-size:13px">' + c.name + ' ' + billing + '</div>' +
+    '<div style="font-weight:600;font-size:13px">' + esc(c.local_name || c.name) + ' ' + billing + '</div>' + (c.local_name ? '<div style="font-size:11px;color:var(--txt3)">' + esc(c.name) + '</div>' : '') +
     '<div style="font-size:11px;color:var(--txt3);font-family:var(--mono)">' + c.phone + ' · ' + fmtDate(c.expiry_date) + dueTxt + '</div>' +
     '</div>';
   }).join('');
@@ -8124,7 +8131,8 @@ function selectWaCustomer(id, name) {
   $('wa-cust-results').style.display = 'none';
   const sel = $('wa-cust-selected');
   sel.style.display = 'block';
-  sel.innerHTML = '✓ Selected: <strong>' + name + '</strong>';
+  const cc = custCache.find(function (x) { return x.id === id; }) || {};
+  sel.innerHTML = '✓ Selected: <strong>' + esc(cc.local_name || name) + '</strong>' + (cc.local_name ? ' <span style="color:var(--txt3);font-size:12px">' + esc(name) + '</span>' : '');
   updateWaPreview(); // re-check session status now that a customer is picked
 }
 
