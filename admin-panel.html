@@ -289,13 +289,13 @@
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border-bottom: 1px solid var(--border);
-        padding: 12px 36px;
+        padding: 6px 36px;
         display: flex;
         align-items: center;
         justify-content: space-between;
       }
       .pg-title {
-        font-size: 24px;
+        font-size: 20px;
         font-weight: 900;
         color: var(--txt);
         letter-spacing: -0.6px;
@@ -304,12 +304,12 @@
       .pg-sub {
         font-size: 11px;
         color: var(--txt3);
-        margin-top: 4px;
+        margin-top: 2px;
         font-family: var(--mono);
         letter-spacing: 0.02em;
       }
       .content {
-        padding: 16px 36px 48px;
+        padding: 8px 36px 6px;
       }
       .stats {
         display: grid;
@@ -489,8 +489,8 @@
         font-size: 13px;
       }
       th {
-        text-align: left;
-        font-size: 10px;
+        text-align: center;
+        font-size: 12px;
         color: var(--txt3);
         padding: 0 14px 14px 0;
         border-bottom: 1.5px solid var(--border);
@@ -498,7 +498,7 @@
         text-transform: uppercase;
         letter-spacing: 0.08em;
         white-space: nowrap;
-        font-weight: 700;
+        font-weight: 800;
       }
       td {
         padding: 14px 14px 14px 0;
@@ -687,7 +687,7 @@
         display: flex;
         gap: 10px;
         align-items: center;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
         flex-wrap: wrap;
       }
       .sbox {
@@ -957,7 +957,8 @@
         box-shadow: 0 0 0 3px var(--blue-l);
         background: var(--surface);
       }
-      .ff:has(input[type="date"]:invalid) > label::after {
+      .ff:has(input[type="date"]:invalid) > label::after,
+      .ff:has(input.fp-alt:invalid) > label::after {
         content: " *";
         color: var(--red);
       }
@@ -1245,6 +1246,100 @@
         margin-bottom: 18px;
         display: none;
       }
+      .wa-chip {
+        min-height: 36px;
+        padding: 0 14px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        border-radius: 99px;
+        font-size: 13px;
+        font-family: inherit;
+        color: var(--txt2);
+        cursor: pointer;
+      }
+      .wa-chip.active {
+        background: #fef3c7;
+        border-color: #fcd34d;
+        color: #78350f;
+        font-weight: 600;
+      }
+      .wa-r {
+        display: grid;
+        grid-template-columns: 28px minmax(0, 1.7fr) 1.2fr 0.7fr 0.8fr 0.9fr;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 14px;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+        cursor: pointer;
+        background: var(--surface);
+      }
+      .wa-r.sel { background: #fffbeb; }
+      .wa-r.wa-h {
+        background: var(--surface-2);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--txt3);
+        cursor: default;
+        padding: 10px 14px;
+      }
+      .wa-r input[type="checkbox"] { 
+        accent-color: #b45309; width: 16px; height: 16px; margin: 0; }
+
+      .wa-aud {
+        min-height: 40px;
+        padding: 0 14px;
+        border: 1px solid transparent;
+        background: transparent;
+        border-radius: 8px;
+        font-size: 13px;
+        font-family: inherit;
+        color: var(--txt2);
+        cursor: pointer;
+      }
+      .wa-aud.active {
+        background: var(--surface);
+        border-color: #fcd34d;
+        color: #78350f;
+        font-weight: 600;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+      }
+      .wa-rc {
+        min-height: 40px;
+        padding: 0 18px;
+        border: none;
+        border-radius: 10px;
+        background: #15803d;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        box-shadow: 0 1px 2px rgba(21, 128, 61, 0.35);
+        transition: background 0.15s, transform 0.1s;
+      }
+      .wa-rc:hover { background: #166534; }
+      .wa-rc:active { transform: translateY(1px); }
+      .wa-tab {
+        min-height: 40px;
+        padding: 0 18px;
+        border-radius: 10px;
+        font-size: 14px;
+        color: var(--txt2);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+      }
+      .wa-tab.active {
+        background: #b45309;
+        color: #fff;
+        font-weight: 600;
+      }
       .tabs {
         display: flex;
         gap: 2px;
@@ -1362,7 +1457,7 @@
         border-radius: var(--r-lg);
         overflow: hidden;
         box-shadow: var(--sh-xs);
-        margin-bottom: 20px;
+        margin-bottom: 0;
         transition: box-shadow 0.2s;
       }
       .tbl-card:hover {
@@ -1371,7 +1466,7 @@
       .tbl-card .tbl-wrap {
         overflow-x: auto;
         overflow-y: auto;
-        max-height: calc(100vh - 190px);
+        max-height: calc(100vh - 144px);
       }
       .tbl-card table {
         min-width: 750px;
@@ -1382,8 +1477,8 @@
         background: var(--surface);
         z-index: 5;
         box-shadow: 0 1px 0 var(--border);
-        padding-top: 14px;
-        padding-bottom: 14px;
+        padding-top: 12px;
+        padding-bottom: 12px;
       }
       .tbl-card th {
         padding-left: 20px;
@@ -1835,7 +1930,7 @@
         .tbl-card > div[style*="padding: 18px 20px 0"] { flex-wrap: wrap; gap: 10px; padding: 14px 14px 0 !important; }
 
         /* WhatsApp two-column layout (inline style has no spaces, so the old stack rule missed it) */
-        div[style*="grid-template-columns:1.1fr"] { display: flex !important; flex-direction: column !important; gap: 14px !important; }
+        div[style*="grid-template-columns:minmax(0,1fr) 360px"] { display: flex !important; flex-direction: column !important; gap: 14px !important; }
         #wa-balance-card > div > div:last-child { text-align: left !important; }
 
         /* hide table headers + drop the 750px min-width on these pages */
@@ -2106,6 +2201,8 @@
       @media (max-width: 768px) { .cm-modal { height: 92vh; } }
 
     </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
   </head>
   <body>
     <div class="toast" id="toast"></div>
@@ -2533,7 +2630,7 @@
               </select>
               <select class="fsel" id="cpagesize" onchange="_custChangeSize()" title="Rows per page">
                 <option value="25">25 / page</option>
-                <option value="50">50 / page</option>
+                <option value="50" selected>50 / page</option>
                 <option value="100">100 / page</option>
                 <option value="200">200 / page</option>
                 <option value="500">500 / page</option>
@@ -2571,7 +2668,7 @@
                   </tbody>
                 </table>
               </div>
-              <div id="cpagination" style="display:none;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--border);background:var(--surface-2);gap:12px;flex-wrap:wrap"></div>
+              <div id="cpagination" style="display:none;align-items:center;justify-content:space-between;padding:4px 20px;border-top:1px solid var(--border);background:var(--surface-2);gap:12px;flex-wrap:wrap"></div>
             </div>
           </div>
         </div>
@@ -3148,46 +3245,44 @@
         </div>
         <div class="content">
 
-          <!-- Balance card -->
-          <div class="card" style="margin-bottom:20px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#86efac" id="wa-balance-card">
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-              <div style="display:flex;align-items:center;gap:16px">
-                <div style="font-size:36px">💬</div>
-                <div>
-                  <div style="font-size:14px;font-weight:700;color:#15803d">WhatsApp Balance</div>
-                  <div style="font-size:28px;font-weight:900;color:#15803d;line-height:1" id="wa-bal-remaining">—</div>
-                  <div style="font-size:11px;color:#16a34a;font-family:var(--mono)" id="wa-bal-detail">messages remaining</div>
-                </div>
-              </div>
-              <div style="text-align:right">
-                <div style="font-size:11px;color:#16a34a;font-family:var(--mono);margin-bottom:4px">USED / TOTAL</div>
-                <div style="font-size:18px;font-weight:700;color:#15803d" id="wa-bal-used">— / —</div>
-                <button class="btn bsm" style="margin-top:6px" onclick="openRcModal('whatsapp_credits','Recharge WhatsApp Credits')">⚡ Recharge Now</button>
-              </div>
+          
+          <!-- Balance + tabs bar -->
+          <div class="card" id="wa-balance-card" style="margin-bottom:12px;padding:8px 14px 8px 8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <div style="display:flex;gap:4px">
+              <div class="wa-tab active" id="wa-tab-send" onclick="switchWaTab('send')">Send message</div>
+              <div class="wa-tab" id="wa-tab-history" onclick="switchWaTab('history')">History</div>
             </div>
-          </div>
-
-          <!-- Tabs -->
-          <div class="tabs" style="margin-bottom:20px">
-            <div class="tab active" id="wa-tab-send" onclick="switchWaTab('send')">📤 Send Message</div>
-            <div class="tab" id="wa-tab-history" onclick="switchWaTab('history')">📋 History</div>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+              <div style="display:flex;align-items:baseline;gap:6px">
+                <span style="font-size:22px;font-weight:800;color:#15803d" id="wa-bal-remaining">—</span>
+                <span style="font-size:13px;color:var(--txt2)" id="wa-bal-detail">messages left</span>
+              </div>
+              <div style="width:150px">
+                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--txt2)"><span>Used</span><span style="font-family:var(--mono)" id="wa-bal-used">— / —</span></div>
+                <div style="height:6px;background:#e2e8f0;border-radius:99px;margin-top:5px"><div id="wa-bal-bar" style="width:0;height:6px;background:#15803d;border-radius:99px"></div></div>
+              </div>
+              <button type="button" class="wa-rc" onclick="openRcModal('whatsapp_credits','Recharge WhatsApp Credits')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+                Recharge
+              </button>
+            </div>
           </div>
 
           <!-- SEND TAB -->
           <div id="wa-panel-send">
-            <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:20px">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start">
               <div class="card">
                 <div class="card-hd">Send WhatsApp Message</div>
 
-                <div class="sec-title">Step 1 — Select Audience</div>
-                <select class="fsel" id="wa-audience" style="width:100%;margin-bottom:8px" onchange="updateWaCount()">
+                <div class="sec-title">Step 1 — Select Customers</div>
+                <select id="wa-audience" style="display:none" onchange="updateWaCount()">
                   <option value="all_active">All Active Customers</option>
                   <option value="expired">All Expired Customers</option>
                   <option value="expiring_3">Expiring in 3 days</option>
                   <option value="expiring_7">Expiring in 7 days</option>
                   <option value="due_balance">Customers with Due Balance</option>
                   <option value="single">Single Customer (search below)</option>
-                  <option value="multiple">Select Multiple Customers</option>
+                  <option value="multiple" selected>Select Multiple Customers</option>
                 </select>
                 <div id="wa-single-search" style="display:none;margin-top:8px">
                   <input class="sbox" id="wa-cust-search" placeholder="Search name or phone..." oninput="searchWaCustomer()" style="width:100%;padding-left:14px"/>
@@ -3195,11 +3290,32 @@
                   <div id="wa-cust-selected" style="display:none;margin-top:6px;padding:8px 12px;background:var(--green-l);border:1px solid rgba(5,150,105,0.2);border-radius:var(--r-sm);font-size:12px;color:var(--green);font-weight:600"></div>
                   <input type="hidden" id="wa-cust-id"/>
                 </div>
-                <div id="wa-multi-search" style="display:none;margin-top:8px">
-                  <input class="sbox" id="wa-multi-filter" placeholder="Search to filter list..." oninput="renderWaMultiList()" style="width:100%;padding-left:14px"/>
-                  <div id="wa-multi-list" style="max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r-sm);padding:8px;background:var(--surface-2);margin-top:8px"></div>
-                  <div style="font-size:11px;color:var(--txt3);margin-top:6px;font-family:var(--mono)" id="wa-multi-count"></div>
+
+                <div id="wa-multi-search" style="display:block;margin-top:8px">
+                  <input class="sbox" id="wa-multi-filter" placeholder="Search name, local name, phone or username…" oninput="renderWaMultiList()" style="width:100%;height:44px"/>
+                  <div id="wa-multi-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+                    <button type="button" class="wa-chip active" data-chip="all" onclick="setWaChip('all')">All</button>
+                    <button type="button" class="wa-chip" data-chip="active" onclick="setWaChip('active')">Active</button>
+                    <button type="button" class="wa-chip" data-chip="expired" onclick="setWaChip('expired')">Expired</button>
+                    <button type="button" class="wa-chip" data-chip="suspended" onclick="setWaChip('suspended')">Suspended</button>
+                    <button type="button" class="wa-chip" data-chip="due" onclick="setWaChip('due')">Balance due</button>
+                    <button type="button" class="wa-chip" data-chip="exp3" onclick="setWaChip('exp3')">Expiring in 3 days</button>
+                    <button type="button" class="wa-chip" data-chip="exp7" onclick="setWaChip('exp7')">Expiring in 7 days</button>
+                  </div>
+                  <div style="margin-top:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden">
+                    <div style="overflow-x:auto">
+                      <div style="min-width:560px">
+                        <div class="wa-r wa-h">
+                          <input type="checkbox" id="wa-multi-all" aria-label="Select all shown" onchange="toggleWaMultiAll(this.checked)">
+                          <span>Customer</span><span>Expiry</span><span>Due</span><span>Status</span><span>Billing</span>
+                        </div>
+                        <div id="wa-multi-list" style="max-height:312px;overflow-y:auto"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="font-size:12px;color:var(--txt3);margin-top:8px;font-family:var(--mono)" id="wa-multi-count"></div>
                 </div>
+
                 <div style="font-size:11px;color:var(--txt3);margin-top:8px;font-family:var(--mono)" id="wa-aud-count"></div>
 
                 <div class="sec-title">Step 2 — Template</div>
@@ -3220,27 +3336,33 @@
                   </div>
                 </div>
 
-                <div class="mactions" style="margin-top:16px">
-                  <button class="btn" onclick="clearWaSend()">Clear</button>
-                  <button class="btn bpri" id="wa-send-btn" onclick="sendWaMessage()" style="background:#25D366;border-color:#25D366">📲 Send WhatsApp</button>
+                <div class="mactions" style="margin-top:16px;align-items:center;justify-content:space-between">
+                  <div style="font-size:13px;color:var(--txt2)" id="wa-send-line">Sending to <strong style="color:var(--txt)">0 customers</strong> · uses 0 messages</div>
+                  <div style="display:flex;gap:10px">
+                    <button class="btn" onclick="clearWaSend()">Clear</button>
+                    <button class="btn bpri" id="wa-send-btn" onclick="sendWaMessage()" style="background:#25D366;border-color:#25D366">📲 Send WhatsApp</button>
+                  </div>
                 </div>
                 <div class="errmsg" id="wa-send-err"></div>
               </div>
 
+              <div style="display:flex;flex-direction:column;gap:16px">
               <div class="card">
                 <div class="card-hd">Preview</div>
-                <div style="background:#e7fde8;border-radius:12px;padding:16px;min-height:120px;border:1px solid #86efac">
-                  <div style="font-size:10px;color:#15803d;font-family:var(--mono);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em">WHATSAPP MESSAGE PREVIEW</div>
-                  <div style="font-size:13px;color:#1a1a1a;line-height:1.6" id="wa-preview-text">Select template to preview...</div>
+                <div style="background:#efeae2;border-radius:12px;padding:14px;margin-top:4px">
+                  <div style="background:#d9fdd3;border-radius:10px 10px 2px 10px;padding:10px 12px;font-size:14px;line-height:1.5;color:#111b21" id="wa-preview-text">Select template to preview...</div>
                 </div>
-                <div style="margin-top:16px">
-                  <div style="font-size:11px;color:var(--txt3);font-family:var(--mono);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em">TEMPLATE NAME</div>
-                  <div style="font-size:12px;color:var(--txt2);font-family:var(--mono)" id="wa-template-name">—</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--txt3)">
+                  Template <span id="wa-template-name" style="font-family:var(--mono);background:var(--surface-2);color:var(--txt2);padding:3px 8px;border-radius:6px">—</span>
                 </div>
-                <div style="margin-top:12px;padding:12px;background:var(--amber-l);border-radius:8px;border:1px solid rgba(217,119,6,0.2)">
-                  <div style="font-size:11px;color:var(--amber);font-weight:600">⚠️ Note</div>
-                  <div style="font-size:11px;color:var(--txt3);margin-top:4px">Templates must be pre-approved in Meta Business Manager. Each message uses 1 balance.</div>
-                </div>
+                <div style="font-size:12px;color:var(--txt3);margin-top:10px;line-height:1.5">Templates must be approved in Meta Business Manager. Each message uses 1 balance.</div>
+              </div>
+              <div class="card">
+                <div class="card-hd">This send</div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--txt2)"><span>Recipients</span><strong style="color:var(--txt)" id="wa-sum-n">0</strong></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--txt2);margin-top:8px"><span>Messages used</span><strong style="color:var(--txt)" id="wa-sum-used">0</strong></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--txt2);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><span>Balance after</span><strong style="color:var(--green)" id="wa-sum-after">—</strong></div>
+              </div>
               </div>
             </div>
           </div>
@@ -3684,13 +3806,13 @@
                 <label>Password</label>
                 <input id="a-pass" placeholder="blank = phone number" />
               </div>
-              <div class="ff full">
-                <label>Address</label>
-                <input id="a-addr" placeholder="House, Street, Area" />
-              </div>
               <div class="ff">
                 <label>Membership No.</label>
                 <input id="a-mem" placeholder="MEM-001" />
+              </div>
+              <div class="ff full">
+                <label>Address</label>
+                <input id="a-addr" placeholder="House, Street, Area" />
               </div>
               <div class="ff full">
                 <label>Comments</label>
@@ -3784,13 +3906,13 @@
                 <input id="e-pass" placeholder="blank = keep current" oninput="updateEditPassHint()" />
                 <div class="cm-hint" id="e-pass-hint">Password will be reset to the new phone number</div>
               </div>
-              <div class="ff full">
-                <label>Address</label>
-                <input id="e-addr" />
-              </div>
               <div class="ff">
                 <label>Membership No.</label>
                 <input id="e-mem" />
+              </div>
+              <div class="ff full">
+                <label>Address</label>
+                <input id="e-addr" />
               </div>
               <div class="ff full">
                 <label>Comments</label>
@@ -4604,7 +4726,7 @@
         } catch(e) { console.error(e); }
       }
 
-      let _custAll = [], _custRaw = [], _custPage = 1, _custSize = 100;
+      let _custAll = [], _custRaw = [], _custPage = 1, _custSize = 50;
       let _custSort = { key: "name", dir: 1 };
 
       function waNumber(p) {
@@ -4789,12 +4911,12 @@
         const endRow = Math.min(start + _custSize, cs.length);
         let html = '<div style="font-size:11.5px;color:var(--txt3);font-family:var(--mono);white-space:nowrap">Showing <strong style="color:var(--txt2)">' + (start+1) + '–' + endRow + '</strong> of <strong style="color:var(--txt2)">' + cs.length + '</strong> customers</div>';
         html += '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">';
-        html += '<button onclick="_custGoPage(' + (_custPage-1) + ')" ' + (_custPage===1?'disabled':'') + ' style="min-width:32px;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--txt2);font-size:12px;cursor:pointer;' + (_custPage===1?'opacity:0.35;cursor:not-allowed':'') + '">‹ Prev</button>';
+        html += '<button onclick="_custGoPage(' + (_custPage-1) + ')" ' + (_custPage===1?'disabled':'') + ' style="min-width:28px;height:26px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--txt2);font-size:12px;cursor:pointer;' + (_custPage===1?'opacity:0.35;cursor:not-allowed':'') + '">‹ Prev</button>';
         _pageRange(_custPage, totalPages).forEach(function(pg) {
           if (pg === '…') { html += '<span style="padding:0 4px;color:var(--txt3)">…</span>'; return; }
-          html += '<button onclick="_custGoPage(' + pg + ')" style="min-width:32px;height:32px;padding:0 10px;border:1px solid ' + (pg===_custPage?'var(--blue)':'var(--border)') + ';border-radius:8px;background:' + (pg===_custPage?'var(--blue)':'var(--surface)') + ';color:' + (pg===_custPage?'#fff':'var(--txt2)') + ';font-size:12px;cursor:pointer;font-weight:600">' + pg + '</button>';
+          html += '<button onclick="_custGoPage(' + pg + ')" style="min-width:28px;height:26px;padding:0 10px;border:1px solid ' + (pg===_custPage?'var(--blue)':'var(--border)') + ';border-radius:8px;background:' + (pg===_custPage?'var(--blue)':'var(--surface)') + ';color:' + (pg===_custPage?'#fff':'var(--txt2)') + ';font-size:12px;cursor:pointer;font-weight:600">' + pg + '</button>';
         });
-        html += '<button onclick="_custGoPage(' + (_custPage+1) + ')" ' + (_custPage===totalPages?'disabled':'') + ' style="min-width:32px;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--txt2);font-size:12px;cursor:pointer;' + (_custPage===totalPages?'opacity:0.35;cursor:not-allowed':'') + '">Next ›</button>';
+        html += '<button onclick="_custGoPage(' + (_custPage+1) + ')" ' + (_custPage===totalPages?'disabled':'') + ' style="min-width:28px;height:26px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--txt2);font-size:12px;cursor:pointer;' + (_custPage===totalPages?'opacity:0.35;cursor:not-allowed':'') + '">Next ›</button>';
         html += '</div>';
         pgn.innerHTML = html;
         pgn.style.display = "flex";
@@ -5324,7 +5446,7 @@
         $("e-brand").value = c.router_brand_id || "";
         _hwCustId = c.id;
         loadHw(c.id, "e-hw-list", true);
-        $("e-expiry").value = c.expiry_date || "";
+        setDateField("e-expiry", c.expiry_date);
         $("e-status").value = c.status || "active";
         $("e-status").options[0].text = (c.status === "active" && c.expiry_date && c.expiry_date < today()) ? "Active (plan expired)" : "Active";
         $("e-mem").value = c.membership || "";
@@ -5338,7 +5460,7 @@
         $("e-billing-type").value = c.billing_type || "prepaid";
         $("e-grace-days").value = c.grace_period_days || 10;
         $("e-auto-suspend").value = c.auto_suspend_enabled ?? 1;
-        $("e-current-due-date").value = c.current_due_date || "";
+        setDateField("e-current-due-date", c.current_due_date);
         $("e-next-bill-date").value = c.next_bill_date || "";
         togglePostpaidFieldsEdit();
         if ($("e-due-mode")) $("e-due-mode").value = c.due_payment_mode || "auto";
@@ -7492,8 +7614,10 @@ async function loadWaBalance() {
       const d = r.data;
       const remaining = (d.whatsapp_balance || 0) - (d.whatsapp_used || 0);
       $('wa-bal-remaining').textContent = remaining;
+      updateWaSummary();
       $('wa-bal-used').textContent = (d.whatsapp_used || 0) + ' / ' + (d.whatsapp_balance || 0);
-      $('wa-bal-detail').textContent = d.whatsapp_enabled ? 'messages remaining' : '⚠️ WhatsApp disabled for this franchise';
+      $('wa-bal-detail').textContent = d.whatsapp_enabled ? 'messages left' : '⚠️ WhatsApp disabled for this franchise';
+      $('wa-bal-bar').style.width = (d.whatsapp_balance ? Math.min(100, Math.round((d.whatsapp_used || 0) / d.whatsapp_balance * 100)) : 0) + '%';
       const card = $('wa-balance-card');
       if (!d.whatsapp_enabled) {
         card.style.background = 'linear-gradient(135deg,#fef2f2,#fee2e2)';
@@ -7504,12 +7628,38 @@ async function loadWaBalance() {
   } catch(e) {}
 }
 
+function setWaAudience(v) {
+  $('wa-audience').value = v;
+  updateWaCount();
+}
+function syncWaAudBtns() {
+  const v = $('wa-audience').value;
+  document.querySelectorAll('#wa-aud-btns .wa-aud').forEach((b) => b.classList.toggle('active', b.dataset.aud === v));
+}
+
+let waRecipients = 0;
+function updateWaSummary() {
+  const a = $('wa-audience').value;
+  let n = waRecipients;
+  if (a === 'single') n = $('wa-cust-id').value ? 1 : 0;
+  else if (a === 'multiple') n = waMultiSelected.size;
+  const bal = parseInt($('wa-bal-remaining').textContent, 10);
+  const after = isNaN(bal) ? null : bal - n;
+  $('wa-sum-n').textContent = n;
+  $('wa-sum-used').textContent = n;
+  $('wa-sum-after').textContent = after === null ? '—' : after;
+  $('wa-sum-after').style.color = after !== null && after < 0 ? 'var(--red)' : 'var(--green)';
+  $('wa-send-line').innerHTML = 'Sending to <strong style="color:var(--txt)">' + n + ' customer' + (n === 1 ? '' : 's') + '</strong> · uses ' + n + ' message' + (n === 1 ? '' : 's');
+}
+
 async function updateWaCount() {
+  syncWaAudBtns();
   const audience = $('wa-audience').value;
   $('wa-single-search').style.display = audience === 'single' ? 'block' : 'none';
   $('wa-multi-search').style.display = audience === 'multiple' ? 'block' : 'none';
-  if (audience === 'multiple') { loadWaMultiList(); $('wa-aud-count').textContent = ''; return; }
-  if (audience === 'single') { $('wa-aud-count').textContent = ''; return; }
+  if (audience === 'multiple') { loadWaMultiList(); $('wa-aud-count').textContent = ''; updateWaSummary(); return; }
+  if (audience === 'single') { $('wa-aud-count').textContent = ''; updateWaSummary(); return; }
+  waRecipients = 0; updateWaSummary();
 
   try {
     const r = await apiFetch('GET', '/api/admin/customers?page=1&limit=9999');
@@ -7529,6 +7679,7 @@ async function updateWaCount() {
     else if (audience === 'due_balance') n = all.filter(c => (c.balance_due || 0) > 0).length;
 
     $('wa-aud-count').textContent = '💬 ' + n + ' customers will receive this message';
+    waRecipients = n; updateWaSummary();
   } catch(e) {}
 }
 
@@ -7544,25 +7695,81 @@ async function loadWaMultiList() {
   renderWaMultiList();
 }
 
+let waMultiChip = 'all';
+let _waShown = [];
+const WA_CHIPS = { all: 'All', active: 'Active', expired: 'Expired', suspended: 'Suspended', due: 'Has due', exp3: 'Expiring in 3 days', exp7: 'Expiring in 7 days' };
+
+function _waPlusDays(n) {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function _waChipMatch(c, k) {
+  if (k === 'all') return true;
+  if (k === 'due') return (c.balance_due || 0) > 0;
+  if (k === 'exp3' || k === 'exp7') {
+    return !!c.expiry_date && c.expiry_date >= today() && c.expiry_date <= _waPlusDays(k === 'exp3' ? 3 : 7);
+  }
+  return realSt(c) === k;
+}
+
+function setWaChip(k) {
+  waMultiChip = k;
+  renderWaMultiList();
+}
+
+function toggleWaMultiAll(on) {
+  _waShown.forEach((id) => {
+    if (on) waMultiSelected.add(id); else waMultiSelected.delete(id);
+    const cb = $('wam' + id); if (cb) cb.checked = on;
+    const r = $('wamr' + id); if (r) r.classList.toggle('sel', on);
+  });
+  updateWaMultiCount();
+}
+
 function renderWaMultiList() {
   const q = $('wa-multi-filter').value.trim().toLowerCase();
   const el = $('wa-multi-list');
-  let list = custCache;
-  if (q) list = list.filter(c => c.name.toLowerCase().includes(q) || (c.phone||'').includes(q));
+  document.querySelectorAll('#wa-multi-chips .wa-chip').forEach((b) => {
+    const k = b.dataset.chip;
+    b.textContent = WA_CHIPS[k] + ' ' + custCache.filter((c) => _waChipMatch(c, k)).length;
+    b.classList.toggle('active', k === waMultiChip);
+  });
+
+  let list = custCache.filter((c) => _waChipMatch(c, waMultiChip));
+  if (q) list = list.filter((c) => [c.name, c.local_name, c.phone, c.isp_username].join(' ').toLowerCase().includes(q));
   list = list.slice(0, 200);
+  _waShown = list.map((c) => c.id);
 
-  if (!list.length) { el.innerHTML = '<div style="padding:10px;font-size:12px;color:var(--txt3)">No customers found</div>'; return; }
+  if (!list.length) {
+    el.innerHTML = '<div style="padding:14px;font-size:12px;color:var(--txt3)">No customers found</div>';
+    updateWaMultiCount();
+    return;
+  }
 
-  el.innerHTML = list.map(c => {
+  el.innerHTML = list.map((c) => {
+    const st = realSt(c);
+    const stCls = { active: 'bok', expired: 'berr', suspended: 'bwarn' }[st] || 'bgray';
     const due = c.balance_due || 0;
+    const dueHtml = due > 0
+      ? '<span style="color:var(--red);font-weight:700">₹' + due.toLocaleString('en-IN') + '</span>'
+      : '<span style="color:var(--txt3)">—</span>';
     const billing = c.billing_type === 'postpaid'
-      ? '<span class="badge bpurple" style="font-size:9px;padding:2px 6px">Postpaid</span>'
-      : '<span class="badge bgray" style="font-size:9px;padding:2px 6px">Prepaid</span>';
-    const dueTxt = due > 0 ? ' · <span style="color:var(--red);font-weight:700">Due ₹' + due + '</span>' : '';
-    const checked = waMultiSelected.has(c.id) ? 'checked' : '';
-    return '<div class="chk-row"><input type="checkbox" id="wam' + c.id + '" ' + checked + ' onchange="toggleWaMulti(' + c.id + ')"/>' +
-      '<label for="wam' + c.id + '" style="cursor:pointer;flex:1;font-size:12.5px"><strong>' + c.name + '</strong> ' +
-      '<span style="color:var(--txt3);font-family:var(--mono)">' + c.phone + '</span>' + dueTxt + '</label>' + billing + '</div>';
+      ? '<span class="badge bpurple" style="font-size:11px;padding:2px 8px">Postpaid</span>'
+      : '<span class="badge bgray" style="font-size:11px;padding:2px 8px">Prepaid</span>';
+    const expHtml = c.expiry_date
+      ? '<span style="display:block;color:var(--txt)">' + fmtDate(c.expiry_date) + '</span>' + _daysLeftHtml(c.expiry_date)
+      : '<span style="color:var(--txt3)">—</span>';
+    const on = waMultiSelected.has(c.id);
+    return '<label class="wa-r' + (on ? ' sel' : '') + '" id="wamr' + c.id + '">' +
+      '<input type="checkbox" id="wam' + c.id + '"' + (on ? ' checked' : '') + ' onchange="toggleWaMulti(' + c.id + ')">' +
+      '<span style="min-width:0"><span style="display:block;font-weight:600;color:var(--txt)">' + esc(c.name || '') + '</span>' +
+      '<span style="display:block;font-family:var(--mono);font-size:12px;color:var(--txt3);margin-top:2px">' + esc(c.phone || '') + (c.local_name ? ' · ' + esc(c.local_name) : '') + '</span></span>' +
+      '<span>' + expHtml + '</span>' +
+      '<span>' + dueHtml + '</span>' +
+      '<span><span class="badge ' + stCls + '" style="font-size:11px;padding:2px 8px">' + st + '</span></span>' +
+      '<span>' + billing + '</span></label>';
   }).join('');
 
   updateWaMultiCount();
@@ -7571,11 +7778,16 @@ function renderWaMultiList() {
 function toggleWaMulti(id) {
   if (waMultiSelected.has(id)) waMultiSelected.delete(id);
   else waMultiSelected.add(id);
+  const r = $('wamr' + id);
+  if (r) r.classList.toggle('sel', waMultiSelected.has(id));
   updateWaMultiCount();
 }
 
 function updateWaMultiCount() {
-  $('wa-multi-count').textContent = waMultiSelected.size + ' customer(s) selected';
+  $('wa-multi-count').textContent = waMultiSelected.size + ' of ' + custCache.length + ' selected · list scrolls';
+  const allBox = $('wa-multi-all');
+  if (allBox) allBox.checked = _waShown.length > 0 && _waShown.every((id) => waMultiSelected.has(id));
+  updateWaSummary();
 }
 
 function updateWaPreview() {
@@ -7634,6 +7846,7 @@ function searchWaCustomer() {
   const res = $('wa-cust-results');
   $('wa-cust-id').value = '';
   $('wa-cust-selected').style.display = 'none';
+  updateWaSummary();
   if (q.length < 2) { res.style.display = 'none'; return; }
 
   const matches = custCache.filter(c =>
@@ -7714,13 +7927,15 @@ async function sendWaMessage() {
 }
 
 function clearWaSend() {
-  $('wa-audience').value = 'all_active';
+  $('wa-audience').value = 'multiple';
   $('wa-template').value = 'expiry_reminder';
   $('wa-cust-id').value = '';
   $('wa-cust-selected').style.display = 'none';
   $('wa-single-search').style.display = 'none';
   $('wa-multi-search').style.display = 'none';
   waMultiSelected.clear();
+  waMultiChip = 'all';
+  $('wa-multi-filter').value = '';
   $('wa-send-err').style.display = 'none';
   $('wa-custom-text').value = '';
   $('wa-custom-box').style.display = 'none';
@@ -7756,6 +7971,29 @@ async function loadWaHistory() {
 }
 
 // ── Add/Edit customer modal helpers ─────────────────────────
+// ── Date fields shown as 17-Nov-2026 (value sent to the API stays YYYY-MM-DD) ──
+function initDateFormat() {
+  if (!window.flatpickr) return; // library blocked/offline: native date box is used
+  ["e-expiry", "e-current-due-date"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el || el._flatpickr) return;
+    flatpickr(el, {
+      dateFormat: "Y-m-d",
+      altInput: true,
+      altFormat: "d-M-Y",
+      altInputClass: "fp-alt",
+      allowInput: true,
+      disableMobile: true,
+    });
+  });
+}
+function setDateField(id, v) {
+  const el = document.getElementById(id);
+  if (el && el._flatpickr) el._flatpickr.setDate(v || null, false);
+  else if (el) el.value = v || "";
+}
+window.addEventListener("load", initDateFormat);
+
 function cmTab(modalId, name) {
   const m = $(modalId);
   m.querySelectorAll('.cm-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
