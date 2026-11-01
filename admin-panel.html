@@ -110,7 +110,7 @@
         z-index: 1;
       }
       .logo {
-        padding: 26px 22px 16px;
+        padding: 14px 22px 10px;
         border-bottom: 1px solid var(--sb-border);
       }
       .logo-badge {
@@ -140,7 +140,7 @@
         letter-spacing: -0.2px;
       }
       .logo-sub {
-        font-size: 9.5px;
+        font-size: 10px;
         color: var(--txt3);
         margin-top: 3px;
         font-family: var(--mono);
@@ -156,9 +156,9 @@
         width: 0;
       }
       .nav-sec {
-        font-size: 9px;
+        font-size: 10px;
         color: var(--txt3);
-        padding: 18px 22px 6px;
+        padding: 10px 22px 4px;
         letter-spacing: 0.14em;
         text-transform: uppercase;
         font-family: var(--mono);
@@ -175,7 +175,7 @@
         display: flex;
         align-items: center;
         gap: 11px;
-        padding: 10px 18px 10px 22px;
+        padding: 6px 18px 6px 22px;
         cursor: pointer;
         color: var(--txt2);
         font-size: 13.5px;
@@ -208,7 +208,7 @@
         transition: color 0.18s;
       }
       .sidebar-ft {
-        padding: 16px 18px;
+        padding: 10px 18px;
         border-top: 1px solid var(--sb-border);
         margin-top: auto;
       }
@@ -2631,7 +2631,7 @@
                 <option value="recent7">Expired in last 7 days</option>
                 <option value="suspended">Suspended</option>
                 <option value="lead">Lead</option>
-                <option value="due">Has due</option>
+                <option value="due">Balance due</option>
               </select>
               <select class="fsel" id="cbilling" onchange="_custViewChanged()">
                 <option value="">All billing</option>
@@ -3316,10 +3316,10 @@
                     <button type="button" class="wa-chip active" data-chip="all" onclick="setWaChip('all')">All</button>
                     <button type="button" class="wa-chip" data-chip="active" onclick="setWaChip('active')">Active</button>
                     <button type="button" class="wa-chip" data-chip="expired" onclick="setWaChip('expired')">Expired</button>
-                    <button type="button" class="wa-chip" data-chip="suspended" onclick="setWaChip('suspended')">Suspended</button>
                     <button type="button" class="wa-chip" data-chip="due" onclick="setWaChip('due')">Balance due</button>
                     <button type="button" class="wa-chip" data-chip="exp3" onclick="setWaChip('exp3')">Expiring in 3 days</button>
                     <button type="button" class="wa-chip" data-chip="exp7" onclick="setWaChip('exp7')">Expiring in 7 days</button>
+                    <button type="button" class="wa-chip" data-chip="suspended" onclick="setWaChip('suspended')">Suspended</button>
                   </div>
                   <div style="margin-top:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden">
                     <div style="overflow-x:auto">
@@ -4769,7 +4769,7 @@
             ? pays.map(p =>
                 '<div class="rc-row">' +
                 '<div>' +
-                  '<div class="rc-name">' + (p.customer_name || "—") + '</div>' +
+                  '<div class="rc-name">' + esc(p.customer_local_name || p.customer_name || "—") + (p.customer_local_name ? '<div style="font-weight:400;font-size:11px;color:var(--txt3)">' + esc(p.customer_name || "") + '</div>' : "") + '</div>' +
                   '<div class="rc-meta">' + fmtDateTime(p.created_at) + ' · ' + (p.payment_method || "—") + '</div>' +
                 '</div>' +
                 '<div style="font-family:var(--mono);font-weight:700;color:var(--green)">₹' + (p.amount_total || 0) + '</div>' +
@@ -5663,7 +5663,7 @@
                 '<tr><td style="font-family:var(--mono);color:var(--txt3);font-size:12px">#' +
                 a.id +
                 '</td><td><div style="font-weight:600;color:var(--txt)">' +
-                (a.customer_name || "—") +
+                esc(a.customer_local_name || a.customer_name || "—") + (a.customer_local_name ? '<div style="font-weight:400;font-size:11px;color:var(--txt3)">' + esc(a.customer_name || "") + '</div>' : "") +
                 '</div><div style="font-size:11px;color:var(--txt3);font-family:var(--mono)">' +
                 (a.customer_phone || "") +
                 '</div></td><td style="font-family:var(--mono);font-size:12px;color:var(--txt)">' +
@@ -5715,7 +5715,7 @@
                 '<tr><td data-label="ID" style="font-family:var(--mono);color:var(--txt3);font-size:12px">#' +
                 p.id +
                 '</td><td data-label="Customer"><div style="font-weight:600;color:var(--txt)">' +
-                (p.customer_name || "—") +
+                esc(p.customer_local_name || p.customer_name || "—") + (p.customer_local_name ? '<div style="font-weight:400;font-size:11px;color:var(--txt3)">' + esc(p.customer_name || "") + '</div>' : "") +
                 '</div><div style="font-size:11px;color:var(--txt3);font-family:var(--mono)">' +
                 (p.customer_phone || "") +
                 '</div></td><td data-label="Amount" style="font-family:var(--mono);font-weight:700;color:var(--green)">₹' +
@@ -5831,7 +5831,7 @@
             .map(
               (t) =>
                 '<tr><td style="font-weight:600;color:var(--txt)">' +
-                (t.customer_name || "—") +
+                esc(t.customer_local_name || t.customer_name || "—") + (t.customer_local_name ? '<div style="font-weight:400;font-size:11px;color:var(--txt3)">' + esc(t.customer_name || "") + '</div>' : "") +
                 '</td><td style="font-family:var(--mono);font-size:12px;color:var(--txt2)">' +
                 (t.customer_phone || "—") +
                 '</td><td style="font-family:var(--mono);font-size:10px;color:var(--txt3)">' +
@@ -7948,7 +7948,7 @@ async function loadWaMultiList() {
 
 let waMultiChip = 'all';
 let _waShown = [];
-const WA_CHIPS = { all: 'All', active: 'Active', expired: 'Expired', suspended: 'Suspended', due: 'Has due', exp3: 'Expiring in 3 days', exp7: 'Expiring in 7 days' };
+const WA_CHIPS = { all: 'All', active: 'Active', expired: 'Expired', suspended: 'Suspended', due: 'Balance due', exp3: 'Expiring in 3 days', exp7: 'Expiring in 7 days' };
 
 function _waPlusDays(n) {
   const d = new Date();
