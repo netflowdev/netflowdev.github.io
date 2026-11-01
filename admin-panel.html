@@ -1669,6 +1669,18 @@
         width: 22px; height: 22px; flex-shrink: 0;
       }
       .wa-link:hover svg { fill: rgb(40, 190, 150); }
+      .cs-cb { width: 16px; height: 16px; accent-color: #25D366; cursor: pointer; margin: 0 8px 0 0; vertical-align: middle; }
+      #cs-all { display: none; }
+      @media (min-width: 769px) {
+        .tbl-card:has(#ctbody) th:first-child,
+        #ctbody td:first-child { width: 1%; white-space: nowrap; }
+        #ctbody td:first-child { padding-left: 8px; }
+        .tbl-card:has(#ctbody) th:first-child { padding-left: 6px; }
+        .cs-cb { margin-right: 6px; }
+        th:has(#cs-all[style*="inline-block"]) .cs-srl { display: none; }
+        #ctbody td:first-child { padding-right: 6px; }
+      }
+      #cs-bar { display: none; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 20px; background: #ecfdf5; border-bottom: 1px solid rgba(5, 150, 105, 0.25); font-size: 13px; }
       .isp-inline { display: none; }
       /* Customers list (desktop): tighter column gaps, headers aligned with cells */
       @media (min-width: 769px) {
@@ -2643,7 +2655,7 @@
                 <table>
                   <thead>
                     <tr>
-                      <th>Sr.</th>
+                      <th><input type="checkbox" id="cs-all" class="cs-cb" onchange="custSelPage(this.checked)" title="Select all on this page" /><span class="cs-srl">Sr.</span></th>
                       <th class="sortable" data-sort="name" onclick="_custSortBy('name')">Name<span class="sort-ar">↕</span></th>
                       <th class="sortable" data-sort="phone" onclick="_custSortBy('phone')">Phone<span class="sort-ar">↕</span></th>
                       <th>ISP</th>
@@ -4390,6 +4402,40 @@
 
 
 
+      <!-- SEND WHATSAPP (from customer list) -->
+      <div class="modal-bg" id="m-wasend" style="display:none">
+        <div class="modal" style="max-width:520px">
+          <div class="modal-title">Send WhatsApp</div>
+          <div id="ws-to" style="margin-bottom:12px;font-size:14px"></div>
+          <div class="ff full">
+            <label>Template</label>
+            <select class="fsel" id="ws-template" style="width:100%" onchange="wsPreview();wsSession()">
+              <option value="payment_due_reminder">💰 Payment Due Reminder</option>
+              <option value="expiry_reminder">⏰ Expiring Soon</option>
+              <option value="plan_expired">❌ Plan Expired</option>
+              <option value="payment_received">💳 Payment Received</option>
+              <option value="new_customer_welcome">👤 New Customer Welcome</option>
+              <option value="app_features_intro">🎬 App Features &amp; OTT Intro (session only)</option>
+              <option value="custom_text">✍️ Custom Message (session only)</option>
+            </select>
+          </div>
+          <div id="ws-custom-box" style="display:none;margin-top:10px">
+            <textarea id="ws-custom" rows="4" oninput="wsPreview()" placeholder="Type your message..." style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font:inherit;resize:vertical"></textarea>
+          </div>
+          <div style="margin-top:12px;background:#e5ddd5;border-radius:10px;padding:12px">
+            <div id="ws-preview" style="background:#d9fdd3;border-radius:10px 10px 2px 10px;padding:10px 12px;font-size:14px;line-height:1.5;color:#111b21;white-space:pre-wrap"></div>
+          </div>
+          <div id="ws-note" style="margin-top:8px;font-size:12px;color:var(--txt3)"></div>
+          <div id="ws-session" style="display:none;margin-top:8px;padding:8px 12px;border-radius:8px;font-size:11.5px;font-weight:600;background:var(--surface-2);color:var(--txt3)"></div>
+          <div class="errmsg" id="ws-err"></div>
+          <div class="mactions">
+            <a id="ws-open" class="btn" href="#" target="_blank" rel="noopener" style="text-decoration:none;margin-right:auto" title="Open a normal WhatsApp chat instead">Open in WhatsApp app</a>
+            <button class="btn" onclick="closeM('m-wasend')">Cancel</button>
+            <button class="btn bpri" id="ws-send" onclick="wsSend()" style="background:#25D366;border-color:#25D366">📲 Send</button>
+          </div>
+        </div>
+      </div>
+
       <!-- ADD/EDIT ROUTER BRAND -->
       <div class="modal-bg" id="m-brand" style="display:none">
         <div class="modal" style="max-width:440px">
@@ -4740,6 +4786,7 @@
       }
       async function loadCustomers(resetPage) {
         if (resetPage !== false) _custPage = 1;
+        if (!window._waChecked) { window._waChecked = true; initCustWa(); }
         const search = $("csearch").value.trim();
         let p = "?page=1&limit=9999";
         $("ctbody").innerHTML = '<tr><td colspan="10"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
@@ -4868,11 +4915,11 @@
             : '<span class="badge bgray">Prepaid</span>';
 
           return '<tr>' +
-            '<td data-label="Sr." style="font-family:var(--mono);color:var(--txt3);font-size:12px;font-weight:600">' + sr + '</td>' +
+            '<td data-label="Sr." style="font-family:var(--mono);color:var(--txt3);font-size:12px;font-weight:600">' + (_waOn ? '<input type="checkbox" class="cs-cb"' + (_custSel.has(c.id) ? ' checked' : '') + ' onchange="custSelToggle(' + c.id + ',this.checked)" />' : '') + sr + '</td>' +
             '<td data-label="Name" style="font-weight:600;color:var(--txt)">' + c.name +
               (c.local_name ? '<div style="font-weight:400;font-size:11px;color:var(--txt3);margin-top:2px">' + esc(c.local_name) + '</div>' : '') +
             '</td>' +
-            '<td data-label="Phone" style="font-family:var(--mono);font-size:12px"><span class="phone-cell"><a class="tel-link" href="tel:' + (c.phone || "") + '">' + (c.phone || "—") + '</a><a class="wa-link" href="https://wa.me/' + waNumber(c.phone) + '" target="_blank" rel="noopener" title="Chat on WhatsApp"><svg viewBox="0 0 448 512" width="19" height="22" fill="rgb(99, 230, 190)"><path d="M380.9 97.1c-41.9-42-97.7-65.1-157-65.1-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480 117.7 449.1c32.4 17.7 68.9 27 106.1 27l.1 0c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3 18.6-68.1-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1s56.2 81.2 56.1 130.5c0 101.8-84.9 184.6-186.6 184.6zM325.1 300.5c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8s-14.3 18-17.6 21.8c-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7s-12.5-30.1-17.1-41.2c-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2s-9.7 1.4-14.8 6.9c-5.1 5.6-19.4 19-19.4 46.3s19.9 53.7 22.6 57.4c2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4s4.6-24.1 3.2-26.4c-1.3-2.5-5-3.9-10.5-6.6z"/></svg></a></span></td>' +
+            '<td data-label="Phone" style="font-family:var(--mono);font-size:12px"><span class="phone-cell"><a class="tel-link" href="tel:' + (c.phone || "") + '">' + (c.phone || "—") + '</a><a class="wa-link" href="https://wa.me/' + waNumber(c.phone) + '" target="_blank" rel="noopener" title="Chat on WhatsApp" onclick="return waIconClick(event,' + c.id + ')"><svg viewBox="0 0 448 512" width="19" height="22" fill="rgb(99, 230, 190)"><path d="M380.9 97.1c-41.9-42-97.7-65.1-157-65.1-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480 117.7 449.1c32.4 17.7 68.9 27 106.1 27l.1 0c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3 18.6-68.1-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1s56.2 81.2 56.1 130.5c0 101.8-84.9 184.6-186.6 184.6zM325.1 300.5c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8s-14.3 18-17.6 21.8c-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7s-12.5-30.1-17.1-41.2c-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2s-9.7 1.4-14.8 6.9c-5.1 5.6-19.4 19-19.4 46.3s19.9 53.7 22.6 57.4c2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4s4.6-24.1 3.2-26.4c-1.3-2.5-5-3.9-10.5-6.6z"/></svg></a></span></td>' +
             '<td data-label="ISP">' + abadge(c.isp_server_id == 1 ? 'jaze_renew' : (c.isp_server_id == 5 ? 'manual' : 'update')) + '</td>' +
             '<td data-label="Username" style="font-family:var(--mono);font-size:12px;color:var(--txt3)">' + (c.isp_username || "—") + '</td>' +
             '<td data-label="Plan" style="color:var(--txt2)">' + '<span class="plan-val"><span class="isp-inline">' + abadge(c.isp_server_id == 1 ? 'jaze_renew' : (c.isp_server_id == 5 ? 'manual' : 'update')) + '</span>' + (c.plan_name || "—") + '</span></td>' +
@@ -4920,6 +4967,7 @@
         html += '</div>';
         pgn.innerHTML = html;
         pgn.style.display = "flex";
+        custSelUpdate();
       }
 
       function _pageRange(cur, total) {
@@ -7571,6 +7619,202 @@ async function submitBrand() {
     } else showErr(err, r.error || 'Failed');
   } catch(e) { showErr(err, 'Network error'); }
   finally { btn.disabled = false; btn.textContent = 'Save Brand'; }
+}
+
+// ── CUSTOMER LIST → WHATSAPP QUICK SEND ───────────────────────
+let _waOn = false;          // franchise has the WhatsApp add-on enabled
+let _waBal = 0;             // messages left
+let _custSel = new Set();   // selected customer ids (survives paging, sorting, filters)
+let _wsIds = [];            // recipients of the open popup
+
+async function initCustWa() {
+  try {
+    const r = await apiFetch('GET', '/api/admin/whatsapp-balance');
+    const d = (r.success && r.data) || {};
+    _waOn = !!d.whatsapp_enabled;
+    _waBal = (d.whatsapp_balance || 0) - (d.whatsapp_used || 0);
+  } catch (e) { _waOn = false; }
+  if (_waOn) {
+    loadWaTemplates();
+    if (_custAll.length) _renderCustPage();
+  }
+  custSelUpdate();
+}
+
+function _csEnsureBar() {
+  if ($('cs-bar')) return;
+  const card = document.querySelector('#page-customers .tbl-card');
+  if (!card) return;
+  const bar = document.createElement('div');
+  bar.id = 'cs-bar';
+  bar.innerHTML =
+    '<strong id="cs-bar-n">0 selected</strong>' +
+    '<button class="btn bsm" id="cs-bar-all" onclick="custSelAllFiltered()"></button>' +
+    '<button class="btn bsm" onclick="custSelClear()">Clear</button>' +
+    '<button class="btn bpri bsm" style="background:#25D366;border-color:#25D366;margin-left:auto" onclick="openWaSend(Array.from(_custSel))">📲 Send WhatsApp</button>';
+  card.insertBefore(bar, card.firstChild);
+}
+
+function custSelToggle(id, on) {
+  if (on) _custSel.add(id); else _custSel.delete(id);
+  custSelUpdate();
+}
+function _custPageIds() {
+  const start = (_custPage - 1) * _custSize;
+  return _custAll.slice(start, start + _custSize).map(function (c) { return c.id; });
+}
+function custSelPage(on) {
+  _custPageIds().forEach(function (id) { if (on) _custSel.add(id); else _custSel.delete(id); });
+  document.querySelectorAll('#ctbody .cs-cb').forEach(function (cb) { cb.checked = on; });
+  custSelUpdate();
+}
+function custSelAllFiltered() {
+  _custAll.forEach(function (c) { _custSel.add(c.id); });
+  document.querySelectorAll('#ctbody .cs-cb').forEach(function (cb) { cb.checked = true; });
+  custSelUpdate();
+}
+function custSelClear() {
+  _custSel.clear();
+  document.querySelectorAll('#ctbody .cs-cb').forEach(function (cb) { cb.checked = false; });
+  custSelUpdate();
+}
+function custSelUpdate() {
+  _csEnsureBar();
+  const all = $('cs-all');
+  if (all) {
+    all.style.display = _waOn ? 'inline-block' : 'none';
+    const ids = _custPageIds();
+    all.checked = ids.length > 0 && ids.every(function (id) { return _custSel.has(id); });
+  }
+  const bar = $('cs-bar');
+  if (!bar) return;
+  const n = _custSel.size;
+  bar.style.display = _waOn && n ? 'flex' : 'none';
+  $('cs-bar-n').textContent = n + ' selected';
+  const rest = _custAll.filter(function (c) { return !_custSel.has(c.id); }).length;
+  const b = $('cs-bar-all');
+  b.style.display = rest > 0 ? '' : 'none';
+  b.textContent = 'Select all ' + _custAll.length + ' in this list';
+}
+
+// Green icon: popup if the add-on is on, otherwise the old wa.me chat
+function waIconClick(ev, id) {
+  if (!_waOn) return true;
+  ev.preventDefault();
+  openWaSend([id]);
+  return false;
+}
+
+async function openWaSend(ids) {
+  ids = (ids || []).filter(Boolean);
+  if (!ids.length) return;
+  _wsIds = ids;
+  await loadWaTemplates();
+  const one = ids.length === 1 ? custCache.find(function (x) { return x.id === ids[0]; }) : null;
+  $('ws-err').style.display = 'none';
+  $('ws-custom').value = '';
+  if (one) {
+    $('ws-to').innerHTML = '<strong>' + esc(one.name || '') + '</strong> <span style="font-family:var(--mono);font-size:12px;color:var(--txt3)">' + esc(one.phone || '') + '</span>';
+    // smart default: due -> due reminder, expired -> plan expired, else expiring soon
+    $('ws-template').value = (one.balance_due || 0) > 0 ? 'payment_due_reminder' : (realSt(one) === 'expired' ? 'plan_expired' : 'expiry_reminder');
+    $('ws-open').style.display = '';
+    $('ws-open').href = 'https://wa.me/' + waNumber(one.phone);
+  } else {
+    $('ws-to').innerHTML = '<strong>' + ids.length + ' customers</strong> selected';
+    $('ws-open').style.display = 'none';
+  }
+  wsPreview();
+  wsSession();
+  $('m-wasend').style.display = 'flex';
+}
+
+function _wsDMY(d) {
+  const p = String(d || '').slice(0, 10).split('-');
+  return p.length === 3 ? p[2] + '-' + p[1] + '-' + p[0] : (d || '');
+}
+// Same values the server puts in each template (see sendExpiryReminder etc. in whatsapp.js)
+function _wsParams(t, c) {
+  const due = c.balance_due || 0;
+  if (t === 'expiry_reminder') return [c.name, 'Broadband', '₹' + (due + (c.plan_price || 0)), _wsDMY(c.expiry_date)];
+  if (t === 'plan_expired') return [c.name, 'broadband', _wsDMY(c.expiry_date)];
+  if (t === 'payment_due_reminder') return [c.name, String(due)];
+  return null;
+}
+
+function wsPreview() {
+  const t = $('ws-template').value;
+  const tp = waTplPreviews && waTplPreviews[t];
+  const one = _wsIds.length === 1 ? custCache.find(function (x) { return x.id === _wsIds[0]; }) : null;
+  const isCustom = t === 'custom_text';
+  $('ws-custom-box').style.display = isCustom ? 'block' : 'none';
+
+  let txt;
+  if (isCustom) {
+    txt = $('ws-custom').value.trim() || '(Type your message above)';
+  } else {
+    const params = one && tp && tp.raw ? _wsParams(t, one) : null;
+    if (params) txt = tp.raw.replace(/\{\{(\d+)\}\}/g, function (_, n) { return params[parseInt(n, 10) - 1] ?? ''; });
+    else txt = (tp && tp.text) || (t === 'app_features_intro' ? 'App features & OTT intro message' : '—');
+  }
+  $('ws-preview').textContent = txt;
+
+  let note;
+  if (isCustom) note = '✍️ Free text. Delivered only if the customer messaged you in the last 24 hours.';
+  else if (t === 'app_features_intro') note = '🎬 Session-only message. Delivered only if the customer messaged you in the last 24 hours.';
+  else if (one && t === 'payment_due_reminder' && !((one.balance_due || 0) > 0)) note = '⚠ This customer has no due, so this send will be skipped.';
+  else if (one && _wsParams(t, one)) note = 'Approved template. The wording is fixed by WhatsApp; this customer\'s values are filled in automatically.';
+  else if (one) note = 'Approved template. Preview shows sample values; real values are filled in when sending.';
+  else note = 'Approved template. Each customer gets their own name, date and amount.';
+  $('ws-note').textContent = note;
+}
+
+async function wsSession() {
+  const box = $('ws-session');
+  const t = $('ws-template').value;
+  if (_wsIds.length !== 1 || !(t === 'custom_text' || t === 'app_features_intro')) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  box.style.background = 'var(--surface-2)'; box.style.color = 'var(--txt3)';
+  box.textContent = 'Checking session status...';
+  try {
+    const r = await apiFetch('GET', '/api/admin/whatsapp-session-status?customer_id=' + _wsIds[0]);
+    if (!r.success) { box.style.display = 'none'; return; }
+    if (r.data.open) {
+      box.style.background = 'var(--green-l)'; box.style.color = 'var(--green)';
+      box.textContent = '🟢 Session open: free-form send allowed';
+    } else {
+      box.style.background = 'var(--red-l)'; box.style.color = 'var(--red)';
+      box.textContent = '🔴 Session closed: customer has not messaged in 24h, this send will be skipped';
+    }
+  } catch (e) { box.style.display = 'none'; }
+}
+
+async function wsSend() {
+  const btn = $('ws-send'), err = $('ws-err');
+  err.style.display = 'none';
+  const t = $('ws-template').value;
+  const msg = $('ws-custom').value.trim();
+  const n = _wsIds.length;
+  if (t === 'custom_text' && !msg) { showErr(err, 'Please type a message'); return; }
+  if (n > _waBal) { showErr(err, 'Not enough WhatsApp balance (' + _waBal + ' left, ' + n + ' needed)'); return; }
+  if (n > 1 && !confirm('Send to ' + n + ' customers?\n\nThis will use up to ' + n + ' WhatsApp messages.')) return;
+
+  btn.disabled = true; btn.textContent = 'Sending...';
+  try {
+    const body = n === 1
+      ? { audience: 'single', customer_id: _wsIds[0], template: t }
+      : { audience: 'multiple', customer_ids: _wsIds, template: t };
+    if (t === 'custom_text') body.custom_message = msg;
+    const r = await apiFetch('POST', '/api/admin/whatsapp-send', body);
+    if (r.success) {
+      toast('✅ Sent: ' + r.data.sent + ' · Failed: ' + r.data.failed + (r.data.skipped ? ' · Skipped: ' + r.data.skipped : ''));
+      _waBal = Math.max(0, _waBal - (r.data.sent || 0));
+      closeM('m-wasend');
+      if (n > 1) custSelClear();
+    } else {
+      showErr(err, r.error || 'Failed');
+    }
+  } catch (e) { showErr(err, 'Network error'); }
+  finally { btn.disabled = false; btn.textContent = '📲 Send'; }
 }
 
 // ── WHATSAPP PAGE ─────────────────────────────────────────────
