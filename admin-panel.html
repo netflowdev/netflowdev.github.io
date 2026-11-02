@@ -792,6 +792,13 @@
         background: var(--red);
         box-shadow: 0 0 8px rgba(220, 38, 38, 0.5);
       }
+      .st-dot.warn {
+        background: var(--amber);
+        box-shadow: 0 0 8px rgba(217, 119, 6, 0.5);
+      }
+      .st-dot.idle {
+        background: #9ca3af;
+      }
       .st-name {
         font-size: 13px;
         font-weight: 600;
@@ -1668,7 +1675,15 @@
         display: inline-flex; align-items: center; justify-content: center;
         width: 22px; height: 22px; flex-shrink: 0;
       }
+
       .wa-link:hover svg { fill: rgb(40, 190, 150); }
+      .tr-row { display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; padding: 12px 20px; border-bottom: 1px solid rgba(228, 232, 241, 0.6); }
+      .tr-row:last-child { border-bottom: 0; }
+      .tr-c1 { flex: 1 1 220px; min-width: 0; }
+      .tr-c2 { flex: 1 1 220px; min-width: 0; font-size: 12.5px; }
+      .tr-c3 { flex: 0 0 auto; text-align: right; font-size: 11.5px; color: var(--txt3); font-family: var(--mono); }
+      .tr-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+      .tr-info .v { font-family: var(--mono); font-size: 13px; word-break: break-all; margin-top: 4px; }
       #a-name, #a-local, #e-name, #e-local { text-transform: uppercase; }
       #wa-panel-send .card-hd { margin-bottom: 6px; }
       #wa-panel-send .sec-title { margin: 8px 0 8px; padding-bottom: 5px; }
@@ -2364,6 +2379,8 @@
             <div class="nav-icon">🔗</div>Payment Links</div>
           <div class="nav-item" id="nav-brands" onclick="showPage('brands')">
             <div class="nav-icon">📡</div>Router Brands</div>
+          <div class="nav-item" id="nav-tr069" onclick="showPage('tr069')">
+            <div class="nav-icon">🛰️</div>TR-069 <span class="addon-tag">Add-on</span></div>
         </nav>
         
         <div class="sidebar-ft">
@@ -2518,92 +2535,27 @@
                 </div>
               </div>
               <div class="card fade-up fade-up-d3">
-                <div class="card-hd">Quick actions</div>
-                <button
-                  class="qa-btn"
-                  onclick="
-                    showPage('customers');
-                    openAdd();
-                  "
-                >
-                  <div class="qa-icon">+</div>
-                  Add new customer
-                </button>
-                <button
-                  class="qa-btn"
-                  onclick="
-                    showPage('payments');
-                    openCash();
-                  "
-                >
-                  <div class="qa-icon">₹</div>
-                  Record cash payment
-                </button>
-                <button class="qa-btn" onclick="showPage('notifications')">
-                  <div class="qa-icon">📢</div>
-                  Send notification
-                </button>
-                <button
-                  class="qa-btn"
-                  onclick="
-                    showPage('ott');
-                    openAddOtt();
-                  "
-                >
-                  <div class="qa-icon">🎬</div>
-                  Add OTT plan
-                </button>
+                
                 <div
                   style="
                     font-size: 13px;
                     font-weight: 700;
                     color: var(--txt);
-                    margin: 20px 0 12px;
+                    margin: 0 0 12px;
                     display: flex;
                     align-items: center;
-                    gap: 8px;
-                  "
-                >
+                    gap: 8px;">
                   <span
                     style="
                       width: 6px;
                       height: 6px;
                       border-radius: 50%;
                       background: var(--green);
-                      box-shadow: 0 0 8px rgba(5, 150, 105, 0.5);
-                    "
-                    class="glow-pulse"
+                      box-shadow: 0 0 8px rgba(5, 150, 105, 0.5);"class="glow-pulse"
                   ></span>
                   System status
                 </div>
-                <div class="st-row">
-                  <div class="st-dot on"></div>
-                  <div>
-                    <div class="st-name">Cloudflare</div>
-                    <div class="st-lbl">online</div>
-                  </div>
-                </div>
-                <div class="st-row">
-                  <div class="st-dot on"></div>
-                  <div>
-                    <div class="st-name">Jaze ISP Server</div>
-                    <div class="st-lbl">connected</div>
-                  </div>
-                </div>
-                <div class="st-row">
-                  <div class="st-dot on"></div>
-                  <div>
-                    <div class="st-name">NetAdmin Server</div>
-                    <div class="st-lbl">scheduler active</div>
-                  </div>
-                </div>
-                <div class="st-row">
-                  <div class="st-dot on"></div>
-                  <div>
-                    <div class="st-name">Payment Gateway</div>
-                    <div class="st-lbl">active</div>
-                  </div>
-                </div>
+                <div id="sys-status"><div class="st-lbl" style="padding: 11px 0">Checking...</div></div>
               </div>
             </div>
           </div>
@@ -3371,10 +3323,7 @@
                 <div style="background:#efeae2;border-radius:12px;padding:14px;margin-top:4px">
                   <div style="background:#d9fdd3;border-radius:10px 10px 2px 10px;padding:10px 12px;font-size:14px;line-height:1.5;color:#111b21" id="wa-preview-text">Select template to preview...</div>
                 </div>
-                <div style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--txt3)">
-                  Template <span id="wa-template-name" style="font-family:var(--mono);background:var(--surface-2);color:var(--txt2);padding:3px 8px;border-radius:6px">—</span>
-                </div>
-                <div style="font-size:12px;color:var(--txt3);margin-top:10px;line-height:1.5">Templates must be approved in Meta Business Manager. Each message uses 1 balance.</div>
+                <div style="font-size:12px;color:var(--txt3);margin-top:10px;line-height:1.5">Each message uses 1 balance.</div>
               </div>
               <div class="card">
                 <div class="card-hd">This send</div>
@@ -3427,6 +3376,59 @@
             </div>
           </div>
 
+          </div>
+        </div>
+
+        <!-- TR-069 -->
+        <div id="page-tr069" style="display:none">
+          <div class="topbar">
+            <div>
+              <div class="pg-title">TR-069</div>
+              <div class="pg-sub">WiFi change server &amp; queue</div>
+            </div>
+            <button class="btn" onclick="loadTr069Page()">↺ Refresh</button>
+          </div>
+          <div class="content">
+            <div class="tbl-card" style="margin-bottom: 16px">
+              <div style="padding: 16px 20px">
+                <div class="sc-label" style="margin-bottom: 10px">ACS server</div>
+                <div class="tr-info" id="tr-info"></div>
+                <div style="font-size: 12px; color: var(--txt3); margin-top: 12px">These settings are managed by your platform administrator. Contact them to change the server.</div>
+              </div>
+            </div>
+            <div class="stats3">
+              <div class="sc amber">
+                <div class="sc-icon amber">⏳</div>
+                <div class="sc-label">Pending</div>
+                <div class="sc-val" id="tr-n-pending" style="color: var(--amber); font-size: 28px">—</div>
+                <div class="sc-sub" style="color: var(--amber)">waiting for the server</div>
+              </div>
+              <div class="sc green">
+                <div class="sc-icon green">✓</div>
+                <div class="sc-label">Confirmed</div>
+                <div class="sc-val" id="tr-n-confirmed" style="color: var(--green); font-size: 28px">—</div>
+                <div class="sc-sub" style="color: var(--green)">applied to router</div>
+              </div>
+              <div class="sc red">
+                <div class="sc-icon red">✕</div>
+                <div class="sc-label">Failed</div>
+                <div class="sc-val" id="tr-n-failed" style="color: var(--red); font-size: 28px">—</div>
+                <div class="sc-sub" id="tr-n-sup" style="color: var(--red)">attention needed</div>
+              </div>
+            </div>
+            <div class="toolbar">
+              <select class="fsel" id="tr-filter" onchange="renderTr069List()">
+                <option value="">All status</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="failed">Failed</option>
+                <option value="superseded">Superseded</option>
+              </select>
+              <button class="btn" id="tr-retry" onclick="retryTr069()" title="Retries the 5 oldest pending requests">↻ Retry pending now</button>
+            </div>
+            <div class="tbl-card">
+              <div id="tr-list"></div>
+            </div>
           </div>
         </div>
 
@@ -3484,7 +3486,7 @@
           </div>
           <div class="content">
             <div class="warn-box" style="margin-bottom:16px">
-              📺 IPTV is a separate add-on subscription — it's billed independently from your ISP plan. Manage its renewal under "Franchise Plan" tab below.
+              📺 IPTV is a separate add-on subscription it's billed independently from your ISP plan. Manage its renewal under "Franchise Plan" tab below.
             </div>
  
             <div class="tabs" style="margin-bottom:20px;max-width:420px">
@@ -3513,7 +3515,7 @@
                   <div class="sc-sub" style="color:var(--amber)">of purchased plan</div>
                 </div>
               </div>
-              <div style="margin:-10px 0 16px;font-size:11.5px;color:var(--txt3);line-height:1.5">Billing is based on <b>active devices</b>, not customer count — one customer can hold multiple paired devices, each counted separately against your plan.</div>
+              <div style="margin:-10px 0 16px;font-size:11.5px;color:var(--txt3);line-height:1.5">Billing is based on <b>active devices</b>, not customer count, One customer can hold multiple paired devices, each counted separately against your plan.</div>
               <div class="toolbar">
                 <input class="sbox" id="iptv-search" placeholder="Search name, mobile or username..." oninput="loadIptvCustomers()" />
                 <button class="btn" onclick="loadIptvCustomers()">↺ Refresh</button>
@@ -4498,7 +4500,7 @@
 
     <script>
       const BASE = "https://isp-billing-api.netflowcloud.workers.dev";
-      const PAGES = ['dashboard','customers','activations','payments','settlements','notifications','plans','ott','paylinks','brands','whatsapp','billing','iptv','isp-plan'];
+      const PAGES = ['dashboard','customers','activations','payments','settlements','notifications','plans','ott','paylinks','brands','whatsapp','billing','iptv','isp-plan','tr069'];
       let custCache = [],
         plansCache = [],
         ottPlansCache = [],
@@ -4728,10 +4730,29 @@
         if (name === 'iptv') { loadIptvCustomers(); loadIptvConfig(); }
         if (name === 'isp-plan') loadIspPlan();
         if (name === 'whatsapp') loadWhatsAppPage();
+        if (name === 'tr069') loadTr069Page();
         if (name === 'billing') loadBillingHistory();
       }
 
+      async function loadSystemStatus() {
+        const box = $("sys-status");
+        if (!box) return;
+        try {
+          const r = await apiFetch("GET", "/api/admin/system-status");
+          if (!r.success) { box.innerHTML = '<div class="st-lbl" style="padding: 11px 0">Status unavailable</div>'; return; }
+          const dot = { active: "on", warn: "warn", blocked: "off", not_configured: "idle", disabled: "idle" };
+          box.innerHTML = r.data.items.map(function (i) {
+            return '<div class="st-row"><div class="st-dot ' + (dot[i.state] || "idle") + '"></div><div>' +
+              '<div class="st-name">' + esc(i.name) + '</div>' +
+              '<div class="st-lbl">' + esc(i.label) + '</div></div></div>';
+          }).join("");
+        } catch (e) {
+          box.innerHTML = '<div class="st-lbl" style="padding: 11px 0">Status unavailable</div>';
+        }
+      }
+
       async function loadDash() {
+        loadSystemStatus();
         try {
           const [cr, ar, pr] = await Promise.all([
             apiFetch("GET", "/api/admin/customers?page=1&limit=9999"),
@@ -7824,6 +7845,80 @@ async function wsSend() {
   finally { btn.disabled = false; btn.textContent = '📲 Send'; }
 }
 
+// ── TR-069 PAGE ───────────────────────────────────────────────
+let _trData = null;
+
+function _trDT(s) {
+  const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2})/);
+  return m ? m[3] + '-' + m[2] + '-' + m[1] + ' ' + m[4] : (s || '');
+}
+
+async function loadTr069Page() {
+  try {
+    const r = await apiFetch('GET', '/api/admin/tr069');
+    if (!r.success) {
+      $('tr-info').innerHTML = '<div style="color:var(--red)">' + esc(r.error || 'Failed to load') + '</div>';
+      return;
+    }
+    const d = r.data;
+    _trData = d;
+    const enabled = d.wifi_method && d.wifi_method !== 'none';
+    $('tr-info').innerHTML =
+      '<div><div class="sc-label">ACS URL</div><div class="v">' + (d.acs_url ? esc(d.acs_url) : '<span style="color:var(--red)">Not configured</span>') + '</div></div>' +
+      '<div><div class="sc-label">WiFi method</div><div class="v">' + (enabled ? esc(d.wifi_method) : '<span style="color:var(--txt3)">Not enabled</span>') + '</div></div>' +
+      '<div><div class="sc-label">SSID prefix</div><div class="v">' + (d.ssid_prefix ? esc(d.ssid_prefix) : '—') + '</div></div>';
+    $('tr-n-pending').textContent = d.summary.pending;
+    $('tr-n-confirmed').textContent = d.summary.confirmed;
+    $('tr-n-failed').textContent = d.summary.failed;
+    $('tr-n-sup').textContent = d.summary.superseded ? d.summary.superseded + ' superseded (replaced by a newer request)' : 'attention needed';
+    renderTr069List();
+  } catch (e) {
+    $('tr-info').innerHTML = '<div style="color:var(--red)">Network error</div>';
+  }
+}
+
+function renderTr069List() {
+  const box = $('tr-list');
+  if (!_trData) return;
+  const f = $('tr-filter').value;
+  const rows = (_trData.changes || []).filter(function (c) { return !f || c.status === f; });
+  if (!rows.length) {
+    box.innerHTML = '<div style="padding:28px;text-align:center;color:var(--txt3);font-size:13px">No WiFi change requests' + (f ? ' with this status' : ' yet') + '</div>';
+    return;
+  }
+  const cls = { confirmed: 'bok', pending: 'bwarn', failed: 'berr', superseded: 'bgray' };
+  box.innerHTML = rows.map(function (c) {
+    const top = esc(c.customer_local_name || c.customer_name || 'Customer #' + c.customer_id);
+    const sub = c.customer_local_name ? '<div style="font-size:11px;color:var(--txt3)">' + esc(c.customer_name || '') + '</div>' : '';
+    return '<div class="tr-row">' +
+      '<div class="tr-c1"><div style="font-weight:600">' + top + '</div>' + sub +
+        '<div style="font-family:var(--mono);font-size:11.5px;color:var(--txt3);margin-top:2px">' + esc(c.customer_phone || '') + ' · ' + esc(c.mac_address || '') + '</div></div>' +
+      '<div class="tr-c2"><div><span style="color:var(--txt3)">New:</span> ' + esc((c.new_ssid || '').trim()) + '</div>' +
+        '<div style="color:var(--txt3)">Old: ' + esc((c.old_ssid || '—').trim()) + '</div>' +
+        (c.failure_reason ? '<div style="color:var(--red);margin-top:2px">' + esc(c.failure_reason) + '</div>' : '') + '</div>' +
+      '<div class="tr-c3"><span class="badge ' + (cls[c.status] || 'bgray') + '">' + esc(c.status) + '</span>' +
+        '<div style="margin-top:6px">Asked ' + esc(_trDT(c.created_at)) + '</div>' +
+        (c.confirmed_at ? '<div>Done ' + esc(_trDT(c.confirmed_at)) + '</div>' : '') + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function retryTr069() {
+  const btn = $('tr-retry');
+  btn.disabled = true;
+  btn.textContent = 'Retrying...';
+  try {
+    const r = await apiFetch('POST', '/api/admin/tr069/retry', {});
+    if (r.success) toast('Retry done. Pending: ' + r.data.pending_before + ' → ' + r.data.pending_after);
+    else toast(r.error || 'Retry failed', 'err');
+  } catch (e) {
+    toast('Network error', 'err');
+  }
+  btn.disabled = false;
+  btn.textContent = '↻ Retry pending now';
+  loadTr069Page();
+}
+
 // ── WHATSAPP PAGE ─────────────────────────────────────────────
 let waTab = 'send';
 
@@ -8321,9 +8416,10 @@ function gbUpdatePreview() {
   let start = mode === 'today' ? today() : (mode === 'custom' ? $('gb-custom').value : (c.expiry_date || today()));
   if (!start) { $('gb-preview').innerHTML = 'Pick a start date.'; return; }
   const days = c.plan_validity_days || 30;
-  const newExp = gbAddDays(start, days);
+  const startsOnStart = mode === 'today' || mode === 'custom' || !c.expiry_date;
+  const newExp = gbAddDays(start, days - (startsOnStart ? 1 : 0));
   const dueAfter = (c.balance_due || 0) + (c.plan_price || 0);
-  let html = 'Plan starts <b>' + fmtDate(start) + '</b> → new expiry <b>' + fmtDate(newExp) + '</b><br>' +
+  let html = 'Plan starts <b>' + fmtDate(startsOnStart ? start : gbAddDays(start, 1)) + '</b> → new expiry <b>' + fmtDate(newExp) + '</b><br>' +
              'Bill ₹' + (c.plan_price || 0) + ' · Total due after: <b>₹' + dueAfter + '</b>';
   if (newExp < today()) html += '<br><span style="color:var(--amber)">⚠ New expiry is still in the past — the customer will remain expired.</span>';
   $('gb-preview').innerHTML = html;
