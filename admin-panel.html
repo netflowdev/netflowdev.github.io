@@ -4918,7 +4918,7 @@
       function _rowMenuKey(e) { if (e.key === "Escape") closeRowMenu(); }
 
       async function syncToRouter(id, name) {
-        if (!confirm("Router par " + name + " ko sync karein?\nExpiry, plan aur user router par dobara push hoga.")) return;
+        if (!confirm("Sync " + name + " to the router?\nUsername, plan and expiry will be pushed to the router again.")) return;
         try {
           const r = await apiFetch("POST", "/api/admin/customers/" + id + "/sync-router");
           if (r && r.success) toast((r.data && r.data.message) || "Sync queued");
@@ -5142,7 +5142,7 @@
       }
 
       const _SORT_GET = {
-        name:    (c) => (c.name || "").toLowerCase(),
+        name:    (c) => (c.local_name || c.name || "").toLowerCase(),
         phone:   (c) => String(c.phone || ""),
         plan:    (c) => (c.plan_name || "").toLowerCase(),
         expiry:  (c) => (c.expiry_date ? String(c.expiry_date).slice(0, 10) : ""),
