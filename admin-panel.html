@@ -2233,6 +2233,36 @@
       .cm-badge { font-size: 9px; font-weight: 700; color: var(--blue); background: var(--blue-l); padding: 1px 6px; border-radius: 99px; margin-left: 6px; font-family: var(--mono); }
       .cm-hint { font-size: 11px; color: var(--amber); display: none; }
       @media (max-width: 768px) { .cm-modal { height: 92vh; } }
+      /* ===== Customer ledger (cards) ===== */
+      .lg-list { margin-top: 10px; }
+      .lg-month { font-size: 10px; font-weight: 700; font-family: var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--txt3); margin: 18px 2px 8px; display: flex; align-items: center; gap: 10px; }
+      .lg-month::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+      .lg-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--border-s); border-radius: var(--r-sm); box-shadow: var(--sh-xs); transition: box-shadow 0.15s, transform 0.15s; }
+      .lg-row:hover { box-shadow: var(--sh); transform: translateY(-1px); }
+      .lg-pay { border-left-color: var(--green); }
+      .lg-bill, .lg-charge { border-left-color: var(--amber); }
+      .lg-open { border-left-color: var(--purple); }
+      .lg-ic { width: 38px; height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; border-radius: 50%; background: var(--surface-2); }
+      .lg-pay .lg-ic { background: var(--green-l); }
+      .lg-bill .lg-ic, .lg-charge .lg-ic { background: var(--amber-l); }
+      .lg-open .lg-ic { background: var(--purple-l); }
+      .lg-main { flex: 1; min-width: 0; }
+      .lg-title { font-size: 13px; font-weight: 600; color: var(--txt); }
+      .lg-sub { font-size: 11px; font-family: var(--mono); color: var(--txt3); margin-top: 2px; }
+      .lg-amt { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+      .lg-chip { font-family: var(--mono); font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 99px; white-space: nowrap; }
+      .lg-paid { color: var(--green); background: var(--green-l); }
+      .lg-billed { color: var(--amber); background: var(--amber-l); }
+      .lg-opn { color: var(--purple); background: var(--purple-l); }
+      .lg-bal { font-size: 10.5px; font-family: var(--mono); color: var(--txt3); white-space: nowrap; }
+      .lg-due { color: var(--red); font-weight: 600; }
+      .lg-clear { color: var(--green); }
+      .lg-adv { color: var(--cyan); }
+      .lg-del { width: 30px; height: 30px; flex-shrink: 0; border-radius: 8px; border: 1px solid rgba(220, 38, 38, 0.25); background: var(--red-l); color: var(--red); cursor: pointer; opacity: 0; transition: opacity 0.15s; }
+      .lg-row:hover .lg-del { opacity: 1; }
+      .lg-sp { width: 30px; flex-shrink: 0; }
+      @media (hover: none) { .lg-del { opacity: 1; } }
+      @media (max-width: 560px) { .lg-row { flex-wrap: wrap; } .lg-amt { flex-direction: row; align-items: center; width: 100%; justify-content: space-between; } .lg-sp { display: none; } }
 
     </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css" />
@@ -3878,12 +3908,7 @@
           <button class="btn bsm" onclick="downloadLedgerCsv()">Download</button>
         </div>
         <div class="dgrid" id="v-hist-sum"></div>
-        <div style="overflow-x:auto;margin-top:10px">
-          <table style="width:100%">
-            <thead><tr><th>Entry</th><th>Transaction amount</th><th>Final</th><th></th></tr></thead>
-            <tbody id="v-hist-body"></tbody>
-          </table>
-        </div>
+        <div id="v-hist-body" class="lg-list"></div>
       </div>
     </div>
 
@@ -4865,6 +4890,17 @@
         return h + "</div>";
       }
 
+      async function syncToRouter(id, name) {
+        if (!confirm("Sync " + name + " to the router?\nThe username, plan and expiry will be pushed to the router again.")) return;
+        try {
+          const r = await apiFetch("POST", "/api/admin/customers/" + id + "/sync-router");
+          if (r && r.success) toast((r.data && r.data.message) || "Sync queued");
+          else toast((r && r.error) || "Sync failed", "err");
+        } catch (e) {
+          toast("Network error", "err");
+        }
+      }
+
       let _rowMenuBtn = null;
       function closeRowMenu() {
         const m = document.getElementById("row-menu");
@@ -4880,6 +4916,18 @@
         closeRowMenu();
       }
       function _rowMenuKey(e) { if (e.key === "Escape") closeRowMenu(); }
+
+      async function syncToRouter(id, name) {
+        if (!confirm("Router par " + name + " ko sync karein?\nExpiry, plan aur user router par dobara push hoga.")) return;
+        try {
+          const r = await apiFetch("POST", "/api/admin/customers/" + id + "/sync-router");
+          if (r && r.success) toast((r.data && r.data.message) || "Sync queued");
+          else toast((r && r.error) || "Sync failed", "err");
+        } catch (e) {
+          toast("Network error", "err");
+        }
+      }
+
       function openRowMenu(btn, id) {
         if (_rowMenuBtn === btn) { closeRowMenu(); return; }
         closeRowMenu();
@@ -4887,6 +4935,9 @@
         if (!c) return;
         const items = [["link", "Send payment link", function () { openPayReminder(id); }]];
         items.push(["bill", "Generate bill now", function () { generateBillNow(id, c.name); }]);
+        if (String(c.isp_server_id) === "2") {
+          items.push(["link", "Sync to router", function () { syncToRouter(id, c.name); }]);
+        }
         if (c.billing_type === "postpaid") {
           if (realSt(c) === "suspended") items.push(["play", "Reactivate", function () { openReactivateModal(id); }, "var(--green)"]);
           else items.push(["pause", "Suspend", function () { openSuspendModal(id); }, "var(--amber)"]);
@@ -5172,7 +5223,7 @@
           di("Email", c.email) +
           di("Membership", c.membership) +
           di("Status", sbadge(realSt(c)), true) +
-          di("Created", c.created_at) +
+          di("Created", fmtDateTime(c.created_at)) +
           di("Address", c.address, "full") +
           di("Comments", c.comments, "full");
         $("v-isp").innerHTML =
@@ -5210,9 +5261,7 @@
 
       function lgDate(d, full) {
         if (!d) return "—";
-        const p = String(d).slice(0, 10).split("-");
-        if (p.length !== 3) return d;
-        return p[2] + "-" + _LG_MON[parseInt(p[1], 10) - 1] + "-" + (full ? p[0] : p[0].slice(2));
+        return full ? fmtDateTime(d) : fmtDate(String(d).slice(0, 10));
       }
       function lgDateTime(d) {
         if (!d) return "";
@@ -5224,7 +5273,7 @@
         _custLedgerId = id;
         const body = $("v-hist-body");
         $("v-hist-sum").innerHTML = "";
-        body.innerHTML = '<tr><td colspan="4"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+        body.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
         try {
           const [pr, br] = await Promise.all([
             apiFetch("GET", "/api/admin/payments?customer_id=" + id),
@@ -5242,7 +5291,7 @@
               kind: "bill",
               delta: b.bill_amount || 0,
               title: "Bill From " + lgDate(b.bill_date) + " To " + lgDate(b.period_end_date),
-              sub: "Billed On " + lgDate(b.bill_date, true),
+              sub: lgDate(b.bill_date, true),
             }),
           );
           pays.forEach((p) => {
@@ -5255,7 +5304,7 @@
                 kind: "charge",
                 delta: p.amount_plan,
                 title: p.recharge_type === "ott" ? "OTT Subscription" : "Plan Recharge" + (p.plan_name ? " — " + p.plan_name : ""),
-                sub: "Recharged On " + lgDate(p.created_at, true),
+                sub: lgDate(p.created_at, true),
               });
             }
             items.push({
@@ -5264,8 +5313,8 @@
               kind: "pay",
               id: p.id,
               delta: -(p.amount_total || 0),
-              title: (p.payment_method === "cash" ? "Cash" : "Online") + " Payment Received On " + ts,
-              sub: "Recorded On " + lgDate(p.created_at, true),
+              title: (p.payment_method === "cash" ? "Cash" : "Online") + " Payment Received",
+              sub: lgDate(p.created_at, true),
             });
           });
 
@@ -5300,40 +5349,50 @@
             di("Balance Due", c.balance_due > 0 ? '<span style="color:var(--red);font-weight:700">₹' + c.balance_due + "</span>" : "₹0", "", "mono");
           renderLedger();
         } catch (e) {
-          body.innerHTML = '<tr><td colspan="4"><div class="empty">Could not load history</div></td></tr>';
+          body.innerHTML = '<div class="empty">Could not load history</div>';
           console.error(e);
         }
       }
 
       function renderLedger() {
         const rows = _custLedger.rows;
-        $("v-hist-body").innerHTML = rows.length
-          ? rows
-              .map((r) => {
-                const icon = r.kind === "pay" ? "💵" : r.kind === "open" ? "⚖️" : "🧾";
-                const plus = r.delta >= 0;
-                const amt =
-                  '<span style="color:' + (plus ? "var(--green)" : "var(--red)") + '">(' + (plus ? "+" : "−") + ") ₹" +
-                  Math.abs(r.delta).toLocaleString("en-IN") + "</span>";
-                const fin =
-                  r.final > 0
-                    ? '<span class="badge bok">₹' + r.final.toLocaleString("en-IN") + '</span> <small style="color:var(--txt3)">Due</small>'
-                    : r.final < 0
-                      ? '<span class="badge bgray">₹' + Math.abs(r.final).toLocaleString("en-IN") + '</span> <small style="color:var(--txt3)">Advance</small>'
-                      : '<span class="badge bgray">₹0</span>';
-                const del =
-                  r.kind === "pay"
-                    ? '<button class="btn bsm" style="background:rgba(220,38,38,0.1);border-color:rgba(220,38,38,0.25);color:var(--red)" title="Delete payment record" onclick="deleteLedgerPayment(' + r.id + ')">🗑</button>'
-                    : "";
-                return (
-                  '<tr><td><div style="display:flex;gap:10px;align-items:center"><span style="font-size:22px">' + icon +
-                  '</span><div><div>' + r.title + '</div><div style="font-size:11px;color:var(--txt3)">' + r.sub +
-                  '</div></div></div></td><td style="font-family:var(--mono);white-space:nowrap">' + amt +
-                  '</td><td style="white-space:nowrap">' + fin + "</td><td>" + del + "</td></tr>"
-                );
-              })
-              .join("")
-          : '<tr><td colspan="4"><div class="empty">Nothing here yet</div></td></tr>';
+        const box = $("v-hist-body");
+        if (!rows.length) {
+          box.innerHTML = '<div class="empty">Nothing here yet</div>';
+          return;
+        }
+        const MN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const inr = (n) => "₹" + Math.abs(n).toLocaleString("en-IN");
+        let html = "";
+        let last = null;
+        rows.forEach((r) => {
+          const key = r.ts ? r.ts.slice(0, 7) : "earlier";
+          if (key !== last) {
+            last = key;
+            html += '<div class="lg-month">' + (key === "earlier" ? "Earlier" : MN[parseInt(key.slice(5, 7), 10) - 1] + " " + key.slice(0, 4)) + "</div>";
+          }
+          const isPay = r.kind === "pay";
+          const isOpen = r.kind === "open";
+          const icon = isPay ? "💵" : isOpen ? "⚖️" : "🧾";
+          const chip = isPay
+            ? '<span class="lg-chip lg-paid">− ' + inr(r.delta) + " Paid</span>"
+            : isOpen
+              ? '<span class="lg-chip lg-opn">' + (r.delta >= 0 ? "+ " : "− ") + inr(r.delta) + "</span>"
+              : '<span class="lg-chip lg-billed">+ ' + inr(r.delta) + " Billed</span>";
+          const bal =
+            r.final > 0
+              ? '<span class="lg-bal lg-due">Due ' + inr(r.final) + "</span>"
+              : r.final < 0
+                ? '<span class="lg-bal lg-adv">Advance ' + inr(r.final) + "</span>"
+                : '<span class="lg-bal lg-clear">Cleared</span>';
+          const del = isPay
+            ? '<button class="lg-del" title="Delete payment record" onclick="deleteLedgerPayment(' + r.id + ')">🗑</button>'
+            : '<span class="lg-sp"></span>';
+          html +=
+            '<div class="lg-row lg-' + r.kind + '"><div class="lg-ic">' + icon + '</div><div class="lg-main"><div class="lg-title">' +
+            esc(r.title) + '</div><div class="lg-sub">' + esc(r.sub) + '</div></div><div class="lg-amt">' + chip + bal + "</div>" + del + "</div>";
+        });
+        box.innerHTML = html;
       }
 
       async function deleteLedgerPayment(id) {
@@ -7849,10 +7908,8 @@ async function wsSend() {
 let _trData = null;
 
 function _trDT(s) {
-  const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2})/);
-  return m ? m[3] + '-' + m[2] + '-' + m[1] + ' ' + m[4] : (s || '');
+  return fmtDateTime(s);
 }
-
 async function loadTr069Page() {
   try {
     const r = await apiFetch('GET', '/api/admin/tr069');
