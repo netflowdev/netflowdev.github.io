@@ -2631,8 +2631,8 @@
               </select>
               <select class="fsel" id="cpagesize" onchange="_custChangeSize()" title="Rows per page">
                 <option value="25">25 / page</option>
-                <option value="50" selected>50 / page</option>
-                <option value="100">100 / page</option>
+                <option value="50">50 / page</option>
+                <option value="100" selected>100 / page</option>
                 <option value="200">200 / page</option>
                 <option value="500">500 / page</option>
                 <option value="1000">1000 / page</option>
@@ -2713,8 +2713,11 @@
               </select>
               <select class="fsel" id="af-type" onchange="loadActivations()">
                 <option value="">All types</option>
-                <option value="update">NetAdmin Server</option>
-                <option value="jaze_renew">Jaze</option>
+                <option value="update">NetAdmin Renewal</option>
+                <option value="expiry">Expiry sync</option>
+                <option value="suspend">Suspend</option>
+                <option value="reactivate">Reactivate</option>
+                <option value="jaze_renew">Jaze Renewal</option>
               </select>
             </div>
             <div class="tbl-card">
@@ -2725,7 +2728,7 @@
                       <th>#</th>
                       <th>Customer</th>
                       <th>Username</th>
-                      <th>Server</th>
+                      <th>Type</th>
                       <th>Profile / Reason</th>
                       <th>Expiry</th>
                       <th>Status</th>
@@ -3753,8 +3756,8 @@
             <input id="pl-isp-id" placeholder="Jaze plan ID if needed" />
           </div>
           <div class="ff">
-            <label>NetAdmin Profile</label>
-            <input id="pl-mk-profile" placeholder="e.g. 1 Month 50 Mbps Prepaid" />
+            <label>NetAdmin Profile (blank = auto)</label>
+            <input id="pl-mk-profile" placeholder="Leave blank for auto name (NetFlow-id)" />
           </div>
           <div class="ff">
             <label>NetAdmin Service</label>
@@ -4302,17 +4305,16 @@
     <input type="hidden" id="gb-cust-id"/>
     <div id="gb-info" style="font-size:13px;color:var(--txt2);margin-bottom:14px"></div>
 
-    <div class="ff" style="margin-bottom:14px">
-      <label>Start plan days from</label>
-      <select id="gb-start" onchange="gbUpdatePreview()">
-        <option value="expiry">Last expiry date</option>
-        <option value="today">Today</option>
-        <option value="custom">Custom date</option>
-      </select>
-    </div>
-    <div class="ff" id="gb-custom-wrap" style="display:none;margin-bottom:14px">
-      <label>Start date</label>
-      <input type="date" id="gb-custom" onchange="gbUpdatePreview()"/>
+    <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:12px">
+      <div class="ff" style="flex:1;margin:0">
+        <label>From</label>
+        <input type="date" id="gb-custom" onchange="gbUpdatePreview()" oninput="gbUpdatePreview()"/>
+      </div>
+      <div style="padding-bottom:12px;color:var(--txt3)">→</div>
+      <div class="ff" style="flex:1;margin:0">
+        <label>To (new expiry)</label>
+        <input type="date" id="gb-to" disabled/>
+      </div>
     </div>
 
     <div id="gb-preview" style="font-size:13px;padding:10px 12px;border-radius:8px;background:var(--bg2,#f4f5f7);margin-bottom:14px"></div>
@@ -4322,7 +4324,7 @@
       <input type="number" id="gb-due-days" min="0" max="60" value="7"/>
     </div>
     <label id="gb-isp-wrap" style="display:none;align-items:center;gap:8px;font-size:13px;margin-bottom:14px;cursor:pointer">
-      <input type="checkbox" id="gb-isp"/> Also recharge on ISP side
+      <input type="checkbox" id="gb-isp"/> <span id="gb-isp-label">Also recharge on ISP side</span>
     </label>
 
     <div class="errmsg" id="gb-err"></div>
@@ -4638,10 +4640,12 @@
         return '<span class="badge bgray">' + (m || "—") + "</span>";
       }
       function abadge(a) {
-        if (a === "jaze_renew") return '<span class="badge bok">Jaze</span>';
+        if (a === "jaze_renew") return '<span class="badge bok">Jaze Renewal</span>';
         if (a === "manual") return '<span class="badge bgray">Manual</span>';
         if (a === "suspend") return '<span class="badge bwarn">⏸ Suspend</span>';
         if (a === "reactivate") return '<span class="badge bok">▶ Reactivate</span>';
+        if (a === "expiry") return '<span class="badge binfo">🔄 Expiry sync</span>';
+        if (a === "update") return '<span class="badge binfo">NetAdmin Renewal</span>';
         return '<span class="badge binfo">NetAdmin</span>';
       }
       function esc(s) {
@@ -4765,6 +4769,8 @@
         try {
           const r = await apiFetch("GET", "/api/admin/system-status");
           if (!r.success) { box.innerHTML = '<div class="st-lbl" style="padding: 11px 0">Status unavailable</div>'; return; }
+          const trNav = $("nav-tr069");
+          if (trNav) trNav.style.display = r.data.wifi_method && r.data.wifi_method !== "none" ? "" : "none";
           const dot = { active: "on", warn: "warn", blocked: "off", not_configured: "idle", disabled: "idle" };
           box.innerHTML = r.data.items.map(function (i) {
             return '<div class="st-row"><div class="st-dot ' + (dot[i.state] || "idle") + '"></div><div>' +
@@ -4825,7 +4831,7 @@
         } catch(e) { console.error(e); }
       }
 
-      let _custAll = [], _custRaw = [], _custPage = 1, _custSize = 50;
+      let _custAll = [], _custRaw = [], _custPage = 1, _custSize = 100;
       let _custSort = { key: "name", dir: 1 };
 
       function waNumber(p) {
@@ -4933,7 +4939,8 @@
         closeRowMenu();
         const c = (custCache || []).find(function (x) { return x.id === id; });
         if (!c) return;
-        const items = [["link", "Send payment link", function () { openPayReminder(id); }]];
+        const items = [];
+        if (!window.matchMedia("(max-width: 768px)").matches) items.push(["link", "Send payment link", function () { openPayReminder(id); }]);
         items.push(["bill", "Generate bill now", function () { generateBillNow(id, c.name); }]);
         if (String(c.isp_server_id) === "2") {
           items.push(["link", "Sync to router", function () { syncToRouter(id, c.name); }]);
@@ -5004,20 +5011,18 @@
             '<td data-label="Plan" style="color:var(--txt2)">' + '<span class="plan-val"><span class="isp-inline">' + abadge(c.isp_server_id == 1 ? 'jaze_renew' : (c.isp_server_id == 5 ? 'manual' : 'update')) + '</span>' + (c.plan_name || "—") + '</span></td>' +
             '<td data-label="Expiry" style="font-family:var(--mono);font-size:12px;color:var(--txt);white-space:nowrap">' + fmtDate(c.expiry_date) + _daysLeftHtml(c.expiry_date) + '</td>' +
             '<td data-label="Due" style="color:' + (c.balance_due > 0 ? "var(--red)" : "var(--txt3)") + ';font-family:var(--mono);font-weight:' + (c.balance_due > 0 ? "700" : "400") + '">' +
-              "₹" + (c.balance_due || 0) +
-            ((c.effective_due_mode || c.due_payment_mode) === "due_only" ? ' <span class="badge berr" style="font-size:9px;padding:2px 6px">DUE ONLY</span>' : "") +
+              '<span style="display:inline-flex;align-items:center;gap:6px">' + "₹" + (c.balance_due || 0) +
+            ((c.effective_due_mode || c.due_payment_mode) === "due_only" ? '<span class="badge berr" style="font-size:9px;padding:2px 6px">DUE ONLY</span>' : "") + '</span>' +
             '<div class="due-bill" style="color:' + (c.billing_type === 'postpaid' ? 'var(--purple)' : 'var(--txt3)') + '">' + (c.billing_type === 'postpaid' ? 'Postpaid' : 'Prepaid') + '</div>' +
             '</td>' +
             '<td data-label="Billing">' + billingBadge + '</td>' +
             '<td data-label="Status">' + sbadge(realSt(c)) + '</td>' +
             '<td style="padding-right:20px">' + _actNewHtml(c) + '<div class="abtns">' +
-            '<button class="btn bsm bpurple-btn" onclick="openPayReminder(' + c.id + ')" title="Send payment reminder">🔗</button>' +
-            '<button class="btn bsm" style="background:var(--green-l);border-color:rgba(5,150,105,0.2);color:var(--green);font-size:11px" onclick="openCash(' + c.id + ')" title="Cash payment">💵</button>' +
+            '<button class="btn bsm bpurple-btn" onclick="openPayReminder(' + c.id + ')" title="Send payment link" style="font-size:11px">📲</button>' +
             '<button class="btn bsm bview" onclick="openView(' + c.id + ')" title="View customer" style="font-size:11px">👁️</button>' +
             '<button class="btn bsm bedit" onclick="openEdit(' + c.id + ')" title="Edit customer" style="font-size:11px">✏️</button>' +
-            generateBillBtn +
-            postpaidBtn +
-            '<button class="btn bsm bdanger" onclick="deleteCustomer(' + c.id + ',' + "'" + n + "'" + ')" title="Delete customer" style="font-size:11px">🗑️</button>' +
+            '<button class="btn bsm" style="background:var(--green-l);border-color:rgba(5,150,105,0.2);color:var(--green);font-size:11px" onclick="openCash(' + c.id + ')" title="Cash payment">💵</button>' +
+            '<button class="btn bsm act-more" onclick="openRowMenu(this,' + c.id + ')" title="More actions" aria-label="More" style="font-size:14px;font-weight:700">⋯</button>' +
             '</div></td></tr>';
         }).join("");
 
@@ -5275,9 +5280,10 @@
         $("v-hist-sum").innerHTML = "";
         body.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
         try {
-          const [pr, br] = await Promise.all([
+          const [pr, br, ar] = await Promise.all([
             apiFetch("GET", "/api/admin/payments?customer_id=" + id),
             apiFetch("GET", "/api/admin/postpaid/billing-history?customer_id=" + id),
+            apiFetch("GET", "/api/admin/activations?customer_id=" + id),
           ]);
           const pays = (pr.data?.payments || []).filter((p) => p.status === "success");
           const bills = br.data?.billing_history || [];
@@ -5289,6 +5295,8 @@
               ts: String(b.bill_date || "").slice(0, 10) + " 00:00:00",
               ord: 0,
               kind: "bill",
+              id: b.id,
+              bstatus: b.status,
               delta: b.bill_amount || 0,
               title: "Bill From " + lgDate(b.bill_date) + " To " + lgDate(b.period_end_date),
               sub: lgDate(b.bill_date, true),
@@ -5317,6 +5325,21 @@
               sub: lgDate(p.created_at, true),
             });
           });
+
+          const ACT = { suspend: "Suspended on router", reactivate: "Re-enabled on router", expiry: "Expiry synced to router" };
+          ((ar && ar.data && ar.data.activations) || []).forEach((a) => {
+            const st = a.status === "confirmed" ? "done" : a.status === "failed" ? "FAILED" : a.status;
+            items.push({
+              ts: lgDateTime(a.created_at),
+              ord: 2,
+              kind: "act",
+              id: a.id,
+              delta: 0,
+              title: (ACT[a.action] || "Activation / recharge pushed to router") + (a.expiry_date && a.action !== "suspend" && a.action !== "reactivate" ? " · Exp " + fmtDate(a.expiry_date) : ""),
+              sub: lgDate(a.created_at, true) + " · " + st + (a.confirmed_at ? " (" + lgDate(a.confirmed_at, true) + ")" : ""),
+            });
+          });
+
 
           items.sort((a, b) => (a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : a.ord - b.ord));
 
@@ -5373,21 +5396,29 @@
           }
           const isPay = r.kind === "pay";
           const isOpen = r.kind === "open";
-          const icon = isPay ? "💵" : isOpen ? "⚖️" : "🧾";
-          const chip = isPay
+          const isAct = r.kind === "act";
+          const icon = isPay ? "💵" : isOpen ? "⚖️" : isAct ? "🔌" : "🧾";
+          const chip = isAct
+            ? '<span class="lg-chip lg-opn">Router</span>'
+            : isPay
             ? '<span class="lg-chip lg-paid">− ' + inr(r.delta) + " Paid</span>"
             : isOpen
               ? '<span class="lg-chip lg-opn">' + (r.delta >= 0 ? "+ " : "− ") + inr(r.delta) + "</span>"
               : '<span class="lg-chip lg-billed">+ ' + inr(r.delta) + " Billed</span>";
-          const bal =
-            r.final > 0
+          const bal = isAct
+            ? ""
+            : r.final > 0
               ? '<span class="lg-bal lg-due">Due ' + inr(r.final) + "</span>"
               : r.final < 0
                 ? '<span class="lg-bal lg-adv">Advance ' + inr(r.final) + "</span>"
                 : '<span class="lg-bal lg-clear">Cleared</span>';
           const del = isPay
             ? '<button class="lg-del" title="Delete payment record" onclick="deleteLedgerPayment(' + r.id + ')">🗑</button>'
-            : '<span class="lg-sp"></span>';
+            : r.kind === "bill"
+              ? '<button class="lg-del" title="Delete bill record" onclick="deleteLedgerBill(' + r.id + ',' + (r.delta || 0) + ',\'' + (r.bstatus || "") + '\')">🗑</button>'
+              : r.kind === "act"
+                ? '<button class="lg-del" title="Delete activation record" onclick="deleteLedgerActivation(' + r.id + ')">🗑</button>'
+                : '<span class="lg-sp"></span>';
           html +=
             '<div class="lg-row lg-' + r.kind + '"><div class="lg-ic">' + icon + '</div><div class="lg-main"><div class="lg-title">' +
             esc(r.title) + '</div><div class="lg-sub">' + esc(r.sub) + '</div></div><div class="lg-amt">' + chip + bal + "</div>" + del + "</div>";
@@ -5401,6 +5432,35 @@
           const r = await apiFetch("DELETE", "/api/admin/payments/" + id);
           if (r.success) {
             toast("Payment deleted");
+            loadCustHistory(_custLedgerId);
+          } else toast(r.error || "Failed", "err");
+        } catch (e) {
+          toast("Network error", "err");
+        }
+      }
+
+      async function deleteLedgerBill(id, amount, status) {
+        const amtTxt = status === "pending" ? "₹" + amount + " from the balance due and " : "";
+        if (!confirm("Delete this bill?\n\nThis will subtract " + amtTxt + "the plan days from the customer's expiry (if this is the latest bill).\n\nThis cannot be undone.")) return;
+        try {
+          const r = await apiFetch("DELETE", "/api/admin/postpaid/billing-history/" + id);
+          if (r.success) {
+            toast("Bill deleted" + (r.data && r.data.days_reversed ? " · expiry " + fmtDate(r.data.expiry_date) : ""));
+            const row = custCache.find((x) => x.id === _custLedgerId);
+            if (row && r.data && r.data.balance_due != null) { row.balance_due = r.data.balance_due; row.expiry_date = r.data.expiry_date; }
+            loadCustHistory(_custLedgerId);
+          } else toast(r.error || "Failed", "err");
+        } catch (e) {
+          toast("Network error", "err");
+        }
+      }
+
+            async function deleteLedgerActivation(id) {
+        if (!confirm("Delete this activation record?\n\nThis only removes the record from the history. It does not change anything on the router.")) return;
+        try {
+          const r = await apiFetch("DELETE", "/api/admin/activations/" + id);
+          if (r.success) {
+            toast("Activation deleted");
             loadCustHistory(_custLedgerId);
           } else toast(r.error || "Failed", "err");
         } catch (e) {
@@ -5990,16 +6050,12 @@
             async function deleteBillingRecord(id) {
         const b = _billingAll.find(x => x.id === id);
         const label = b ? (b.customer_name || 'customer') + ' — ₹' + (b.bill_amount || 0) + ' bill (' + fmtDate(b.bill_date) + ')' : 'this record';
-        if (!confirm('Delete billing record for ' + label + '?\n\nThis cannot be undone.')) return;
+        if (!confirm('Delete billing record for ' + label + '?\n\nThis will subtract the unpaid amount and the plan days from the customer\'s expiry (if this is the latest bill).\n\nThis cannot be undone.')) return;
 
-        let adjust = false;
-        if (b && b.status === 'pending') {
-          adjust = confirm('Also subtract ₹' + (b.bill_amount || 0) + ' from the customer\'s balance due?\n\nOK = subtract from balance due\nCancel = delete record only');
-        }
         try {
-          const r = await apiFetch('DELETE', '/api/admin/postpaid/billing-history/' + id + (adjust ? '?adjust_balance=1' : ''));
+          const r = await apiFetch('DELETE', '/api/admin/postpaid/billing-history/' + id);
           if (r.success) {
-            toast(r.data?.balance_adjusted ? 'Record deleted & balance adjusted' : 'Record deleted');
+            toast('Bill deleted' + (r.data?.days_reversed ? ' · expiry ' + fmtDate(r.data.expiry_date) : ''));
             loadBillingHistory();
           } else toast(r.error || 'Failed', 'err');
         } catch (e) {
@@ -7921,7 +7977,7 @@ async function loadTr069Page() {
     _trData = d;
     const enabled = d.wifi_method && d.wifi_method !== 'none';
     $('tr-info').innerHTML =
-      '<div><div class="sc-label">ACS URL</div><div class="v">' + (d.acs_url ? esc(d.acs_url) : '<span style="color:var(--red)">Not configured</span>') + '</div></div>' +
+      (d.acs_url ? '<div><div class="sc-label">ACS URL</div><div class="v">' + esc(d.acs_url) + '</div></div>' : '') +
       '<div><div class="sc-label">WiFi method</div><div class="v">' + (enabled ? esc(d.wifi_method) : '<span style="color:var(--txt3)">Not enabled</span>') + '</div></div>' +
       '<div><div class="sc-label">SSID prefix</div><div class="v">' + (d.ssid_prefix ? esc(d.ssid_prefix) : '—') + '</div></div>';
     $('tr-n-pending').textContent = d.summary.pending;
@@ -8444,12 +8500,13 @@ function generateBillNow(id, name) {
   const c = (custCache || []).find(function (x) { return x.id === id; });
   if (!c) return;
   $('gb-cust-id').value = id;
-  $('gb-start').value = 'expiry';
-  $('gb-custom').value = today();
-  $('gb-custom-wrap').style.display = 'none';
+  $('gb-custom').value = gbDefaultStart(c).date;
   $('gb-err').style.display = 'none';
   $('gb-isp').checked = false;                       // ISP recharge is OFF by default
-  $('gb-isp-wrap').style.display = c.billing_type === 'postpaid' ? 'none' : 'flex';
+  const sid = parseInt(c.isp_server_id);
+  const ispLabel = sid === 1 ? 'Also recharge on Jaze portal' : (sid === 2 ? 'Also recharge on NetFlow Admin' : '');
+  $('gb-isp-label').textContent = ispLabel;
+  $('gb-isp-wrap').style.display = (c.billing_type === 'postpaid' || !ispLabel) ? 'none' : 'flex';
   $('gb-due-days').value = 7;
   $('gb-due-wrap').style.display = c.billing_type === 'postpaid' ? 'none' : 'block';
   $('gb-info').innerHTML = '<b>' + name + '</b> · ' + (c.plan_name || 'No plan') +
@@ -8465,29 +8522,40 @@ function gbAddDays(dateStr, days) {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 
+// Default start: after the current expiry if it is still running, else today
+function gbDefaultStart(c) {
+  const t = today();
+  return (c.expiry_date && c.expiry_date >= t)
+    ? { mode: 'expiry', date: gbAddDays(c.expiry_date, 1) }
+    : { mode: 'today', date: t };
+}
+
+
+
 function gbUpdatePreview() {
   const c = (custCache || []).find(function (x) { return x.id === parseInt($('gb-cust-id').value); });
   if (!c) return;
-  const mode = $('gb-start').value;
-  $('gb-custom-wrap').style.display = mode === 'custom' ? 'block' : 'none';
-  let start = mode === 'today' ? today() : (mode === 'custom' ? $('gb-custom').value : (c.expiry_date || today()));
-  if (!start) { $('gb-preview').innerHTML = 'Pick a start date.'; return; }
   const days = c.plan_validity_days || 30;
-  const startsOnStart = mode === 'today' || mode === 'custom' || !c.expiry_date;
-  const newExp = gbAddDays(start, days - (startsOnStart ? 1 : 0));
+  const from = $('gb-custom').value;
+  if (!from) { $('gb-to').value = ''; $('gb-preview').innerHTML = 'Pick a start date.'; return; }
+  const to = gbAddDays(from, days - 1);
+  $('gb-to').value = to;
   const dueAfter = (c.balance_due || 0) + (c.plan_price || 0);
-  let html = 'Plan starts <b>' + fmtDate(startsOnStart ? start : gbAddDays(start, 1)) + '</b> → new expiry <b>' + fmtDate(newExp) + '</b><br>' +
-             'Bill ₹' + (c.plan_price || 0) + ' · Total due after: <b>₹' + dueAfter + '</b>';
-  if (newExp < today()) html += '<br><span style="color:var(--amber)">⚠ New expiry is still in the past — the customer will remain expired.</span>';
+  let html = 'Bill ₹' + (c.plan_price || 0) + ' · ' + days + ' days · Total due after: <b>₹' + dueAfter + '</b>';
+  if (c.expiry_date && c.expiry_date >= from) {
+    html += '<br><span style="color:var(--amber)">ℹ Current expiry is ' + fmtDate(c.expiry_date) +
+            ' — this plan will overlap the remaining days. Use "Choose another date" to continue after the expiry.</span>';
+  }
+  if (to < today()) html += '<br><span style="color:var(--amber)">⚠ New expiry is still in the past — the customer will remain expired.</span>';
   $('gb-preview').innerHTML = html;
 }
 
 async function submitGenerateBill() {
   const id = parseInt($('gb-cust-id').value);
-  const mode = $('gb-start').value;
+  const mode = 'custom';
   const btn = $('gb-btn'), err = $('gb-err');
   err.style.display = 'none';
-  if (mode === 'custom' && !$('gb-custom').value) { err.textContent = 'Pick a start date'; err.style.display = 'block'; return; }
+  if (!$('gb-custom').value) { err.textContent = 'Pick a start date'; err.style.display = 'block'; return; }
   btn.disabled = true;
   try {
     const r = await apiFetch('POST', '/api/admin/postpaid/generate-bill', {
