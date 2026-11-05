@@ -3725,7 +3725,7 @@
         <div class="fgrid">
           <div class="ff full">
             <label>Plan Name *</label>
-            <input id="pl-name" placeholder="e.g. Basic 50 Mbps" />
+            <input id="pl-name" placeholder=" Basic 50 Mbps" />
           </div>
           <div class="ff">
             <label>Download Speed (Mbps)</label>
@@ -3846,7 +3846,7 @@
               </div>
               <div class="ff">
                 <label>Nick name <span style="font-weight:400;color:var(--txt3)">(optional, for your reference only)</span></label>
-                <input id="a-local" placeholder="e.g. Ramesh" />
+                <input id="a-local" placeholder=" Ramesh Kumar" />
               </div>
               <div class="ff">
                 <label>Phone *</label>
@@ -3867,6 +3867,11 @@
               <div class="ff full">
                 <label>Address</label>
                 <input id="a-addr" placeholder="House, Street, Area" />
+              </div>
+              <div class="ff full">
+                <label>Area</label>
+                <input id="a-area" list="area-list" autocomplete="off" />
+                <datalist id="area-list"></datalist>
               </div>
               <div class="ff full">
                 <label>Comments</label>
@@ -3940,7 +3945,7 @@
               </div>
               <div class="ff">
                 <label>Local name <span style="font-weight:400;color:var(--txt3)">(optional)</span></label>
-                <input id="e-local" placeholder="Ramesh Kumar" />
+                <input id="e-local" />
               </div>
               <div class="ff">
                 <label>Phone *</label>
@@ -3962,6 +3967,10 @@
               <div class="ff full">
                 <label>Address</label>
                 <input id="e-addr" />
+              </div>
+              <div class="ff full">
+                <label>Area</label>
+                <input id="e-area" list="area-list" autocomplete="off" />
               </div>
               <div class="ff full">
                 <label>Comments</label>
@@ -5090,7 +5099,7 @@
         });
       }
       // Box 1: name, mobile, PPPoE username
-      function _custBasicText(c) { return [c.name, c.local_name, c.phone, c.isp_username].join(" "); }
+      function _custBasicText(c) { return [c.name, c.local_name, c.phone, c.isp_username, c.area].join(" "); }
       // Box 2: address, membership no, MAC, router, plan, hardware... (passwords NOT searched)
       function _custAdvText(c) {
         return [c.address, c.membership, c.mac_address,
@@ -5235,6 +5244,7 @@
           di("Status", sbadge(realSt(c)), true) +
           di("Created", fmtDateTime(c.created_at)) +
           di("Address", c.address, "full") +
+          di("Area", c.area) +
           di("Comments", c.comments, "full");
         $("v-isp").innerHTML =
           di("ISP Server", c.isp_server) +
@@ -5618,12 +5628,25 @@
         }
       }
 
+      function refreshAreaList() {
+        const seen = {};
+        (custCache || []).forEach((c) => {
+          const a = (c.area || "").trim();
+          if (a && !seen[a.toLowerCase()]) seen[a.toLowerCase()] = a;
+        });
+        $("area-list").innerHTML = Object.keys(seen)
+          .sort()
+          .map((k) => '<option value="' + esc(seen[k]) + '"></option>')
+          .join("");
+      }
+
       function openAdd() {
-        ["a-name", "a-local", "a-phone", "a-email", "a-pass", "a-addr", "a-mem", "a-comments"].forEach((i) => {
+        ["a-name", "a-local", "a-phone", "a-email", "a-pass", "a-addr", "a-area", "a-mem", "a-comments"].forEach((i) => {
           const el = $(i);
           if (el) el.value = "";
         });
         $("a-err").style.display = "none";
+        refreshAreaList();
         $("m-add").style.display = "flex";
       }
 
@@ -5641,6 +5664,8 @@
         $("e-email").value = c.email || "";
         $("e-pass").value = "";
         $("e-addr").value = c.address || "";
+        $("e-area").value = c.area || "";
+        refreshAreaList();
         $("e-isp").value = c.isp_server_id || "2";
         $("e-iuser").value = c.isp_username || "";
         $("e-brand").value = c.router_brand_id || "";
@@ -5683,6 +5708,7 @@
           email: $("a-email").value.trim(),
           password: $("a-pass").value.trim(),
           address: $("a-addr").value.trim(),
+          area: $("a-area").value.trim(),
           membership: $("a-mem").value.trim(),
           comments: $("a-comments").value.trim(),
           isp_server_id: 5, // Manual (No ISP Integration); change in Edit
@@ -5721,6 +5747,7 @@
           phone: $("e-phone").value.trim(),
           email: $("e-email").value.trim(),
           address: $("e-addr").value.trim(),
+          area: $("e-area").value.trim(),
           isp_server_id: parseInt($("e-isp").value),
           isp_username: $("e-iuser").value.trim(),
           router_brand_id: $("e-brand").value || null,
