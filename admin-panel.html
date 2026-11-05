@@ -2376,6 +2376,10 @@
             <div class="nav-icon">🏦</div>
             Settlements
           </div>
+          <div class="nav-item" id="nav-colreport" onclick="showPage('colreport')">
+            <div class="nav-icon">📊</div>
+            Collection Report
+          </div>
           <div class="nav-sec">Add-ons</div>
           <div class="nav-item" id="nav-iptv" onclick="showPage('iptv')">
             <div class="nav-icon">📺</div>
@@ -2484,7 +2488,7 @@
                 </div>
                 <div class="sc-sub" style="color: var(--green)">online</div>
               </div>
-              <div class="sc green fade-up fade-up-d2" onclick="showPage('payments')">
+              <div class="sc green fade-up fade-up-d2" onclick="openColReport('today','online')">
                 <div class="sc-row">
                   <div class="sc-icon green">₹</div>
                   <div class="sc-text">
@@ -2602,8 +2606,8 @@
           </div>
           <div class="content">
             <div class="toolbar">
-              <input class="sbox" id="csearch" placeholder="Search name, username or mobile..." oninput="searchC()" />
-              <input class="sbox" id="csearch2" placeholder="Advanced: address, membership no, MAC, hardware, plan..." oninput="searchC()" />
+              <input class="sbox" id="csearch" placeholder="Name, username or mobile..." oninput="searchC()" />
+              <input class="sbox" id="csearch2" placeholder="Area, address, membership no, MAC, hardware, plan..." oninput="searchC()" />
               <select class="fsel" id="cstatus" onchange="_custFilterChanged()">
                 <option value="">All status</option>
                 <option value="active">Active</option>
@@ -2870,6 +2874,78 @@
                         </div>
                       </td>
                     </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+                <!-- COLLECTION REPORT -->
+        <div id="page-colreport" style="display: none">
+          <div class="topbar">
+            <div>
+              <div class="pg-title">Collection Report</div>
+              <div class="pg-sub" id="cr-range">—</div>
+            </div>
+            <button class="btn" onclick="loadColReport()">↻ Refresh</button>
+          </div>
+          <div class="content">
+            <div class="toolbar" style="flex-wrap: wrap; gap: 8px">
+              <button class="btn bsm bpri" data-cr="today" onclick="crSetPeriod('today')">Today</button>
+              <button class="btn bsm" data-cr="yesterday" onclick="crSetPeriod('yesterday')">Yesterday</button>
+              <button class="btn bsm" data-cr="month" onclick="crSetPeriod('month')">This Month</button>
+              <button class="btn bsm" data-cr="lastmonth" onclick="crSetPeriod('lastmonth')">Last Month</button>
+              <button class="btn bsm" data-cr="custom" onclick="crSetPeriod('custom')">Custom</button>
+              <select class="fsel" id="cr-method" onchange="crRender()">
+                <option value="online">Online only</option>
+                <option value="cash">Cash only</option>
+                <option value="all">All payments</option>
+              </select>
+            </div>
+            <div class="toolbar" id="cr-custom" style="display: none; gap: 8px; align-items: center; flex-wrap: wrap">
+              <input class="sbox" type="date" id="cr-from" style="max-width: 170px" />
+              <span style="color: var(--txt3)">to</span>
+              <input class="sbox" type="date" id="cr-to" style="max-width: 170px" />
+              <button class="btn bsm bpri" onclick="crRender()">Show</button>
+            </div>
+            <div class="stats3">
+              <div class="sc green">
+                <div class="sc-icon green">₹</div>
+                <div class="sc-label" id="cr-total-lbl">Online Collected</div>
+                <div class="sc-val" id="cr-total" style="font-size: 24px; color: var(--green)">—</div>
+                <div class="sc-sub" style="color: var(--green)" id="cr-total-sub">—</div>
+              </div>
+              <div class="sc blue">
+                <div class="sc-icon blue">🌐</div>
+                <div class="sc-label">Online</div>
+                <div class="sc-val" id="cr-online" style="font-size: 24px; color: var(--blue)">—</div>
+                <div class="sc-sub" id="cr-online-sub">—</div>
+              </div>
+              <div class="sc amber">
+                <div class="sc-icon amber">💵</div>
+                <div class="sc-label">Cash</div>
+                <div class="sc-val" id="cr-cash" style="font-size: 24px; color: var(--amber)">—</div>
+                <div class="sc-sub" style="color: var(--amber)" id="cr-cash-sub">—</div>
+              </div>
+            </div>
+            <div class="tbl-card">
+              <div class="tbl-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Customer</th>
+                      <th>Amount</th>
+                      <th>Method</th>
+                      <th>Type</th>
+                      <th>App Ref</th>
+                      <th>Bank Txn</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cr-tbody">
+                    <tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>
                   </tbody>
                 </table>
               </div>
@@ -4536,7 +4612,7 @@
 
     <script>
       const BASE = "https://isp-billing-api.netflowcloud.workers.dev";
-      const PAGES = ['dashboard','customers','activations','payments','settlements','notifications','plans','ott','paylinks','brands','whatsapp','billing','iptv','isp-plan','tr069'];
+      const PAGES = ['dashboard','customers','activations','payments','colreport','settlements','notifications','plans','ott','paylinks','brands','whatsapp','billing','iptv','isp-plan','tr069'];
       let custCache = [],
         plansCache = [],
         ottPlansCache = [],
@@ -4758,6 +4834,7 @@
         if (name === "activations") loadActivations();
         if (name === "payments") loadPayments();
         if (name === "settlements") loadSettlements();
+        if (name === 'colreport') loadColReport();
         if (name === "notifications") {
           loadTpls();
           loadNHistory();
@@ -4775,6 +4852,7 @@
         if (name === 'whatsapp') loadWhatsAppPage();
         if (name === 'tr069') loadTr069Page();
         if (name === 'billing') loadBillingHistory();
+
       }
 
       async function loadSystemStatus() {
@@ -5099,10 +5177,10 @@
         });
       }
       // Box 1: name, mobile, PPPoE username
-      function _custBasicText(c) { return [c.name, c.local_name, c.phone, c.isp_username, c.area].join(" "); }
+      function _custBasicText(c) { return [c.name, c.local_name, c.phone, c.isp_username].join(" "); }
       // Box 2: address, membership no, MAC, router, plan, hardware... (passwords NOT searched)
       function _custAdvText(c) {
-        return [c.address, c.membership, c.mac_address,
+        return [c.address, c.area, c.membership, c.mac_address,
                 c.plan_name, c.isp_server, c.email, c.hw_text].join(" ");
       }
       function filterSt(s) {
@@ -5986,6 +6064,7 @@
         }
       }
 
+
       async function viewSettlementTxns(payoutId) {
         $("settlement-txns-title").textContent = "Settled Transactions — " + payoutId;
         $("settlement-txns-list").innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
@@ -6025,6 +6104,109 @@
         } catch (e) {
           $("settlement-txns-list").innerHTML = '<div class="empty">Failed to load</div>';
         }
+      }
+
+
+      // ── COLLECTION REPORT ────────────────────────────────────────
+      let _crPeriod = "today", _crPays = [];
+
+      function _crIsOnline(p) { return p.payment_method === "easebuzz" || p.payment_method === "razorpay"; }
+
+      // Used by the dashboard "Online Today" card
+      function openColReport(period, method) {
+        $("cr-method").value = method || "online";
+        showPage("colreport");
+        crSetPeriod(period || "today");
+      }
+
+      function _crRange() {
+        const pad = (n) => String(n).padStart(2, "0");
+        const f = (x) => x.getFullYear() + "-" + pad(x.getMonth() + 1) + "-" + pad(x.getDate());
+        const d = new Date(), y = d.getFullYear(), m = d.getMonth();
+        if (_crPeriod === "today") return [f(d), f(d)];
+        if (_crPeriod === "yesterday") { const t = f(new Date(y, m, d.getDate() - 1)); return [t, t]; }
+        if (_crPeriod === "month") return [f(new Date(y, m, 1)), f(new Date(y, m + 1, 0))];
+        if (_crPeriod === "lastmonth") return [f(new Date(y, m - 1, 1)), f(new Date(y, m, 0))];
+        let a = $("cr-from").value, b = $("cr-to").value;
+        if (a && b && a > b) { const t = a; a = b; b = t; }
+        return [a, b];
+      }
+
+      function crSetPeriod(p) {
+        _crPeriod = p;
+        document.querySelectorAll("[data-cr]").forEach((b) => {
+          b.className = "btn bsm" + (b.dataset.cr === p ? " bpri" : "");
+        });
+        $("cr-custom").style.display = p === "custom" ? "flex" : "none";
+        crRender();
+      }
+
+      async function loadColReport() {
+        $("cr-tbody").innerHTML = '<tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading...</div></td></tr>';
+        try {
+          const r = await apiFetch("GET", "/api/admin/payments");
+          _crPays = (r.data?.payments || []).filter((p) => p.status === "success");
+          crRender();
+        } catch (e) {
+          console.error(e);
+          $("cr-tbody").innerHTML = '<tr><td colspan="9"><div class="empty">Failed to load</div></td></tr>';
+        }
+      }
+
+      function crRender() {
+        const [from, to] = _crRange();
+        if (!from || !to) {
+          $("cr-range").textContent = "Choose From and To dates";
+          $("cr-tbody").innerHTML = '<tr><td colspan="9"><div class="empty">Choose From and To dates, then press Show</div></td></tr>';
+          return;
+        }
+        $("cr-range").textContent = from === to ? fmtDate(from) : fmtDate(from) + " – " + fmtDate(to);
+
+        const inRange = _crPays.filter((p) => {
+          const day = String(p.created_at || "").slice(0, 10);
+          return day >= from && day <= to;
+        });
+        const onl = inRange.filter(_crIsOnline);
+        const csh = inRange.filter((p) => p.payment_method === "cash");
+        const sum = (a) => a.reduce((s, p) => s + (Number(p.amount_total) || 0), 0);
+        const money = (n) => "₹" + n.toLocaleString("en-IN");
+        const cnt = (a) => a.length + (a.length === 1 ? " payment" : " payments");
+
+        const mode = $("cr-method").value;
+        const rows = (mode === "online" ? onl : mode === "cash" ? csh : inRange)
+          .slice()
+          .sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
+
+        $("cr-total-lbl").textContent = mode === "online" ? "Online Collected" : mode === "cash" ? "Cash Collected" : "Total Collected";
+        $("cr-total").textContent = money(sum(rows));
+        $("cr-total-sub").textContent = cnt(rows);
+        $("cr-online").textContent = money(sum(onl));
+        $("cr-online-sub").textContent = cnt(onl);
+        $("cr-cash").textContent = money(sum(csh));
+        $("cr-cash-sub").textContent = cnt(csh);
+
+        if (!rows.length) {
+          $("cr-tbody").innerHTML = '<tr><td colspan="9"><div class="empty">No payments in this period</div></td></tr>';
+          return;
+        }
+        $("cr-tbody").innerHTML = rows.map((p) =>
+          '<tr><td data-label="ID" style="font-family:var(--mono);color:var(--txt3);font-size:12px">#' + p.id +
+          '</td><td data-label="Customer"><div style="font-weight:600;color:var(--txt)">' +
+          esc(p.customer_local_name || p.customer_name || "—") +
+          (p.customer_local_name ? '<div style="font-weight:400;font-size:11px;color:var(--txt3)">' + esc(p.customer_name || "") + '</div>' : "") +
+          '</div><div style="font-size:11px;color:var(--txt3);font-family:var(--mono)">' + (p.customer_phone || "") +
+          '</div></td><td data-label="Amount" style="font-family:var(--mono);font-weight:700;color:var(--green)">₹' +
+          (p.amount_total || 0).toLocaleString("en-IN") +
+          '</td><td data-label="Method">' + mbadge(p.payment_method) +
+          '</td><td data-label="Type" style="color:var(--txt2)">' + (p.recharge_type || "").replace(/_/g, " ") +
+          '</td><td data-label="App Ref" style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' +
+          (p.payu_order_id || (p.payment_method === "cash" ? "CASH-" + p.id : "—")) +
+          '</td><td data-label="Bank Txn" style="font-family:var(--mono);font-size:11px;color:var(--txt3);max-width:160px;word-break:break-all;white-space:normal">' +
+          (p.payu_txn_id || "—") +
+          '</td><td data-label="Status">' + sbadge(p.status) +
+          '</td><td data-label="Date" style="font-family:var(--mono);font-size:11px;color:var(--txt3)">' + fmtDateTime(p.created_at) +
+          '</td></tr>'
+        ).join("");
       }
 
 
