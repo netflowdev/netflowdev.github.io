@@ -8718,7 +8718,7 @@ function generateBillNow(id, name) {
   $('gb-err').style.display = 'none';
   $('gb-isp').checked = false;                       // ISP recharge is OFF by default
   const sid = parseInt(c.isp_server_id);
-  const ispLabel = sid === 1 ? 'Also recharge on Jaze portal' : (sid === 2 ? 'Also recharge on NetFlow Admin' : '');
+  const ispLabel = sid === 1 ? 'Activate on Jaze portal' : (sid === 2 ? 'Activate on NetAdmin' : '');
   $('gb-isp-label').textContent = ispLabel;
   $('gb-isp-wrap').style.display = (c.billing_type === 'postpaid' || !ispLabel) ? 'none' : 'flex';
   $('gb-due-days').value = 7;
