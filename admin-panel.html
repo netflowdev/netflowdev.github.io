@@ -3917,20 +3917,20 @@
           <div class="cm-pane active" data-pane="details">
             <div class="fgrid">
               <div class="ff">
-                <label>Billing name *</label>
-                <input id="a-name" placeholder="Ramesh Kumar" />
+                <label>Customer name <span style="font-weight:400;color:var(--txt3)">(optional)</span></label>
+                <input id="a-local" />
               </div>
               <div class="ff">
-                <label>Nick name <span style="font-weight:400;color:var(--txt3)">(optional, for your reference only)</span></label>
-                <input id="a-local" placeholder=" Ramesh Kumar" />
+                <label>Billing name*</label>
+                <input id="a-name" />
               </div>
               <div class="ff">
-                <label>Phone *</label>
-                <input id="a-phone" type="tel" placeholder="9876543210" />
+                <label>Phone*</label>
+                <input id="a-phone" type="tel" />
               </div>
               <div class="ff">
                 <label>Email</label>
-                <input id="a-email" type="email" placeholder="email@example.com" />
+                <input id="a-email" type="email" />
               </div>
               <div class="ff">
                 <label>Password</label>
@@ -4016,12 +4016,12 @@
           <div class="cm-pane active" data-pane="details">
             <div class="fgrid">
               <div class="ff">
-                <label>Billing name *</label>
-                <input id="e-name" />
+                <label>Customer name <span style="font-weight:400;color:var(--txt3)">(optional)</span></label>
+                <input id="e-local" />
               </div>
               <div class="ff">
-                <label>Local name <span style="font-weight:400;color:var(--txt3)">(optional)</span></label>
-                <input id="e-local" />
+                <label>Billing name*</label>
+                <input id="e-name" />
               </div>
               <div class="ff">
                 <label>Phone *</label>
@@ -4166,13 +4166,13 @@
                 <label>Next Bill Generation Date</label>
                 <input id="e-next-bill-date" type="date" required />
               </div>
+              <div class="ff" id="e-currentduedate-field" style="display:none">
+                <label>Reminder Date (Auto suspend if due pending)</label>
+                <input id="e-current-due-date" type="date" required />
+              </div>
               <div class="ff">
                 <label>Expiry Date</label>
                 <input id="e-expiry" type="date" required />
-              </div>
-              <div class="ff" id="e-currentduedate-field" style="display:none">
-                <label>Reminder Date (Current Due Date)</label>
-                <input id="e-current-due-date" type="date" required />
               </div>
             </div>
           </div>
