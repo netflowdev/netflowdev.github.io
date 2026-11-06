@@ -325,6 +325,10 @@
       }
       .stats.stats5 { grid-template-columns: repeat(5, 1fr); }
       #csort { display: none; }
+      @media (min-width: 769px) {
+        #csearch, #csearch2 { width: 210px; }
+        #cpool { width: 170px; }
+      }
       @media (max-width: 1100px) { .stats.stats5 { grid-template-columns: repeat(3, 1fr); } }
       @media (max-width: 768px) {
         .stats.stats5 { grid-template-columns: 1fr 1fr; }
@@ -1747,6 +1751,10 @@
       @media (min-width: 769px) {
         #ctbody td { padding-top: 7px; padding-bottom: 7px; }
         #ctbody td[data-label="Plan"] { white-space: nowrap; }
+        #ctbody .pool-sub {
+          font-size: 11px; color: var(--txt3); margin-top: 2px;
+          white-space: normal; max-width: 130px; line-height: 1.3;
+        }
       }
 
       body.sb-open .mob-menu-btn { display: none !important; }
@@ -2624,6 +2632,10 @@
                 <option value="prepaid">Prepaid</option>
                 <option value="postpaid">Postpaid</option>
               </select>
+              <select class="fsel" id="cpool" onchange="_custViewChanged()" title="Router pool">
+                <option value="">All pools</option>
+                <option value="none">No pool (default)</option>
+              </select>
               <select class="fsel" id="csort" onchange="_custSortSelect()" title="Sort">
                 <option value="">Sort: Newest first</option>
                 <option value="name:1">Name A-Z</option>
@@ -2897,9 +2909,9 @@
               <button class="btn bsm" data-cr="lastmonth" onclick="crSetPeriod('lastmonth')">Last Month</button>
               <button class="btn bsm" data-cr="custom" onclick="crSetPeriod('custom')">Custom</button>
               <select class="fsel" id="cr-method" onchange="crRender()">
+                <option value="all" selected>All payments</option>
                 <option value="online">Online only</option>
                 <option value="cash">Cash only</option>
-                <option value="all">All payments</option>
               </select>
             </div>
             <div class="toolbar" id="cr-custom" style="display: none; gap: 8px; align-items: center; flex-wrap: wrap">
@@ -3074,7 +3086,10 @@
               <div class="pg-title">Plans</div>
               <div class="pg-sub">manage broadband plans</div>
             </div>
-            <button class="btn bpri" onclick="openAddPlan()">+ Add Plan</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn" onclick="openPools()">Router Pools</button>
+              <button class="btn bpri" onclick="openAddPlan()">+ Add Plan</button>
+            </div>
           </div>
           <div class="content">
             <div class="tbl-card">
@@ -3793,6 +3808,42 @@
     </div>
     <!-- end .shell -->
 
+    <!-- ROUTER POOLS -->
+    <div class="modal-bg" id="m-pools" style="display: none">
+      <div class="modal">
+        <div class="modal-title">Router Pools</div>
+        <div style="font-size:12px;color:var(--txt3);margin-bottom:12px">
+          Each entry is one router profile (e.g. "50 Mbps" with its pool, local address and speed). Pick it on the customer's ISP tab.
+        </div>
+        <div id="pool-list" style="margin-bottom:14px"></div>
+        <input type="hidden" id="pp-id" />
+        <div class="fgrid">
+          <div class="ff">
+            <label>Pool name (label) *</label>
+            <input id="pp-name" />
+          </div>
+          <div class="ff">
+            <label>Router pool name *</label>
+            <input id="pp-pool" />
+          </div>
+          <div class="ff">
+            <label>Local address</label>
+            <input id="pp-local" placeholder="10.10.10.1" />
+          </div>
+          <div class="ff">
+            <label>Speed (Mbps) *</label>
+            <input id="pp-speed" type="number" step="any" placeholder="50" />
+          </div>
+        </div>
+        <div class="errmsg" id="pp-err"></div>
+        <div class="mactions">
+          <button class="btn" onclick="closeM('m-pools')">Close</button>
+          <button class="btn" onclick="poolFormReset()">Clear</button>
+          <button class="btn bpri" id="pp-btn" onclick="submitPool()">Add Pool</button>
+        </div>
+      </div>
+    </div>
+
     <!-- PLAN MODAL -->
     <div class="modal-bg" id="m-plan" style="display: none">
       <div class="modal">
@@ -3819,25 +3870,15 @@
             <label>Validity (days) *</label>
             <input id="pl-days" type="number" placeholder="30" />
           </div>
-          <div class="ff">
-            <label>ISP Server</label>
-            <select id="pl-isp">
-              <option value="1">Jaze ISP Server</option>
-              <option value="2">NetAdmin Server</option>
-              <option value="5">Manual (No ISP Integration)</option>
-            </select>
+          <div class="ff full">
+            <label>Default Pool *</label>
+            <select id="pl-def-pool" onchange="syncPlanDefault()"></select>
+            <div class="cm-hint" style="display:block">Used when a customer has no pool chosen. Can be any pool.</div>
           </div>
-          <div class="ff">
-            <label>ISP Plan ID (Jaze)</label>
-            <input id="pl-isp-id" placeholder="Jaze plan ID if needed" />
-          </div>
-          <div class="ff">
-            <label>NetAdmin Profile (blank = auto)</label>
-            <input id="pl-mk-profile" placeholder="Leave blank for auto name (NetFlow-id)" />
-          </div>
-          <div class="ff">
-            <label>NetAdmin Service</label>
-            <input id="pl-mk-service" placeholder="pppoe" value="pppoe" />
+          <div class="ff" style="grid-column:1/-1">
+            <label>Limit to these pools (optional)</label>
+            <div class="cm-hint" style="display:block;margin:0 0 4px">Leave all unticked = this plan works with every pool. If you tick some, the default pool is always included.</div>
+            <div id="pl-pools" style="max-height:220px;overflow-y:auto"></div>
           </div>
           <div class="ff">
             <label>Status</label>
@@ -4094,7 +4135,7 @@
             <div class="fgrid">
               <div class="ff">
                 <label>ISP Server *</label>
-                <select id="e-isp">
+                <select id="e-isp" onchange="updateEditPoolHint()">
                   <option value="5">Manual (No ISP Integration)</option>
                   <option value="1">Jaze ISP Server</option>
                   <option value="2">NetAdmin Server</option>
@@ -4106,10 +4147,17 @@
               </div>
               <div class="ff">
                 <label>Internet Plan</label>
-                <select id="e-plan" onchange="updateEditPlanWarn()">
+                <select id="e-plan" onchange="updateEditPlanWarn();filterEditPools()">
                   <option value="">— Select Plan —</option>
                 </select>
                 <div class="cm-hint" id="e-plan-warn">⚠ No plan selected — customer will be saved without a plan</div>
+              </div>
+              <div class="ff" id="e-pool-field" style="display:none">
+                <label>Router Pool</label>
+                <select id="e-pool" onchange="updateEditPoolHint()">
+                  <option value="">Default (plan's own pool)</option>
+                </select>
+                <div class="cm-hint" id="e-pool-hint"></div>
               </div>
               <div class="ff">
                 <label>Status</label>
@@ -5100,7 +5148,7 @@
             '<td data-label="Phone" style="font-family:var(--mono);font-size:12px"><span class="phone-cell"><a class="tel-link" href="tel:' + (c.phone || "") + '">' + (c.phone || "—") + '</a><a class="wa-link" href="https://wa.me/' + waNumber(c.phone) + '" target="_blank" rel="noopener" title="Chat on WhatsApp" onclick="return waIconClick(event,' + c.id + ')"><svg viewBox="0 0 448 512" width="19" height="22" fill="rgb(99, 230, 190)"><path d="M380.9 97.1c-41.9-42-97.7-65.1-157-65.1-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480 117.7 449.1c32.4 17.7 68.9 27 106.1 27l.1 0c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3 18.6-68.1-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1s56.2 81.2 56.1 130.5c0 101.8-84.9 184.6-186.6 184.6zM325.1 300.5c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8s-14.3 18-17.6 21.8c-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7s-12.5-30.1-17.1-41.2c-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2s-9.7 1.4-14.8 6.9c-5.1 5.6-19.4 19-19.4 46.3s19.9 53.7 22.6 57.4c2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4s4.6-24.1 3.2-26.4c-1.3-2.5-5-3.9-10.5-6.6z"/></svg></a></span></td>' +
             '<td data-label="ISP">' + ispBadge(c.isp_server_id) + '</td>' +
             '<td data-label="Username" style="font-family:var(--mono);font-size:12px;color:var(--txt3)">' + (c.isp_username || "—") + '</td>' +
-            '<td data-label="Plan" style="color:var(--txt2)">' + '<span class="plan-val"><span class="isp-inline">' + ispBadge(c.isp_server_id) + '</span>' + (c.plan_name || "—") + '</span></td>' +
+            '<td data-label="Plan" style="color:var(--txt2)">' + '<span class="plan-val"><span class="isp-inline">' + ispBadge(c.isp_server_id) + '</span>' + (c.plan_name || "—") + '</span>' + (c.pool_name ? '<div class="pool-sub" title="' + esc(c.pool_name) + '">' + esc(c.pool_name) + '</div>' : '') + '</td>' +
             '<td data-label="Expiry" style="font-family:var(--mono);font-size:12px;color:var(--txt);white-space:nowrap">' + fmtDate(c.expiry_date) + _daysLeftHtml(c.expiry_date) + '</td>' +
             '<td data-label="Due" style="color:' + (c.balance_due > 0 ? "var(--red)" : "var(--txt3)") + ';font-family:var(--mono);font-weight:' + (c.balance_due > 0 ? "700" : "400") + '">' +
               '<span style="display:inline-flex;align-items:center;gap:6px">' + "₹" + (c.balance_due || 0) +
@@ -5181,7 +5229,7 @@
       // Box 2: address, membership no, MAC, router, plan, hardware... (passwords NOT searched)
       function _custAdvText(c) {
         return [c.address, c.area, c.membership, c.mac_address,
-                c.plan_name, c.isp_server, c.email, c.hw_text].join(" ");
+                c.plan_name, c.pool_name, c.isp_server, c.email, c.hw_text].join(" ");
       }
       function filterSt(s) {
         $("cstatus").value = s;
@@ -5250,9 +5298,11 @@
 
       function _custApplyView() {
         const f = $("cstatus").value, b = $("cbilling").value;
+        const pf = $("cpool") ? $("cpool").value : "";
         const w1 = _custWords($("csearch").value), w2 = _custWords($("csearch2").value);
         let list = _custRaw.filter((c) =>
           _custMatch(c, f) && (!b || (c.billing_type === "postpaid" ? "postpaid" : "prepaid") === b) &&
+          (!pf || (pf === "none" ? !c.pool_id : String(c.pool_id) === pf)) &&
           _custHas(_custBasicText(c), w1) && _custHas(_custAdvText(c), w2)
         );
         if (_custSort.key) {
@@ -5328,7 +5378,8 @@
           di("ISP Server", c.isp_server) +
           di("ISP Username", c.isp_username, "full", "mono") +
           di("Plan", c.plan_name) +
-          di("Plan ID", c.plan_id);
+          di("Plan ID", c.plan_id) +
+          di("Router Pool", c.pool_name ? c.pool_name + " (" + (c.pool_router_name || "") + ")" : "Default (plan's own pool)");
         $("v-hw").innerHTML =
           di("Router Brand", c.router_brand) +
           di("MAC Address", c.mac_address, "", "mono");
@@ -5757,6 +5808,10 @@
         $("e-mac").value = c.mac_address || "";
         $("e-err").style.display = "none";
         $("e-plan").value = c.plan_id ? String(c.plan_id) : "";
+        filterEditPools(c.pool_id);
+        $("e-pool").value = c.pool_id ? String(c.pool_id) : "";
+        updateEditPlanWarn();
+        updateEditPoolHint();
         if ($("e-wifi-ssid")) $("e-wifi-ssid").value = c.wifi_ssid || "";
         if ($("e-wifi-band")) $("e-wifi-band").value = c.wifi_band || "single";
         $("e-due").value = c.balance_due || 0;
@@ -5831,6 +5886,7 @@
           router_brand_id: $("e-brand").value || null,
           expiry_date: $("e-expiry").value || null,
           plan_id: $("e-plan").value ? parseInt($("e-plan").value) : null,
+          pool_id: $("e-isp").value === "2" && $("e-pool").value ? parseInt($("e-pool").value) : null,
           status: $("e-status").value,
           membership: $("e-mem").value.trim(),
           comments: $("e-comments").value.trim(),
@@ -6114,7 +6170,7 @@
 
       // Used by the dashboard "Online Today" card
       function openColReport(period, method) {
-        $("cr-method").value = method || "online";
+        $("cr-method").value = method || "all";
         showPage("colreport");
         crSetPeriod(period || "today");
       }
@@ -6812,11 +6868,158 @@
         }
       }
 
+      let poolsCache = [];
+      async function loadPools() {
+        try {
+          const r = await apiFetch("GET", "/api/admin/router-pools");
+          poolsCache = r.data?.pools || [];
+        } catch (e) {
+          poolsCache = [];
+        }
+        const fill = (sid, first) => {
+          const sel = document.getElementById(sid);
+          if (!sel) return;
+          const cur = sel.value;
+          sel.innerHTML = first;
+          poolsCache.forEach((p) => {
+            const o = document.createElement("option");
+            o.value = p.id;
+            o.textContent = p.name + " — " + p.pool;
+            sel.appendChild(o);
+          });
+          if (cur) sel.value = cur;
+        };
+        fill("e-pool", '<option value="">Default (plan\'s own pool)</option>');
+        fill("cpool", '<option value="">All pools</option><option value="none">No pool (default)</option>');
+        renderPoolList();
+        updateEditPoolHint();
+      }
+      function renderPoolList() {
+        const box = $("pool-list");
+        if (!box) return;
+        if (!poolsCache.length) {
+          box.innerHTML = '<div style="font-size:13px;color:var(--txt3)">No pools yet. Add your first pool below.</div>';
+          return;
+        }
+        box.innerHTML =
+          "<table><thead><tr><th>Name</th><th>Router pool</th><th>Local address</th><th></th></tr></thead><tbody>" +
+          poolsCache
+            .map(
+              (p) =>
+                '<tr><td style="font-weight:600">' + esc(p.name) +
+                '</td><td style="font-family:var(--mono);font-size:12px">' + esc(p.pool) +
+                '</td><td style="font-family:var(--mono);font-size:12px">' + esc(p.local_address || "—") +
+                '</td><td>' + (p.speed_mbps ? p.speed_mbps + " Mbps" : "—") +
+                '</td><td><div class="abtns"><button class="btn bsm bedit" onclick="editPool(' + p.id +
+                ')">✏</button><button class="btn bsm bdanger" onclick="deletePool(' + p.id +
+                ')">✕</button></div></td></tr>',
+            )
+            .join("") +
+          "</tbody></table>";
+      }
+
+
+      function filterEditPools(keepId) {
+        const sel = $("e-pool");
+        if (!sel) return;
+        const cur = sel.value;
+        const keep = keepId != null ? String(keepId) : "";
+        const plan = plansCache.find((x) => String(x.id) === $("e-plan").value);
+        const allowed = plan && (plan.pool_ids || []).length ? plan.pool_ids.map(Number) : null;
+        const defPool = plan && plan.default_pool_id ? poolsCache.find((p) => p.id === Number(plan.default_pool_id)) : null;
+        sel.innerHTML = '<option value="">' + (defPool ? "Default — " + esc(defPool.name) + " (" + esc(defPool.pool) + ")" : "Default (no default pool set)") + "</option>";
+        poolsCache
+          .filter((p) => !allowed || allowed.includes(p.id) || String(p.id) === keep)
+          .forEach((p) => {
+            const o = document.createElement("option");
+            o.value = p.id;
+            o.textContent = p.name + " — " + p.pool;
+            sel.appendChild(o);
+          });
+        if (cur && Array.from(sel.options).some((o) => o.value === cur)) sel.value = cur;
+        updateEditPoolHint();
+      }
+
+      function updateEditPoolHint() {
+        const f = $("e-pool-field");
+        if (!f) return;
+        const isNet = $("e-isp").value === "2";
+        f.style.display = isNet ? "" : "none";
+        const plan = plansCache.find((x) => String(x.id) === $("e-plan").value);
+        const pool = poolsCache.find((x) => String(x.id) === $("e-pool").value);
+        $("e-pool-hint").textContent = !isNet || !pool ? "" :
+          pool.speed_mbps ? "Router profile: " + pool.name : "No speed set on this pool, so the plan's own profile is used";
+      }
+      function openPools() {
+        poolFormReset();
+        $("m-pools").style.display = "flex";
+        loadPools();
+      }
+      function poolFormReset() {
+        ["pp-id", "pp-name", "pp-pool", "pp-local", "pp-speed"].forEach((i) => ($(i).value = ""));
+        $("pp-err").style.display = "none";
+        $("pp-btn").textContent = "Add Pool";
+      }
+      function editPool(id) {
+        const p = poolsCache.find((x) => x.id === id);
+        if (!p) return;
+        $("pp-id").value = p.id;
+        $("pp-name").value = p.name || "";
+        $("pp-pool").value = p.pool || "";
+        $("pp-local").value = p.local_address || "";
+        $("pp-speed").value = p.speed_mbps || "";
+        $("pp-err").style.display = "none";
+        $("pp-btn").textContent = "Save Pool";
+      }
+      async function submitPool() {
+        const btn = $("pp-btn"),
+          err = $("pp-err");
+        err.style.display = "none";
+        const id = $("pp-id").value;
+        const d = {
+          name: $("pp-name").value.trim(),
+          pool: $("pp-pool").value.trim(),
+          local_address: $("pp-local").value.trim(),
+          speed_mbps: parseFloat($("pp-speed").value) || null,
+        };
+        if (!d.name || !d.pool || !d.speed_mbps) {
+          showErr(err, "Pool name, router pool name and speed are required");
+          return;
+        }
+        btn.disabled = true;
+        try {
+          const r = id
+            ? await apiFetch("PUT", "/api/admin/router-pools/" + id, d)
+            : await apiFetch("POST", "/api/admin/router-pools", d);
+          if (r.success) {
+            toast(id ? "Pool updated!" : "Pool added!");
+            poolFormReset();
+            await loadPools();
+          } else showErr(err, r.error || "Failed");
+        } catch (e) {
+          showErr(err, "Network error");
+        } finally {
+          btn.disabled = false;
+        }
+      }
+      async function deletePool(id) {
+        const p = poolsCache.find((x) => x.id === id);
+        if (!p) return;
+        if (!confirm('Delete pool "' + p.name + '"?\n\nCustomers on this pool go back to the plan\'s own profile.')) return;
+        const r = await apiFetch("DELETE", "/api/admin/router-pools/" + id);
+        if (r.success) {
+          toast("Pool deleted");
+          await loadPools();
+          loadCustomers(false);
+        } else toast(r.error || "Failed", "err");
+      }
+
       async function loadPlans() {
         try {
           const r = await apiFetch("GET", "/api/admin/plans");
           const ps = r.data?.plans || [];
           plansCache = ps;
+          loadPools();
           ["a-plan", "e-plan", "cc-plan"].forEach((sid) => {
             const sel = document.getElementById(sid);
             if (!sel) return;
@@ -6869,14 +7072,47 @@
         }
       }
 
+      function renderPlanPools(selected, defId) {
+        const box = $("pl-pools");
+        if (!box) return;
+        const ds = $("pl-def-pool");
+        ds.innerHTML =
+          '<option value="">— Choose default pool —</option>' +
+          poolsCache
+            .map((p) => '<option value="' + p.id + '"' + (p.id === Number(defId) ? " selected" : "") + ">" + esc(p.name) + "</option>")
+            .join("");
+        if (!poolsCache.length) {
+          box.innerHTML = '<span style="font-size:12px;color:var(--txt3)">No pools yet. Add pools first.</span>';
+          return;
+        }
+        const sel = (selected || []).map(Number);
+        box.innerHTML = poolsCache
+          .map(
+            (p) =>
+              '<label style="display:flex;align-items:center;gap:6px;font-size:13px;margin:4px 0"><input type="checkbox" class="pl-pool-cb" value="' +
+              p.id + '"' + (sel.includes(p.id) ? " checked" : "") + ' onchange="syncPlanDefault()" /> ' + esc(p.name) + "</label>",
+          )
+          .join("");
+        syncPlanDefault();
+      }
+      // if the plan is limited to some pools, the default pool is always one of them
+      function syncPlanDefault() {
+        const d = Number($("pl-def-pool").value);
+        const cbs = Array.from(document.querySelectorAll(".pl-pool-cb"));
+        if (d && cbs.some((c) => c.checked)) {
+          const me = cbs.find((c) => Number(c.value) === d);
+          if (me) me.checked = true;
+        }
+      }
+
+
       function openAddPlan() {
         $("plan-modal-title").textContent = "Add Plan";
         $("pl-id").value = "";
-        ["pl-name", "pl-down", "pl-up", "pl-price", "pl-days", "pl-isp-id", "pl-mk-profile"].forEach(
+        ["pl-name", "pl-down", "pl-up", "pl-price", "pl-days"].forEach(
           (i) => ($(i).value = ""),
         );
-        $("pl-mk-service").value = "pppoe";
-        $("pl-isp").value = "1";
+        renderPlanPools([]);
         $("pl-active").value = "1";
         $("pl-err").style.display = "none";
         $("m-plan").style.display = "flex";
@@ -6894,10 +7130,7 @@
         $("pl-up").value = p.speed_up_mbps || "";
         $("pl-price").value = p.price || "";
         $("pl-days").value = p.validity_days || 30;
-        $("pl-isp").value = p.isp_server_id || 1;
-        $("pl-isp-id").value = p.isp_plan_id || "";
-        $("pl-mk-profile").value = p.mikrotik_profile || "";
-        $("pl-mk-service").value = p.mikrotik_service || "pppoe";
+        renderPlanPools(p.pool_ids, p.default_pool_id);
         $("pl-active").value = p.is_active ? "1" : "0";
         $("pl-err").style.display = "none";
         $("m-plan").style.display = "flex";
@@ -6913,14 +7146,16 @@
           speed_up_mbps: parseInt($("pl-up").value) || 0,
           price: parseFloat($("pl-price").value),
           validity_days: parseInt($("pl-days").value),
-          isp_server_id: parseInt($("pl-isp").value),
-          isp_plan_id: $("pl-isp-id").value.trim() || null,
-          mikrotik_profile: $("pl-mk-profile").value.trim() || null,
-          mikrotik_service: $("pl-mk-service").value.trim() || "pppoe",
+          pool_ids: Array.from(document.querySelectorAll(".pl-pool-cb:checked")).map((c) => parseInt(c.value)),
+          default_pool_id: parseInt($("pl-def-pool").value) || null,
           is_active: parseInt($("pl-active").value),
         };
         if (!d.name || !d.price || !d.validity_days) {
           showErr(err, "Name, price and validity required");
+          return;
+        }
+        if (!id && !d.default_pool_id) {
+          showErr(err, "Choose a default pool");
           return;
         }
         btn.disabled = true;
