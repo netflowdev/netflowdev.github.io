@@ -3104,7 +3104,7 @@
                       <th>Price</th>
                       <th>Validity</th>
                       <th>ISP Server</th>
-                      <th>NetAdmin Profile</th>
+                      <th>Default Pool</th>
                       <th>Status</th>
                       <th style="padding-right: 20px">Actions</th>
                     </tr>
@@ -7057,7 +7057,9 @@
                 ' days</td><td><span class="badge binfo">' +
                 (p.isp_server_name || "—") +
                 '</span></td><td style="font-size:12px;color:var(--txt2)">' +
-                (p.mikrotik_profile || "—") +
+                (p.isp_server_name !== "netadmin"
+                  ? "—"
+                  : p.default_pool_name || '<span style="color:var(--red)">Not set</span>') +
                 "</td><td>" +
                 sbadge(p.is_active ? "active" : "inactive") +
                 '</td><td style="padding-right:20px"><div class="abtns"><button class="btn bsm bedit" onclick="openEditPlan(' +
