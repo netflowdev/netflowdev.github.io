@@ -7295,7 +7295,7 @@
             lastPaymentId = sp[0].id;
             for (const p of np) {
               const a = p.amount_total || 0,
-                n = p.customer_name || "a customer",
+                n = (p.customer_local_name || "").trim() || p.customer_name || "a customer",
                 m = p.payment_method || "online";
               toast("💰 ₹" + a + " from " + n + "!");
               const fn = VM[voiceLang] || VM["en-IN"];
