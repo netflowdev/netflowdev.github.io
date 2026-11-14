@@ -1962,6 +1962,37 @@
         #ptbody td[data-label="Del"] { grid-row: 8; justify-content: flex-end; padding-top: 10px !important; }
       }
 
+      /* ── Collection Report list → cards (mobile) ── */
+      @media (max-width: 768px) {
+        #page-colreport table { min-width: 0; }
+        #page-colreport thead { display: none; }
+        #page-colreport .tbl-wrap { overflow-x: visible; }
+
+        #cr-tbody tr { display: grid; grid-template-columns: 1fr auto; column-gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+        #cr-tbody td:not([data-label]) { grid-column: 1 / -1; }
+
+        #cr-tbody td[data-label] { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 4px 0 !important; border: none; text-align: right; max-width: none !important; }
+        #cr-tbody td[data-label]::before { content: attr(data-label); font-family: var(--mono); font-size: 10px; text-transform: uppercase; color: var(--txt3); text-align: left; flex-shrink: 0; }
+
+        /* header row: customer (left) | amount (right) */
+        #cr-tbody td[data-label="Customer"] { grid-column: 1; grid-row: 1; display: block; text-align: left; font-size: 14px; padding-bottom: 2px !important; }
+        #cr-tbody td[data-label="Amount"] { grid-column: 2; grid-row: 1; justify-content: flex-end; font-size: 16px; }
+        /* second row: date (left) | status (right) */
+        #cr-tbody td[data-label="Date"] { grid-column: 1; grid-row: 2; justify-content: flex-start; text-align: left; padding-bottom: 8px !important; }
+        #cr-tbody td[data-label="Status"] { grid-column: 2; grid-row: 2; justify-content: flex-end; padding-bottom: 8px !important; }
+        #cr-tbody td[data-label="Customer"]::before,
+        #cr-tbody td[data-label="Amount"]::before,
+        #cr-tbody td[data-label="Date"]::before,
+        #cr-tbody td[data-label="Status"]::before { display: none; }
+
+        /* detail rows */
+        #cr-tbody td[data-label="Method"] { grid-row: 3; }
+        #cr-tbody td[data-label="Type"] { grid-row: 4; }
+        #cr-tbody td[data-label="App Ref"] { grid-row: 5; }
+        #cr-tbody td[data-label="Bank Txn"] { grid-row: 6; }
+        #cr-tbody td[data-label="ID"] { grid-row: 7; }
+      }
+
       /* ── All other list pages → cards (mobile) ── */
       @media (max-width: 768px) {
         /* 3 stat cards: first one full width, other two side by side */
@@ -2496,7 +2527,7 @@
                 </div>
                 <div class="sc-sub" style="color: var(--green)">online</div>
               </div>
-              <div class="sc green fade-up fade-up-d2" onclick="openColReport('today','online')">
+              <div class="sc green fade-up fade-up-d2" onclick="openColReport('today','all')">
                 <div class="sc-row">
                   <div class="sc-icon green">₹</div>
                   <div class="sc-text">
@@ -2735,6 +2766,7 @@
                 <option value="reactivate">Reactivate</option>
                 <option value="jaze_renew">Jaze Renewal</option>
               </select>
+              <input class="sbox" id="act-q" placeholder="Search name, phone, username, plan..." oninput="actRender()" />
             </div>
             <div class="tbl-card">
               <div class="tbl-wrap">
@@ -2798,6 +2830,9 @@
                 <div class="sc-val" id="pc" style="font-size: 24px; color: var(--amber)">—</div>
                 <div class="sc-sub" style="color: var(--amber)">collected</div>
               </div>
+            </div>
+            <div class="toolbar">
+              <input class="sbox" id="pay-q" placeholder="Search name, phone, app ref, bank txn..." oninput="payRender()" />
             </div>
             <div class="tbl-card">
               <div class="tbl-wrap">
@@ -2913,6 +2948,7 @@
                 <option value="online">Online only</option>
                 <option value="cash">Cash only</option>
               </select>
+              <input class="sbox" id="cr-q" placeholder="Search name, phone, app ref..." oninput="crRender()" />
             </div>
             <div class="toolbar" id="cr-custom" style="display: none; gap: 8px; align-items: center; flex-wrap: wrap">
               <input class="sbox" type="date" id="cr-from" style="max-width: 170px" />
@@ -3796,6 +3832,25 @@
               <button class="btn bpri" onclick="openRcModal('isp_customer_slots','Renew ISP Subscription')">Renew / Buy Slots →</button>
             </div>
           </div>
+
+          <div class="card" style="max-width:600px;margin-top:18px">
+            <div class="card-hd">Payment Settings</div>
+            <div class="ff">
+              <label>Allow partial payments</label>
+              <select id="ps-allow" onchange="togglePsMin()">
+                <option value="0">OFF - customers must pay the full amount</option>
+                <option value="1">ON - customers can pay part of the due</option>
+              </select>
+            </div>
+            <div class="ff" id="ps-min-wrap" style="display:none">
+              <label>Minimum partial amount (₹)</label>
+              <input id="ps-min" type="number" min="0" placeholder="100" />
+            </div>
+            <div class="errmsg" id="ps-err"></div>
+            <div class="mactions">
+              <button class="btn bpri" id="ps-btn" onclick="savePartialSettings()">Save Settings</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -4192,6 +4247,14 @@
                   <option value="auto">Auto (recommended)</option>
                   <option value="due_only">Force Due Only</option>
                   <option value="normal">Force Due + Renew</option>
+                </select>
+              </div>
+              <div class="ff" id="e-partial-field">
+                <label>Partial Payment</label>
+                <select id="e-partial-mode">
+                  <option value="follow">Follow franchise setting</option>
+                  <option value="allow">Always allow</option>
+                  <option value="deny">Never allow</option>
                 </select>
               </div>
               <div class="ff" id="e-postpaid-fields" style="display:none">
@@ -5154,6 +5217,9 @@
               '<span style="display:inline-flex;align-items:center;gap:6px">' + "₹" + (c.balance_due || 0) +
             ((c.effective_due_mode || c.due_payment_mode) === "due_only" ? '<span class="badge berr" style="font-size:9px;padding:2px 6px">DUE ONLY</span>' : "") + '</span>' +
             '<div class="due-bill" style="color:' + (c.billing_type === 'postpaid' ? 'var(--purple)' : 'var(--txt3)') + '">' + (c.billing_type === 'postpaid' ? 'Postpaid' : 'Prepaid') + '</div>' +
+            ((c.partial_paid > 0 && c.balance_due > 0)
+              ? '<div style="margin-top:3px"><span class="badge" style="font-size:9px;padding:2px 6px;background:var(--amber-l);color:var(--amber)">PART PAID ₹' + (Math.round(c.partial_paid * 100) / 100) + '</span></div>'
+              : '') +
             '</td>' +
             '<td data-label="Billing">' + billingBadge + '</td>' +
             '<td data-label="Status">' + sbadge(realSt(c)) + '</td>' +
@@ -5822,6 +5888,7 @@
         $("e-next-bill-date").value = c.next_bill_date || "";
         togglePostpaidFieldsEdit();
         if ($("e-due-mode")) $("e-due-mode").value = c.due_payment_mode || "auto";
+        if ($("e-partial-mode")) $("e-partial-mode").value = c.partial_payment_mode || "follow";
         $("e-orig-phone").value = c.phone || "";
         updateEditPassHint();
         updateEditPlanWarn();
@@ -5895,6 +5962,7 @@
           wifi_band: $("e-wifi-band") ? $("e-wifi-band").value || "single" : "single",
           balance_due: parseFloat($("e-due").value) || 0,
           due_payment_mode: $("e-due-mode") ? $("e-due-mode").value : "auto",
+          partial_payment_mode: $("e-partial-mode") ? $("e-partial-mode").value : "follow",
           billing_type: $("e-billing-type").value,
           grace_period_days: parseInt($("e-grace-days").value) || 10,
           auto_suspend_enabled: parseInt($("e-auto-suspend").value),
@@ -5958,9 +6026,22 @@
           $("ac").textContent = all.filter((a) => a.status === "confirmed").length;
           $("af").textContent = all.filter((a) => a.status === "failed").length;
           $("s-pending").textContent = all.filter((a) => a.status === "pending" && a.action === "update").length;
-          const acts = fr.data?.activations || [];
+          _actAll = fr.data?.activations || [];
+          actRender();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      let _actAll = [];
+      function actRender() {
+        try {
+          const q = ($("act-q") || {}).value || "";
+          const acts = _actAll.filter((a) =>
+            _searchHit(q, [a.customer_name, a.customer_local_name, a.customer_phone, a.isp_username, a.plan_name, a.mikrotik_profile, a.id])
+          );
           if (!acts.length) {
-            $("atbody").innerHTML = '<tr><td colspan="10"><div class="empty">No activations found</div></td></tr>';
+            $("atbody").innerHTML = '<tr><td colspan="10"><div class="empty">' + (q.trim() ? "No matching activations" : "No activations found") + '</div></td></tr>';
             return;
           }
           $("atbody").innerHTML = acts
@@ -6011,8 +6092,22 @@
           $("pt").textContent = "₹" + tot.toLocaleString("en-IN");
           $("po").textContent = "₹" + onl.toLocaleString("en-IN");
           $("pc").textContent = "₹" + csh.toLocaleString("en-IN");
+          _payAll = pays;
+          payRender();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      let _payAll = [];
+      function payRender() {
+        try {
+          const q = ($("pay-q") || {}).value || "";
+          const pays = _payAll.filter((p) =>
+            _searchHit(q, [p.customer_name, p.customer_local_name, p.customer_phone, p.payu_order_id, p.payu_txn_id, p.id, p.payment_method === "cash" ? "CASH-" + p.id : "", (p.recharge_type || "").replace(/_/g, " ")])
+          );
           if (!pays.length) {
-            $("ptbody").innerHTML = '<tr><td colspan="10"><div class="empty">No payments yet</div></td></tr>';
+            $("ptbody").innerHTML = '<tr><td colspan="10"><div class="empty">' + (q.trim() ? "No matching payments" : "No payments yet") + '</div></td></tr>';
             return;
           }
           $("ptbody").innerHTML = pays
@@ -6163,6 +6258,13 @@
       }
 
 
+      // ── SEARCH HELPER (Payments, Activations, Collection Report) ──
+      function _searchHit(q, vals) {
+        q = String(q || "").trim().toLowerCase();
+        if (!q) return true;
+        return vals.some((v) => String(v == null ? "" : v).toLowerCase().includes(q));
+      }
+
       // ── COLLECTION REPORT ────────────────────────────────────────
       let _crPeriod = "today", _crPays = [];
 
@@ -6220,7 +6322,8 @@
 
         const inRange = _crPays.filter((p) => {
           const day = String(p.created_at || "").slice(0, 10);
-          return day >= from && day <= to;
+          return day >= from && day <= to &&
+            _searchHit($("cr-q").value, [p.customer_name, p.customer_local_name, p.customer_phone, p.payu_order_id, p.payu_txn_id, p.id, p.payment_method === "cash" ? "CASH-" + p.id : ""]);
         });
         const onl = inRange.filter(_crIsOnline);
         const csh = inRange.filter((p) => p.payment_method === "cash");
@@ -6651,6 +6754,37 @@
           di('Customer Slots', limit ? (used + ' / ' + limit) : (used + ' / Unlimited')) +
           di('Status', sbadge(u.subscription_status || 'inactive'), true) +
           di('Subscription Expiry', fmtDate(u.subscription_expiry_date));
+        loadPartialSettings();
+      }
+
+      async function loadPartialSettings() {
+        try {
+          const r = await apiFetch('GET', '/api/admin/partial-payment-settings');
+          if (r.success) {
+            $('ps-allow').value = r.data.allow_partial_payment ? '1' : '0';
+            $('ps-min').value = r.data.min_partial_amount || '';
+            togglePsMin();
+          }
+        } catch (e) {}
+      }
+
+      function togglePsMin() {
+        $('ps-min-wrap').style.display = $('ps-allow').value === '1' ? '' : 'none';
+      }
+
+      async function savePartialSettings() {
+        const btn = $('ps-btn'), err = $('ps-err');
+        err.style.display = 'none';
+        btn.disabled = true; btn.textContent = 'Saving...';
+        try {
+          const r = await apiFetch('PUT', '/api/admin/partial-payment-settings', {
+            allow_partial_payment: $('ps-allow').value === '1' ? 1 : 0,
+            min_partial_amount: parseFloat($('ps-min').value) || 0,
+          });
+          if (r.success) toast('Payment settings saved');
+          else showErr(err, r.error || 'Failed');
+        } catch (e) { showErr(err, 'Network error'); }
+        finally { btn.disabled = false; btn.textContent = 'Save Settings'; }
       }
 
       // ── NOTIFICATIONS ─────────────────────────────────────────────
