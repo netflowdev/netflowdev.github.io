@@ -173,7 +173,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
       <div class="plan-label">Your Plan</div>
       <div class="plan-name" id="plan-name">—</div>
       <div class="plan-meta">
-        <div class="plan-meta-item">
+        <div class="plan-meta-item" id="plan-speed-item">
           <div class="plan-meta-label">Speed</div>
           <div class="plan-meta-val" id="plan-speed">—</div>
         </div>
@@ -188,7 +188,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
           <span class="validity-val" id="vr-current-val">—</span>
         </div>
         <div class="validity-row">
-          <span class="validity-label">New Validity</span>
+          <span class="validity-label">New Expiry</span>
           <span class="validity-val new" id="vr-new-val">—</span>
         </div>
       </div>
@@ -416,21 +416,13 @@ async function loadLink() {
       document.getElementById('due-only-card').style.display = 'none';
       document.getElementById('amount-label').textContent = 'Total Amount';
       document.getElementById('plan-name').textContent = linkData.plan_name || 'N/A';
-      document.getElementById('plan-speed').textContent = linkData.plan_speed || 'N/A';
+      document.getElementById('plan-speed').textContent = linkData.plan_speed || '';
+      document.getElementById('plan-speed-item').style.display = linkData.plan_speed ? '' : 'none';
       document.getElementById('plan-validity').textContent = (linkData.plan_validity || '—') + ' days';
 
       const rp = linkData.renewal_preview;
-      if (rp) {
-        const curRow = document.getElementById('vr-current');
-        if (rp.current_expiry) {
-          document.getElementById('vr-current-label').textContent = rp.is_running ? 'Current Plan Till' : 'Expired On';
-          document.getElementById('vr-current-val').textContent = formatDateShort(rp.current_expiry);
-          curRow.style.display = 'flex';
-        } else {
-          curRow.style.display = 'none';
-        }
-        document.getElementById('vr-new-val').textContent =
-          formatDateShort(rp.new_start) + ' → ' + formatDateShort(rp.new_expiry);
+      if (rp && rp.new_expiry) {
+        document.getElementById('vr-new-val').textContent = formatDateShort(rp.new_expiry);
         document.getElementById('validity-box').style.display = 'flex';
       } else {
         document.getElementById('validity-box').style.display = 'none';
