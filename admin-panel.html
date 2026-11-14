@@ -7428,13 +7428,10 @@
       async function checkNewPayments() {
         if (!voiceReady || !voiceEnabled) return;
         try {
-          const r = await apiFetch("GET", "/api/admin/payments");
-          const pays = r.data?.payments || [];
-          const sp = pays.filter((p) => p.status === "success");
-          if (!sp.length) return;
-          const np = sp.filter((p) => p.id > lastPaymentId);
+          const r = await apiFetch("GET", "/api/admin/payments/latest?after=" + lastPaymentId);
+          const np = r.data?.payments || [];
           if (np.length) {
-            lastPaymentId = sp[0].id;
+            lastPaymentId = np[np.length - 1].id;
             for (const p of np) {
               const a = p.amount_total || 0,
                 n = (p.customer_local_name || "").trim() || p.customer_name || "a customer",
