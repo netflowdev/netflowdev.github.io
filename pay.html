@@ -56,11 +56,26 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
 .plan-meta-label{font-size:10px;color:#9B94C9;text-transform:uppercase;letter-spacing:0.06em}
 .plan-meta-val{font-size:14px;font-weight:600;color:#1A1640}
 
+.validity-box{margin-top:14px;padding-top:12px;border-top:1px dashed #DDD8F5;display:flex;flex-direction:column;gap:8px}
+.validity-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.validity-label{font-size:11px;color:#9B94C9;text-transform:uppercase;letter-spacing:0.06em}
+.validity-val{font-size:13px;font-weight:600;color:#1A1640;text-align:right}
+.validity-val.new{color:#7C6CF7}
+
 /* due-only card — generic label, never says prepaid/postpaid */
 .due-only-card{background:#FFF7F0;border:1.5px solid #FFE0C2;border-radius:16px;padding:16px 18px;margin-bottom:20px;display:none}
 .due-only-label{font-size:10px;font-weight:700;color:#D97706;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
 .due-only-title{font-size:17px;font-weight:700;color:#1A1640}
 .due-only-sub{font-size:12px;color:#9B94C9;margin-top:4px;line-height:1.5}
+
+.partial-box{margin-bottom:18px}
+.partial-box label{display:block;font-size:11px;font-weight:700;color:#9B94C9;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px}
+.partial-box input{width:100%;padding:12px 14px;border:1.5px solid #EDE9FF;border-radius:12px;font-size:18px;font-weight:700;color:#1A1640;box-sizing:border-box;outline:none;background:#fff}
+.partial-box input:focus{border-color:#7C6CF7}
+.partial-hint{font-size:12px;color:#9B94C9;margin-top:6px;min-height:16px}
+.partial-hint.bad{color:#E5484D}
+.partial-full{display:none;font-size:12px;font-weight:600;color:#7C6CF7;cursor:pointer;margin-top:2px}
+
 
 .divider{height:1px;background:#EDE9FF;margin:20px 0}
 
@@ -167,6 +182,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
           <div class="plan-meta-val" id="plan-validity">—</div>
         </div>
       </div>
+      <div class="validity-box" id="validity-box" style="display:none">
+        <div class="validity-row" id="vr-current" style="display:none">
+          <span class="validity-label" id="vr-current-label">Current Plan Till</span>
+          <span class="validity-val" id="vr-current-val">—</span>
+        </div>
+        <div class="validity-row">
+          <span class="validity-label">New Validity</span>
+          <span class="validity-val new" id="vr-new-val">—</span>
+        </div>
+      </div>
     </div>
 
     <div class="due-only-card" id="due-only-card">
@@ -182,6 +207,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
     <div class="amount-row">
       <div class="amount-label" id="amount-label">Total Amount</div>
       <div class="amount-val" id="pay-amount">₹—</div>
+    </div>
+
+    <div class="partial-box" id="partial-box" style="display:none">
+      <label for="pay-input">Amount to pay (₹)</label>
+      <input id="pay-input" type="number" inputmode="decimal" step="0.01" oninput="validatePartial()" />
+      <div class="partial-hint" id="partial-hint"></div>
+      <a class="partial-full" id="partial-full" onclick="resetFullAmount()">Pay full amount</a>
     </div>
 
     <button class="btn-pay" id="btn-pay" onclick="startPayment()">Pay Now →</button>
@@ -238,6 +270,14 @@ function formatDate(d) {
   return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+// Short form for ranges: 21 Nov 2026
+function formatDateShort(d) {
+  if (!d) return d;
+  const dt = new Date(d + 'T00:00:00');
+  if (isNaN(dt)) return d;
+  return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 // paid_at aata hai 'YYYY-MM-DD HH:MM:SS' (IST) format mein
 function formatDateTime(d) {
   if (!d) return d;
@@ -278,7 +318,17 @@ function checkReturnFromPayment() {
       document.getElementById('txn-expiry-row').style.display = 'flex';
     }
 
-    if (type === 'due_only' || type === 'postpaid_due') {
+    const paidAmt = params.get('paid');
+    const remainingAmt = params.get('remaining');
+    if ((type === 'due_only' || type === 'postpaid_due') && remainingAmt !== null && parseFloat(remainingAmt) > 0) {
+      document.getElementById('success-title').textContent = 'Partial Payment Received!';
+      document.getElementById('success-msg').textContent = 'Thank you. Your remaining due is ₹' + remainingAmt + '.';
+      document.getElementById('activation-note').style.display = 'none';
+      if (paidAmt) {
+        document.getElementById('txn-amount').textContent = '₹' + paidAmt;
+        document.getElementById('txn-amount-row').style.display = 'flex';
+      }
+    } else if (type === 'due_only' || type === 'postpaid_due') {
       document.getElementById('success-msg').textContent = 'Your outstanding due has been cleared successfully.';
       document.getElementById('activation-note').style.display = 'none';
     } else {
@@ -369,12 +419,30 @@ async function loadLink() {
       document.getElementById('plan-speed').textContent = linkData.plan_speed || 'N/A';
       document.getElementById('plan-validity').textContent = (linkData.plan_validity || '—') + ' days';
 
+      const rp = linkData.renewal_preview;
+      if (rp) {
+        const curRow = document.getElementById('vr-current');
+        if (rp.current_expiry) {
+          document.getElementById('vr-current-label').textContent = rp.is_running ? 'Current Plan Till' : 'Expired On';
+          document.getElementById('vr-current-val').textContent = formatDateShort(rp.current_expiry);
+          curRow.style.display = 'flex';
+        } else {
+          curRow.style.display = 'none';
+        }
+        document.getElementById('vr-new-val').textContent =
+          formatDateShort(rp.new_start) + ' → ' + formatDateShort(rp.new_expiry);
+        document.getElementById('validity-box').style.display = 'flex';
+      } else {
+        document.getElementById('validity-box').style.display = 'none';
+      }
+
       if (linkData.balance_due > 0) {
         document.getElementById('due-note').style.display = 'block';
         document.getElementById('due-amount').textContent = '₹' + linkData.balance_due;
       }
     }
 
+    setupPartial();
     show('payment');
   } catch (e) {
     showError('Network Error', 'Could not load payment details. Please try again.');
@@ -383,6 +451,7 @@ async function loadLink() {
 
 async function startPayment() {
   if (!linkData) return;
+  if (partialCfg && !validatePartial()) return;
   const btn = document.getElementById('btn-pay');
   btn.disabled = true;
   btn.textContent = 'Creating order...';
@@ -391,7 +460,10 @@ async function startPayment() {
     const r = await fetch(`${BASE}/api/payment-link/pay`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: getToken() })
+      body: JSON.stringify({
+        token: getToken(),
+        amount: partialCfg ? parseFloat(document.getElementById('pay-input').value) : undefined
+      })
     });
     const data = await r.json();
 
@@ -418,6 +490,42 @@ async function startPayment() {
     btn.textContent = 'Pay Now →';
   }
 }
+
+let partialCfg = null;
+
+function setupPartial() {
+  partialCfg = (linkData && linkData.partial) || null;
+  const box = document.getElementById('partial-box');
+  if (!partialCfg) { box.style.display = 'none'; return; }
+  document.getElementById('pay-input').value = linkData.amount;   // pre-filled with the full amount
+  box.style.display = 'block';
+  validatePartial();
+}
+
+function validatePartial() {
+  if (!partialCfg) return true;
+  const full = Number(linkData.amount);
+  const val = parseFloat(document.getElementById('pay-input').value);
+  const hint = document.getElementById('partial-hint');
+  let msg = '', valid = true;
+
+  if (!(val > 0)) { valid = false; msg = 'Enter an amount'; }
+  else if (val > full) { valid = false; msg = 'Maximum amount is ₹' + full; }
+  else if (val < partialCfg.min) { valid = false; msg = 'Minimum payment is ₹' + partialCfg.min; }
+  else if (val < full) { msg = 'Remaining after this payment: ₹' + (Math.round((full - val) * 100) / 100); }
+
+  hint.textContent = msg;
+  hint.className = 'partial-hint' + (valid ? '' : ' bad');
+  document.getElementById('partial-full').style.display = (val !== full) ? 'inline' : 'none';
+  document.getElementById('btn-pay').disabled = !valid;
+  return valid;
+}
+
+function resetFullAmount() {
+  document.getElementById('pay-input').value = linkData.amount;
+  validatePartial();
+}
+
 
 window.addEventListener('load', () => {
   loadLink();
