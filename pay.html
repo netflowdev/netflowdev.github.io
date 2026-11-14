@@ -107,6 +107,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
     <div class="success-icon">✅</div>
     <div class="success-title">All Clear!</div>
     <div class="success-msg">There's no payment pending on your account right now.</div>
+    <div class="success-msg" id="nodue-expiry" style="display:none;font-weight:700;color:#7c6cf7;margin-top:10px"></div>
   </div>
 
   <!-- Success / Already Paid -->
@@ -133,7 +134,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F3F2;min-height:1
         <span class="txn-val" id="txn-ref">—</span>
       </div>
       <div class="txn-row" id="txn-expiry-row" style="display:none">
-        <span class="txn-label">New Expiry Date</span>
+        <span class="txn-label" id="txn-expiry-label">New Expiry Date</span>
         <span class="txn-val" id="txn-expiry">—</span>
       </div>
     </div>
@@ -245,6 +246,15 @@ function formatDateTime(d) {
   return dt.toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
+// Builds the "paid up to / valid till / expired on" line for the All Clear screen
+function expiryLine(data) {
+  if (!data || !data.expiry_date) return '';
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+  const nice = formatDate(data.expiry_date);
+  if (data.expiry_date < today) return 'Plan expired on ' + nice;
+  return (data.is_postpaid ? 'Paid up to ' : 'Plan valid till ') + nice;
+}
+
 // Returns true if we've already shown the success screen (caller should stop)
 // — ye tab chalta hai jab Easebuzz redirect karke wapas laata hai (surl/furl)
 function checkReturnFromPayment() {
@@ -294,6 +304,12 @@ function showAlreadyPaid() {
   document.getElementById('txn-paidon-row').style.display = 'flex';
   document.getElementById('txn-paidon').textContent = formatDateTime(linkData.paid_at);
 
+  if (linkData.expiry_date) {
+    document.getElementById('txn-expiry-label').textContent = 'Valid Till';
+    document.getElementById('txn-expiry').textContent = formatDate(linkData.expiry_date);
+    document.getElementById('txn-expiry-row').style.display = 'flex';
+  }
+
   show('success');
 }
 
@@ -318,6 +334,12 @@ async function loadLink() {
 
     // Backend ne live status decide kiya hai — usi ke hisaab se screen dikhao
     if (linkData.status === 'no_due') {
+      const line = expiryLine(linkData);
+      const el = document.getElementById('nodue-expiry');
+      if (line) {
+        el.textContent = line;
+        el.style.display = 'block';
+      }
       show('nodue');
       return;
     }
