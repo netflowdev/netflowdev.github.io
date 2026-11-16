@@ -1881,6 +1881,19 @@
         #ctbody td:nth-child(4):not(:only-child) { grid-column: 2; }
         #ctbody td:nth-child(9):not(:only-child) { grid-column: 3; }
 
+        /* Card must never grow wider than the screen */
+        #ctbody tr { grid-template-columns: minmax(0, 1fr) auto auto; }
+        #ctbody td { min-width: 0; }
+        #page-customers .tbl-wrap { overflow-x: hidden; }
+
+        /* Name: local name on top, billing name underneath (no side-by-side space) */
+        #ctbody td:nth-child(2):not(:only-child) { flex-direction: column; align-items: flex-start; gap: 0; word-break: break-word; }
+
+        /* Plan, Expiry, Due: wrap to a second line instead of overflowing */
+        #ctbody td:nth-child(6),
+        #ctbody td:nth-child(7),
+        #ctbody td:nth-child(8) { flex-wrap: wrap; white-space: normal !important; }
+
 
         /* Modal action buttons wrap instead of overflowing */
         .mactions { flex-wrap: wrap; justify-content: stretch; }
