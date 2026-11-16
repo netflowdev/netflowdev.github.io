@@ -7404,10 +7404,9 @@
       }
       async function startPaymentPolling() {
         try {
-          const r = await apiFetch("GET", "/api/admin/payments");
-          const pays = r.data?.payments || [];
-          const s = pays.filter((p) => p.status === "success");
-          if (s.length) lastPaymentId = s[0].id;
+          const r = await apiFetch("GET", "/api/admin/payments/latest?after=0");
+          const s = r.data?.payments || [];
+          if (s.length) lastPaymentId = s[s.length - 1].id;
         } catch (e) {}
         if (voiceInterval) clearInterval(voiceInterval);
         voiceInterval = setInterval(checkNewPayments, 15000);
