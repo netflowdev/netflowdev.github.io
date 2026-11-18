@@ -1065,6 +1065,10 @@
         word-break: break-all;
         font-weight: 500;
       }
+      .dval.pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
       .loading {
         display: flex;
         align-items: center;
@@ -5460,7 +5464,7 @@
           di("Created", fmtDateTime(c.created_at)) +
           di("Address", c.address, "full") +
           di("Area", c.area) +
-          di("Comments", c.comments, "full");
+          di("Comments", c.comments ? hwEsc(c.comments) : "", "full", "pre");
         $("v-isp").innerHTML =
           di("ISP Server", c.isp_server) +
           di("ISP Username", c.isp_username, "full", "mono") +
@@ -7039,7 +7043,7 @@
           poolsCache.forEach((p) => {
             const o = document.createElement("option");
             o.value = p.id;
-            o.textContent = p.name + " — " + p.pool;
+            o.textContent = p.name;
             sel.appendChild(o);
           });
           if (cur) sel.value = cur;
@@ -7082,13 +7086,13 @@
         const plan = plansCache.find((x) => String(x.id) === $("e-plan").value);
         const allowed = plan && (plan.pool_ids || []).length ? plan.pool_ids.map(Number) : null;
         const defPool = plan && plan.default_pool_id ? poolsCache.find((p) => p.id === Number(plan.default_pool_id)) : null;
-        sel.innerHTML = '<option value="">' + (defPool ? "Default — " + esc(defPool.name) + " (" + esc(defPool.pool) + ")" : "Default (no default pool set)") + "</option>";
+        sel.innerHTML = '<option value="">' + (defPool ? "Default — " + esc(defPool.name) : "Default (no default pool set)") + "</option>";
         poolsCache
           .filter((p) => !allowed || allowed.includes(p.id) || String(p.id) === keep)
           .forEach((p) => {
             const o = document.createElement("option");
             o.value = p.id;
-            o.textContent = p.name + " — " + p.pool;
+            o.textContent = p.name;
             sel.appendChild(o);
           });
         if (cur && Array.from(sel.options).some((o) => o.value === cur)) sel.value = cur;
